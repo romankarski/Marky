@@ -46,7 +46,14 @@ Plans:
   2. User can have multiple files open as tabs and switch between them by clicking, with each tab showing the file name
   3. User can close individual tabs without closing others
   4. The UI shows frosted glass panels, warm orange accents on a light background, and generous whitespace — consistent with the Big Hero 6 laboratory aesthetic
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Install Phase 2 libraries, define Tab types and useTabs reducer hook
+- [ ] 02-02-PLAN.md — MarkdownPreview component (react-markdown pipeline) and TableOfContents
+- [ ] 02-03-PLAN.md — TabBar component (dnd-kit sortable) and WelcomeScreen empty state
+- [ ] 02-04-PLAN.md — App.tsx refactor: wire all components into three-column layout with design system
+- [ ] 02-05-PLAN.md — Visual verification checkpoint (human approves all 8 requirements)
 
 ### Phase 3: Editor
 **Goal**: Users can edit any open file in a split view with the preview always visible, changes save automatically, and two files can be edited at once in split-screen mode
@@ -89,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Server Foundation | 3/3 | Complete   | 2026-03-06 |
-| 2. Browser Shell | 0/TBD | Not started | - |
+| 2. Browser Shell | 0/5 | Not started | - |
 | 3. Editor | 0/TBD | Not started | - |
 | 4. Live Reload | 0/TBD | Not started | - |
 | 5. Search and Tags | 0/TBD | Not started | - |
