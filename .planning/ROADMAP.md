@@ -33,9 +33,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Monorepo scaffold, shared types, Vitest test stubs
-- [ ] 01-02-PLAN.md — Fastify server with all five file CRUD endpoints
-- [ ] 01-03-PLAN.md — React client shell with file tree and content view
+- [x] 01-01-PLAN.md — Monorepo scaffold, shared types, Vitest test stubs
+- [x] 01-02-PLAN.md — Fastify server with all five file CRUD endpoints
+- [x] 01-03-PLAN.md — React client shell with file tree and content view
 
 ### Phase 2: Browser Shell
 **Goal**: Users can navigate their knowledge base, read documents beautifully, and experience the full visual design — Marky looks and feels like the purpose-built tool it is
