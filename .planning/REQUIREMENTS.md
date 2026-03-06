@@ -89,33 +89,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FILE-01 | Phase 1 | Pending |
-| FILE-02 | Phase 1 | Pending |
-| FILE-03 | Phase 1 | Pending |
-| FILE-04 | Phase 1 | Pending |
-| FILE-05 | Phase 1 | Pending |
-| VIEW-01 | Phase 2 | Pending |
-| VIEW-02 | Phase 2 | Pending |
-| VIEW-03 | Phase 2 | Pending |
-| VIEW-04 | Phase 2 | Pending |
-| VIEW-05 | Phase 3 | Pending |
-| EDIT-01 | Phase 3 | Pending |
-| EDIT-02 | Phase 3 | Pending |
-| EDIT-03 | Phase 3 | Pending |
-| EDIT-04 | Phase 3 | Pending |
-| EDIT-05 | Phase 3 | Pending |
-| LIVE-01 | Phase 4 | Pending |
-| LIVE-02 | Phase 4 | Pending |
-| SRCH-01 | Phase 5 | Pending |
-| SRCH-02 | Phase 5 | Pending |
-| SRCH-03 | Phase 5 | Pending |
-| TAG-01 | Phase 5 | Pending |
-| TAG-02 | Phase 5 | Pending |
-| TAG-03 | Phase 5 | Pending |
-| DSNG-01 | Phase 2 | Pending |
-| DSNG-02 | Phase 2 | Pending |
-| DSNG-03 | Phase 2 | Pending |
-| DSNG-04 | Phase 2 | Pending |
+| FILE-01 | Phase 1: Server Foundation | Pending |
+| FILE-02 | Phase 1: Server Foundation | Pending |
+| FILE-03 | Phase 1: Server Foundation | Pending |
+| FILE-04 | Phase 1: Server Foundation | Pending |
+| FILE-05 | Phase 1: Server Foundation | Pending |
+| VIEW-01 | Phase 2: Browser Shell | Pending |
+| VIEW-02 | Phase 2: Browser Shell | Pending |
+| VIEW-03 | Phase 2: Browser Shell | Pending |
+| VIEW-04 | Phase 2: Browser Shell | Pending |
+| DSNG-01 | Phase 2: Browser Shell | Pending |
+| DSNG-02 | Phase 2: Browser Shell | Pending |
+| DSNG-03 | Phase 2: Browser Shell | Pending |
+| DSNG-04 | Phase 2: Browser Shell | Pending |
+| VIEW-05 | Phase 3: Editor | Pending |
+| EDIT-01 | Phase 3: Editor | Pending |
+| EDIT-02 | Phase 3: Editor | Pending |
+| EDIT-03 | Phase 3: Editor | Pending |
+| EDIT-04 | Phase 3: Editor | Pending |
+| EDIT-05 | Phase 3: Editor | Pending |
+| LIVE-01 | Phase 4: Live Reload | Pending |
+| LIVE-02 | Phase 4: Live Reload | Pending |
+| SRCH-01 | Phase 5: Search and Tags | Pending |
+| SRCH-02 | Phase 5: Search and Tags | Pending |
+| SRCH-03 | Phase 5: Search and Tags | Pending |
+| TAG-01 | Phase 5: Search and Tags | Pending |
+| TAG-02 | Phase 5: Search and Tags | Pending |
+| TAG-03 | Phase 5: Search and Tags | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total
@@ -124,4 +124,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-06 after initial definition*
+*Last updated: 2026-03-06 after roadmap creation*
