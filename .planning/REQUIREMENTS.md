@@ -48,7 +48,7 @@
 
 ### Design
 
-- [ ] **DSNG-01**: UI uses a glass-inspired design — frosted panels, soft blur, transparency layers
+- [x] **DSNG-01**: UI uses a glass-inspired design — frosted panels, soft blur, transparency layers
 - [x] **DSNG-02**: Color palette is orange and white — warm orange accents on a clean white/light background
 - [x] **DSNG-03**: Aesthetic is inspired by the Hiro Hamada laboratory in Big Hero 6 — bright, clean, futuristic yet warm
 - [x] **DSNG-04**: Typography and spacing feel airy and uncluttered — generous whitespace, no visual noise
@@ -98,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VIEW-02 | Phase 2: Browser Shell | Complete |
 | VIEW-03 | Phase 2: Browser Shell | Complete |
 | VIEW-04 | Phase 2: Browser Shell | Complete |
-| DSNG-01 | Phase 2: Browser Shell | Pending |
+| DSNG-01 | Phase 2: Browser Shell | Complete |
 | DSNG-02 | Phase 2: Browser Shell | Complete |
 | DSNG-03 | Phase 2: Browser Shell | Complete |
 | DSNG-04 | Phase 2: Browser Shell | Complete |

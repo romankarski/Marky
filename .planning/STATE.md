@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-browser-shell-02-02-PLAN.md
-last_updated: "2026-03-06T21:22:34.645Z"
+stopped_at: Completed 02-browser-shell-02-04-PLAN.md
+last_updated: "2026-03-06T21:55:31.594Z"
 last_activity: "2026-03-06 — Phase 2 Plan 03 complete: TabBar (dnd-kit sortable) and WelcomeScreen components built"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 63
 ---
 
@@ -56,6 +56,7 @@ Progress: [██████░░░░] 63%
 | Phase 02-browser-shell P01 | 3 | 2 tasks | 7 files |
 | Phase 02-browser-shell P03 | 5 | 2 tasks | 3 files |
 | Phase 02-browser-shell P02 | 2 | 2 tasks | 2 files |
+| Phase 02-browser-shell P04 | 8 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 02-browser-shell]: TabBar returns null when empty; WelcomeScreen is a zero-prop sibling rendered by App.tsx
 - [Phase 02-browser-shell]: yaml:()=>null component override required to suppress remark-frontmatter output in react-markdown
 - [Phase 02-browser-shell]: TOC uses regex on raw markdown string for synchronous heading extraction — avoids second remark AST parse
+- [Phase 02-browser-shell]: react-resizable-panels v4 uses Group/Panel/Separator exports — PanelGroup and PanelResizeHandle are v1-v2 API only
+- [Phase 02-browser-shell]: useEffect for content fetch depends on activeTab.id + activeTab.path primitives (not full object) to prevent infinite re-fetch loops
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T21:22:34.643Z
-Stopped at: Completed 02-browser-shell-02-02-PLAN.md
+Last session: 2026-03-06T21:55:31.592Z
+Stopped at: Completed 02-browser-shell-02-04-PLAN.md
 Resume file: None
