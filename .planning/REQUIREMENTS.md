@@ -7,11 +7,11 @@
 
 ### File System
 
-- [ ] **FILE-01**: User can open a root folder and all files/subfolders appear in the sidebar tree
-- [ ] **FILE-02**: User can navigate the folder tree to browse and open markdown files
-- [ ] **FILE-03**: User can create a new markdown file from the UI
-- [ ] **FILE-04**: User can rename a file from the UI
-- [ ] **FILE-05**: User can delete a file from the UI (with confirmation)
+- [x] **FILE-01**: User can open a root folder and all files/subfolders appear in the sidebar tree
+- [x] **FILE-02**: User can navigate the folder tree to browse and open markdown files
+- [x] **FILE-03**: User can create a new markdown file from the UI
+- [x] **FILE-04**: User can rename a file from the UI
+- [x] **FILE-05**: User can delete a file from the UI (with confirmation)
 
 ### Viewing
 
@@ -89,11 +89,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FILE-01 | Phase 1: Server Foundation | Pending |
-| FILE-02 | Phase 1: Server Foundation | Pending |
-| FILE-03 | Phase 1: Server Foundation | Pending |
-| FILE-04 | Phase 1: Server Foundation | Pending |
-| FILE-05 | Phase 1: Server Foundation | Pending |
+| FILE-01 | Phase 1: Server Foundation | Complete |
+| FILE-02 | Phase 1: Server Foundation | Complete |
+| FILE-03 | Phase 1: Server Foundation | Complete |
+| FILE-04 | Phase 1: Server Foundation | Complete |
+| FILE-05 | Phase 1: Server Foundation | Complete |
 | VIEW-01 | Phase 2: Browser Shell | Pending |
 | VIEW-02 | Phase 2: Browser Shell | Pending |
 | VIEW-03 | Phase 2: Browser Shell | Pending |
