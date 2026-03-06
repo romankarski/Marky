@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-06T16:21:22.424Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-06T16:25:18.933Z"
 last_activity: 2026-03-06 — Roadmap created, ready to begin Phase 1 planning
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 3 | 2 tasks | 19 files |
+| Phase 01 P02 | 2 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [Phase 01-01]: npm workspaces chosen over pnpm/turborepo: simpler for two-package monorepo, no extra tooling
 - [Phase 01-01]: tsconfig paths used for @marky/shared resolution to avoid NodeNext dual-import issues
 - [Phase 01-01]: Tailwind v4 CSS-first config: @import tailwindcss in index.css via @tailwindcss/vite plugin, no config file
+- [Phase 01]: macOS realpath fix: for non-existent files reconstruct real path via realRoot + path.relative() instead of falling back to symlinked path
+- [Phase 01]: buildApp() factory with fastify.decorate('rootDir') chosen over env-based config for test isolation
+- [Phase 01]: Exact GET /api/files registered before wildcard GET /api/files/* to prevent route shadowing (Fastify first-match wins)
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T16:21:22.422Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-06T16:25:18.894Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
