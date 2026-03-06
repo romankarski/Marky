@@ -15,7 +15,7 @@
 
 ### Viewing
 
-- [ ] **VIEW-01**: Markdown files open in rendered preview mode by default
+- [x] **VIEW-01**: Markdown files open in rendered preview mode by default
 - [x] **VIEW-02**: User can have multiple files open simultaneously in tabs
 - [x] **VIEW-03**: User can switch between open files by clicking tabs
 - [x] **VIEW-04**: User can close tabs individually
@@ -49,9 +49,9 @@
 ### Design
 
 - [ ] **DSNG-01**: UI uses a glass-inspired design — frosted panels, soft blur, transparency layers
-- [ ] **DSNG-02**: Color palette is orange and white — warm orange accents on a clean white/light background
-- [ ] **DSNG-03**: Aesthetic is inspired by the Hiro Hamada laboratory in Big Hero 6 — bright, clean, futuristic yet warm
-- [ ] **DSNG-04**: Typography and spacing feel airy and uncluttered — generous whitespace, no visual noise
+- [x] **DSNG-02**: Color palette is orange and white — warm orange accents on a clean white/light background
+- [x] **DSNG-03**: Aesthetic is inspired by the Hiro Hamada laboratory in Big Hero 6 — bright, clean, futuristic yet warm
+- [x] **DSNG-04**: Typography and spacing feel airy and uncluttered — generous whitespace, no visual noise
 
 ## v2 Requirements
 
@@ -94,14 +94,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-03 | Phase 1: Server Foundation | Complete |
 | FILE-04 | Phase 1: Server Foundation | Complete |
 | FILE-05 | Phase 1: Server Foundation | Complete |
-| VIEW-01 | Phase 2: Browser Shell | Pending |
+| VIEW-01 | Phase 2: Browser Shell | Complete |
 | VIEW-02 | Phase 2: Browser Shell | Complete |
 | VIEW-03 | Phase 2: Browser Shell | Complete |
 | VIEW-04 | Phase 2: Browser Shell | Complete |
 | DSNG-01 | Phase 2: Browser Shell | Pending |
-| DSNG-02 | Phase 2: Browser Shell | Pending |
-| DSNG-03 | Phase 2: Browser Shell | Pending |
-| DSNG-04 | Phase 2: Browser Shell | Pending |
+| DSNG-02 | Phase 2: Browser Shell | Complete |
+| DSNG-03 | Phase 2: Browser Shell | Complete |
+| DSNG-04 | Phase 2: Browser Shell | Complete |
 | VIEW-05 | Phase 3: Editor | Pending |
 | EDIT-01 | Phase 3: Editor | Pending |
 | EDIT-02 | Phase 3: Editor | Pending |

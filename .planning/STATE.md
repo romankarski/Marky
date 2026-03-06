@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-browser-shell-02-03-PLAN.md
-last_updated: "2026-03-06T21:22:27.790Z"
+stopped_at: Completed 02-browser-shell-02-02-PLAN.md
+last_updated: "2026-03-06T21:22:34.645Z"
 last_activity: "2026-03-06 — Phase 2 Plan 03 complete: TabBar (dnd-kit sortable) and WelcomeScreen components built"
 progress:
   total_phases: 5
@@ -80,6 +80,8 @@ Recent decisions affecting current work:
 - [Phase 02-browser-shell]: Vitest installed for client workspace TDD; pure reducer tests require no DOM environment
 - [Phase 02-browser-shell]: @dnd-kit/utilities installed separately for CSS.Transform.toString — not bundled with @dnd-kit/sortable
 - [Phase 02-browser-shell]: TabBar returns null when empty; WelcomeScreen is a zero-prop sibling rendered by App.tsx
+- [Phase 02-browser-shell]: yaml:()=>null component override required to suppress remark-frontmatter output in react-markdown
+- [Phase 02-browser-shell]: TOC uses regex on raw markdown string for synchronous heading extraction — avoids second remark AST parse
 
 ### Pending Todos
 
@@ -93,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T21:22:10.021Z
-Stopped at: Completed 02-browser-shell-02-03-PLAN.md
+Last session: 2026-03-06T21:22:34.643Z
+Stopped at: Completed 02-browser-shell-02-02-PLAN.md
 Resume file: None
