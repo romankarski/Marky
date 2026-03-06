@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-06T16:25:18.933Z"
+stopped_at: "Checkpoint: Task 2 human-verify — 01-03-PLAN.md"
+last_updated: "2026-03-06T16:28:03.508Z"
 last_activity: 2026-03-06 — Roadmap created, ready to begin Phase 1 planning
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01 P01 | 3 | 2 tasks | 19 files |
 | Phase 01 P02 | 2 | 2 tasks | 7 files |
+| Phase 01 P03 | 8 | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,8 @@ Recent decisions affecting current work:
 - [Phase 01]: macOS realpath fix: for non-existent files reconstruct real path via realRoot + path.relative() instead of falling back to symlinked path
 - [Phase 01]: buildApp() factory with fastify.decorate('rootDir') chosen over env-based config for test isolation
 - [Phase 01]: Exact GET /api/files registered before wildcard GET /api/files/* to prevent route shadowing (Fastify first-match wins)
+- [Phase 01]: window.prompt/confirm used for Phase 1 CRUD inputs — explicit deferral of modal UI to Phase 2
+- [Phase 01]: Hook pattern established: custom hook owns fetch + state + refetch; component receives via props
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T16:25:18.894Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-03-06T16:28:03.506Z
+Stopped at: Checkpoint: Task 2 human-verify — 01-03-PLAN.md
 Resume file: None
