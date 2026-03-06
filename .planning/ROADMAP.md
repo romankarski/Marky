@@ -30,7 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can create a new markdown file from the UI and it appears on disk
   4. User can rename a file from the UI and the change persists on disk
   5. User can delete a file from the UI (with confirmation) and it is removed from disk
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Monorepo scaffold, shared types, Vitest test stubs
+- [ ] 01-02-PLAN.md — Fastify server with all five file CRUD endpoints
+- [ ] 01-03-PLAN.md — React client shell with file tree and content view
 
 ### Phase 2: Browser Shell
 **Goal**: Users can navigate their knowledge base, read documents beautifully, and experience the full visual design — Marky looks and feels like the purpose-built tool it is
@@ -83,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Server Foundation | 0/TBD | Not started | - |
+| 1. Server Foundation | 0/3 | In progress | - |
 | 2. Browser Shell | 0/TBD | Not started | - |
 | 3. Editor | 0/TBD | Not started | - |
 | 4. Live Reload | 0/TBD | Not started | - |
