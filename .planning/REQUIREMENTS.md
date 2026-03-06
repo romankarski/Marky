@@ -16,9 +16,9 @@
 ### Viewing
 
 - [ ] **VIEW-01**: Markdown files open in rendered preview mode by default
-- [ ] **VIEW-02**: User can have multiple files open simultaneously in tabs
-- [ ] **VIEW-03**: User can switch between open files by clicking tabs
-- [ ] **VIEW-04**: User can close tabs individually
+- [x] **VIEW-02**: User can have multiple files open simultaneously in tabs
+- [x] **VIEW-03**: User can switch between open files by clicking tabs
+- [x] **VIEW-04**: User can close tabs individually
 - [ ] **VIEW-05**: User can split the view to see two documents side by side
 
 ### Editing
@@ -95,9 +95,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-04 | Phase 1: Server Foundation | Complete |
 | FILE-05 | Phase 1: Server Foundation | Complete |
 | VIEW-01 | Phase 2: Browser Shell | Pending |
-| VIEW-02 | Phase 2: Browser Shell | Pending |
-| VIEW-03 | Phase 2: Browser Shell | Pending |
-| VIEW-04 | Phase 2: Browser Shell | Pending |
+| VIEW-02 | Phase 2: Browser Shell | Complete |
+| VIEW-03 | Phase 2: Browser Shell | Complete |
+| VIEW-04 | Phase 2: Browser Shell | Complete |
 | DSNG-01 | Phase 2: Browser Shell | Pending |
 | DSNG-02 | Phase 2: Browser Shell | Pending |
 | DSNG-03 | Phase 2: Browser Shell | Pending |
