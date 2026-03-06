@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-browser-shell-02-01-PLAN.md
-last_updated: "2026-03-06T21:19:25.853Z"
-last_activity: "2026-03-06 — Phase 2 Plan 01 complete: nine Phase 2 libs installed, Tab types + useTabs hook defined"
+stopped_at: Completed 02-browser-shell-02-03-PLAN.md
+last_updated: "2026-03-06T21:22:27.790Z"
+last_activity: "2026-03-06 — Phase 2 Plan 03 complete: TabBar (dnd-kit sortable) and WelcomeScreen components built"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 4
-  percent: 0
+  completed_plans: 6
+  percent: 63
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 2 of 5 (Browser Shell — in progress)
-Plan: 1 of 5 complete
-Status: Phase 2 in progress — Plan 02-01 complete
-Last activity: 2026-03-06 — Phase 2 Plan 01 complete: nine Phase 2 libs installed, Tab types + useTabs hook defined
+Plan: 3 of 5 complete
+Status: Phase 2 in progress — Plan 02-03 complete
+Last activity: 2026-03-06 — Phase 2 Plan 03 complete: TabBar (dnd-kit sortable) and WelcomeScreen components built
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
@@ -54,6 +54,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P02 | 2 | 2 tasks | 7 files |
 | Phase 01 P03 | 8 | 1 tasks | 5 files |
 | Phase 02-browser-shell P01 | 3 | 2 tasks | 7 files |
+| Phase 02-browser-shell P03 | 5 | 2 tasks | 3 files |
+| Phase 02-browser-shell P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -76,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 02-browser-shell]: tabReducer exported from useTabs.ts for unit testing without React environment
 - [Phase 02-browser-shell]: skipLibCheck: true in client tsconfig — @dnd-kit/core 6.x JSX namespace incompatible with react-jsx strict mode
 - [Phase 02-browser-shell]: Vitest installed for client workspace TDD; pure reducer tests require no DOM environment
+- [Phase 02-browser-shell]: @dnd-kit/utilities installed separately for CSS.Transform.toString — not bundled with @dnd-kit/sortable
+- [Phase 02-browser-shell]: TabBar returns null when empty; WelcomeScreen is a zero-prop sibling rendered by App.tsx
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T21:19:25.851Z
-Stopped at: Completed 02-browser-shell-02-01-PLAN.md
+Last session: 2026-03-06T21:22:10.021Z
+Stopped at: Completed 02-browser-shell-02-03-PLAN.md
 Resume file: None
