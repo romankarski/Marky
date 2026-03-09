@@ -12,4 +12,9 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    // jsdom environment required by @testing-library/react renderHook.
+    // Pure reducer tests (tabReducer, useTabs) also run fine in jsdom.
+    environment: 'jsdom',
+  },
 });
