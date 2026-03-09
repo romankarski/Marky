@@ -30,31 +30,77 @@ export default function App() {
 
   // Split view state
   const [splitMode, setSplitMode] = useState(false);
+  // Each pane owns an ordered list of tab IDs and an active tab ID
+  const [leftTabIds, setLeftTabIds] = useState<string[]>([]);
+  const [rightTabIds, setRightTabIds] = useState<string[]>([]);
+  const [leftActiveTabId, setLeftActiveTabId] = useState<string | null>(null);
   const [rightActiveTabId, setRightActiveTabId] = useState<string | null>(null);
   const [activePaneId, setActivePaneId] = useState<'left' | 'right'>('left');
-  const [pendingRightPath, setPendingRightPath] = useState<string | null>(null);
+
+  const leftTab = tabs.find(t => t.id === leftActiveTabId) ?? null;
   const rightTab = tabs.find(t => t.id === rightActiveTabId) ?? null;
 
-  // When a file was opened targeting the right pane, once activeTabId updates, assign it
-  useEffect(() => {
-    if (!pendingRightPath) return;
-    const tab = tabs.find(t => t.path === pendingRightPath);
-    if (tab) {
-      setRightActiveTabId(tab.id);
-      setPendingRightPath(null);
-    }
-  }, [pendingRightPath, tabs]);
+  // Enter split mode: all current tabs go to left pane, right pane starts empty
+  const enterSplit = useCallback(() => {
+    setLeftTabIds(tabs.map(t => t.id));
+    setLeftActiveTabId(activeTabId);
+    setRightTabIds([]);
+    setRightActiveTabId(null);
+    setActivePaneId('left');
+    setSplitMode(true);
+  }, [tabs, activeTabId]);
 
-  // Left pane dispatch: intercepts FOCUS to update left active tab
+  // Exit split mode: merge left+right back into main tab list order, focus leftActive
+  const exitSplit = useCallback(() => {
+    // Merge: left tabs first, then right tabs that aren't already in left
+    const merged = [...leftTabIds, ...rightTabIds.filter(id => !leftTabIds.includes(id))];
+    // Re-focus in the reducer order — just focus whatever was active in left pane
+    if (leftActiveTabId) dispatch({ type: 'FOCUS', id: leftActiveTabId });
+    setSplitMode(false);
+    // Reset pane state
+    setLeftTabIds([]);
+    setRightTabIds([]);
+    setLeftActiveTabId(null);
+    setRightActiveTabId(null);
+    void merged; // order is already preserved in reducer's tabs array
+  }, [leftTabIds, rightTabIds, leftActiveTabId, dispatch]);
+
+  // Keep leftTabIds in sync when tabs are closed (remove closed tab IDs from pane lists)
+  useEffect(() => {
+    if (!splitMode) return;
+    const allIds = new Set(tabs.map(t => t.id));
+    setLeftTabIds(prev => prev.filter(id => allIds.has(id)));
+    setRightTabIds(prev => prev.filter(id => allIds.has(id)));
+    setLeftActiveTabId(prev => (prev && allIds.has(prev) ? prev : null));
+    setRightActiveTabId(prev => (prev && allIds.has(prev) ? prev : null));
+  }, [tabs, splitMode]);
+
+  // When a new tab is opened in split mode, add it to the active pane
+  useEffect(() => {
+    if (!splitMode) return;
+    const allPaneIds = new Set([...leftTabIds, ...rightTabIds]);
+    const newTab = tabs.find(t => !allPaneIds.has(t.id));
+    if (!newTab) return;
+    if (activePaneId === 'right') {
+      setRightTabIds(prev => [...prev, newTab.id]);
+      setRightActiveTabId(newTab.id);
+    } else {
+      setLeftTabIds(prev => [...prev, newTab.id]);
+      setLeftActiveTabId(newTab.id);
+    }
+  }, [tabs, splitMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Left pane dispatch
   const leftDispatch = useCallback((action: TabAction) => {
     if (action.type === 'FOCUS') {
-      dispatch(action); // keeps main activeTabId in sync
+      setLeftActiveTabId(action.id);
+      dispatch(action);
     } else {
       dispatch(action);
     }
   }, [dispatch]);
 
-  // Right pane dispatch: intercepts FOCUS to update local state, routes everything else to shared reducer
+  // Right pane dispatch
   const rightDispatch = useCallback((action: TabAction) => {
     if (action.type === 'FOCUS') {
       setRightActiveTabId(action.id);
@@ -63,14 +109,21 @@ export default function App() {
     }
   }, [dispatch]);
 
-  // Move a tab to a pane by focusing it there
+  // Move a tab between panes
   const handleMoveToPane = useCallback((tabId: string, targetPane: 'left' | 'right') => {
     if (targetPane === 'right') {
+      setLeftTabIds(prev => prev.filter(id => id !== tabId));
+      setRightTabIds(prev => prev.includes(tabId) ? prev : [...prev, tabId]);
       setRightActiveTabId(tabId);
+      if (leftActiveTabId === tabId) setLeftActiveTabId(null);
     } else {
+      setRightTabIds(prev => prev.filter(id => id !== tabId));
+      setLeftTabIds(prev => prev.includes(tabId) ? prev : [...prev, tabId]);
+      setLeftActiveTabId(tabId);
       dispatch({ type: 'FOCUS', id: tabId });
+      if (rightActiveTabId === tabId) setRightActiveTabId(null);
     }
-  }, [dispatch]);
+  }, [leftActiveTabId, rightActiveTabId, dispatch]);
 
   // Resizable sidebar and TOC widths (pixels)
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
@@ -105,38 +158,37 @@ export default function App() {
   const allTopDirs = tree.filter(n => n.type === 'dir').map(n => n.name);
   const filteredTree = tree.filter(node => includeDirs.includes(node.name));
 
+  // Fetch content for the active tab in single-pane mode
+  const singleActiveTab = splitMode ? null : tabs.find(t => t.id === activeTabId) ?? null;
   useEffect(() => {
-    if (!activeTab || activeTab.content !== null || !activeTab.loading) return;
-    fetch(`/api/files/${activeTab.path}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then(data => dispatch({ type: 'SET_CONTENT', path: activeTab.path, content: data.content }))
-      .catch(() => dispatch({ type: 'SET_CONTENT', path: activeTab.path, content: '> Failed to load file.' }));
-  }, [activeTab?.id, activeTab?.path]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!singleActiveTab || singleActiveTab.content !== null || !singleActiveTab.loading) return;
+    fetch(`/api/files/${singleActiveTab.path}`)
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => dispatch({ type: 'SET_CONTENT', path: singleActiveTab.path, content: data.content }))
+      .catch(() => dispatch({ type: 'SET_CONTENT', path: singleActiveTab.path, content: '> Failed to load file.' }));
+  }, [singleActiveTab?.id, singleActiveTab?.path]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Fetch content for right pane tab when it loads
+  // In split mode, fetch content for whichever tab is active in each pane
   useEffect(() => {
-    if (!rightTab || rightTab.content !== null || !rightTab.loading) return;
+    if (!splitMode || !leftTab || leftTab.content !== null || !leftTab.loading) return;
+    fetch(`/api/files/${leftTab.path}`)
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => dispatch({ type: 'SET_CONTENT', path: leftTab.path, content: data.content }))
+      .catch(() => dispatch({ type: 'SET_CONTENT', path: leftTab.path, content: '> Failed to load file.' }));
+  }, [leftTab?.id, leftTab?.path, splitMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!splitMode || !rightTab || rightTab.content !== null || !rightTab.loading) return;
     fetch(`/api/files/${rightTab.path}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
       .then(data => dispatch({ type: 'SET_CONTENT', path: rightTab.path, content: data.content }))
       .catch(() => dispatch({ type: 'SET_CONTENT', path: rightTab.path, content: '> Failed to load file.' }));
-  }, [rightTab?.id, rightTab?.path]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rightTab?.id, rightTab?.path, splitMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectFile = (path: string) => {
     openTab(path);
     const folder = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
     setActiveFolder(folder);
-    // In split mode, direct the newly opened/focused tab to the active pane
-    if (splitMode && activePaneId === 'right') {
-      // After openTab dispatch, the tab's id is path-based — find it next render via useEffect
-      setPendingRightPath(path);
-    }
   };
 
   const handleFolderToggle = (folderPath: string) => {
@@ -242,16 +294,19 @@ export default function App() {
         {/* Tab bar row with split toggle */}
         {splitMode ? (
           <SplitTabBar
-            tabs={tabs}
-            leftActiveTabId={activeTabId}
+            allTabs={tabs}
+            leftTabIds={leftTabIds}
+            rightTabIds={rightTabIds}
+            leftActiveTabId={leftActiveTabId}
             rightActiveTabId={rightActiveTabId}
             leftDispatch={leftDispatch}
             rightDispatch={rightDispatch}
-            onReorder={(from, to) => dispatch({ type: 'REORDER', from, to })}
+            onLeftReorder={setLeftTabIds}
+            onRightReorder={setRightTabIds}
             onMoveToPane={handleMoveToPane}
             splitToggle={
               <button
-                onClick={() => setSplitMode(false)}
+                onClick={exitSplit}
                 title="Single pane"
                 className="px-3 py-2.5 text-xs text-gray-400 hover:text-orange-500 transition-colors"
               >□</button>
@@ -261,7 +316,7 @@ export default function App() {
           <div className="flex items-center border-b border-gray-200/60 bg-gray-50/60 shrink-0">
             <TabBar tabs={tabs} activeTabId={activeTabId} dispatch={dispatch} />
             <button
-              onClick={() => setSplitMode(true)}
+              onClick={enterSplit}
               title="Split view"
               className="ml-auto px-3 py-2.5 text-xs text-gray-400 hover:text-orange-500 transition-colors shrink-0"
             >⊞</button>
@@ -274,9 +329,9 @@ export default function App() {
             <WelcomeScreen />
           ) : splitMode ? (
             <SplitView
-              leftTab={activeTab}
+              leftTab={leftTab}
               rightTab={rightTab}
-              dispatch={dispatch}
+              dispatch={leftDispatch}
               rightDispatch={rightDispatch}
               onLinkClick={handleInternalLink}
               activePaneId={activePaneId}
@@ -287,8 +342,8 @@ export default function App() {
               className="h-full overflow-hidden rounded-xl backdrop-blur-md bg-white/60 border border-white/20 shadow-sm"
               style={{ willChange: 'transform' }}
             >
-              {activeTab ? (
-                <EditorPane tab={activeTab} dispatch={dispatch} onLinkClick={handleInternalLink} />
+              {singleActiveTab ? (
+                <EditorPane tab={singleActiveTab} dispatch={dispatch} onLinkClick={handleInternalLink} />
               ) : null}
             </div>
           )}

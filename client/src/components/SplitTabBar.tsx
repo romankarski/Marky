@@ -14,24 +14,20 @@ import {
   SortableContext,
   horizontalListSortingStrategy,
   useSortable,
+  arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Tab, TabAction } from '../types/tabs';
 
-interface PaneId {
-  pane: 'left' | 'right';
-}
-
 interface SortableTabProps {
   tab: Tab;
   isActive: boolean;
-  pane: 'left' | 'right';
   dispatch: React.Dispatch<TabAction>;
 }
 
 function SortableTab({ tab, isActive, dispatch }: SortableTabProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: `${tab.id}`,
+    id: tab.id,
   });
 
   const style = {
@@ -114,52 +110,58 @@ function DroppablePaneBar({
       className={`
         flex items-end overflow-x-auto scrollbar-none min-h-[40px] flex-1
         transition-colors
-        ${isOver ? 'bg-orange-50/60' : ''}
+        ${isOver ? 'bg-orange-50/80' : ''}
       `}
     >
-      <SortableContext
-        items={tabs.map(t => t.id)}
-        strategy={horizontalListSortingStrategy}
-      >
+      <SortableContext items={tabs.map(t => t.id)} strategy={horizontalListSortingStrategy}>
         {tabs.map(tab => (
           <SortableTab
             key={tab.id}
             tab={tab}
             isActive={tab.id === activeTabId}
-            pane={pane}
             dispatch={dispatch}
           />
         ))}
       </SortableContext>
       {tabs.length === 0 && (
-        <span className="px-3 py-2.5 text-xs text-gray-300 italic">Drop tabs here</span>
+        <span className="px-3 py-2.5 text-xs text-gray-300 italic select-none">
+          {isOver ? 'Drop here' : 'Empty — drag tabs here'}
+        </span>
       )}
     </div>
   );
 }
 
-interface SplitTabBarProps {
-  tabs: Tab[];
+export interface SplitTabBarProps {
+  /** All open tabs */
+  allTabs: Tab[];
+  /** Ordered list of tab IDs in the left pane */
+  leftTabIds: string[];
+  /** Ordered list of tab IDs in the right pane */
+  rightTabIds: string[];
   leftActiveTabId: string | null;
   rightActiveTabId: string | null;
   leftDispatch: React.Dispatch<TabAction>;
   rightDispatch: React.Dispatch<TabAction>;
-  onReorder: (from: number, to: number) => void;
+  /** Called when left pane tab order changes */
+  onLeftReorder: (ids: string[]) => void;
+  /** Called when right pane tab order changes */
+  onRightReorder: (ids: string[]) => void;
+  /** Called when a tab is moved from one pane to the other */
   onMoveToPane: (tabId: string, targetPane: 'left' | 'right') => void;
   splitToggle: React.ReactNode;
 }
 
-// Track which pane each tab "belongs to" for drag-to-move
-// Tabs are shared but each pane has an active tab — we derive "ownership" from activeTabId
-// For drag purposes, source pane = pane whose tab bar the drag started from
-
 export function SplitTabBar({
-  tabs,
+  allTabs,
+  leftTabIds,
+  rightTabIds,
   leftActiveTabId,
   rightActiveTabId,
   leftDispatch,
   rightDispatch,
-  onReorder,
+  onLeftReorder,
+  onRightReorder,
   onMoveToPane,
   splitToggle,
 }: SplitTabBarProps) {
@@ -171,13 +173,15 @@ export function SplitTabBar({
   const [overPane, setOverPane] = useState<'left' | 'right' | null>(null);
   const [dragSourcePane, setDragSourcePane] = useState<'left' | 'right' | null>(null);
 
-  const activeTab = tabs.find(t => t.id === activeId) ?? null;
+  const tabById = (id: string) => allTabs.find(t => t.id === id);
+  const leftTabs = leftTabIds.map(id => tabById(id)).filter(Boolean) as Tab[];
+  const rightTabs = rightTabIds.map(id => tabById(id)).filter(Boolean) as Tab[];
+  const activeTab = activeId ? tabById(activeId) : null;
 
   function handleDragStart(event: DragStartEvent) {
     const tabId = event.active.id as string;
     setActiveId(tabId);
-    // Determine source pane: if tab is active in left → left, else right (fallback left)
-    setDragSourcePane(tabId === leftActiveTabId ? 'left' : tabId === rightActiveTabId ? 'right' : 'left');
+    setDragSourcePane(leftTabIds.includes(tabId) ? 'left' : 'right');
   }
 
   function handleDragOver(event: { over: { id: string } | null }) {
@@ -185,11 +189,17 @@ export function SplitTabBar({
     const overId = event.over.id as string;
     if (overId === 'pane-left') setOverPane('left');
     else if (overId === 'pane-right') setOverPane('right');
-    else setOverPane(null);
+    else {
+      // Hovering over a tab — determine which pane it belongs to
+      if (leftTabIds.includes(overId)) setOverPane('left');
+      else if (rightTabIds.includes(overId)) setOverPane('right');
+      else setOverPane(null);
+    }
   }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    const tabId = active.id as string;
     setActiveId(null);
     setOverPane(null);
     setDragSourcePane(null);
@@ -198,22 +208,38 @@ export function SplitTabBar({
 
     const overId = over.id as string;
 
-    // Dropped on a pane drop zone
+    // Dropped on a pane drop zone (empty area of a bar)
     if (overId === 'pane-left' || overId === 'pane-right') {
       const targetPane = overId === 'pane-left' ? 'left' : 'right';
       if (targetPane !== dragSourcePane) {
-        onMoveToPane(active.id as string, targetPane);
+        onMoveToPane(tabId, targetPane);
       }
       return;
     }
 
-    // Dropped on another tab (reorder within same pane — same behaviour as before)
-    if (active.id !== over.id) {
-      const from = tabs.findIndex(t => t.id === active.id);
-      const to = tabs.findIndex(t => t.id === over.id);
-      if (from !== -1 && to !== -1) {
-        onReorder(from, to);
-      }
+    // Dropped on a tab
+    if (tabId === overId) return;
+
+    const overInLeft = leftTabIds.includes(overId);
+    const overInRight = rightTabIds.includes(overId);
+    const sourceInLeft = leftTabIds.includes(tabId);
+
+    if (overInLeft && sourceInLeft) {
+      // Reorder within left
+      const from = leftTabIds.indexOf(tabId);
+      const to = leftTabIds.indexOf(overId);
+      onLeftReorder(arrayMove(leftTabIds, from, to));
+    } else if (overInRight && !sourceInLeft) {
+      // Reorder within right
+      const from = rightTabIds.indexOf(tabId);
+      const to = rightTabIds.indexOf(overId);
+      onRightReorder(arrayMove(rightTabIds, from, to));
+    } else if (overInLeft && !sourceInLeft) {
+      // Move from right to left
+      onMoveToPane(tabId, 'left');
+    } else if (overInRight && sourceInLeft) {
+      // Move from left to right
+      onMoveToPane(tabId, 'right');
     }
   }
 
@@ -226,34 +252,26 @@ export function SplitTabBar({
       onDragEnd={handleDragEnd}
     >
       <div className="flex items-stretch border-b border-gray-200/60 bg-gray-50/60 shrink-0">
-        {/* Left pane tab bar */}
         <DroppablePaneBar
           pane="left"
-          tabs={tabs}
+          tabs={leftTabs}
           activeTabId={leftActiveTabId}
           dispatch={leftDispatch}
           isOver={overPane === 'left'}
         />
-
-        {/* Divider */}
         <div className="w-px bg-gray-200 shrink-0 self-stretch" />
-
-        {/* Right pane tab bar */}
         <DroppablePaneBar
           pane="right"
-          tabs={tabs}
+          tabs={rightTabs}
           activeTabId={rightActiveTabId}
           dispatch={rightDispatch}
           isOver={overPane === 'right'}
         />
-
-        {/* Split toggle */}
         <div className="shrink-0 flex items-center border-l border-gray-200/40">
           {splitToggle}
         </div>
       </div>
 
-      {/* Drag overlay — ghost tab while dragging */}
       <DragOverlay>
         {activeTab ? (
           <div className="flex items-center gap-1.5 px-4 py-2.5 text-sm bg-white shadow-lg rounded border border-orange-200 text-orange-700 cursor-grabbing opacity-90">
