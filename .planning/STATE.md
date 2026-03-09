@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 04-live-reload-04-01-PLAN.md
-last_updated: "2026-03-09T16:31:22.623Z"
+stopped_at: Completed 04-live-reload-04-02-PLAN.md
+last_updated: "2026-03-09T16:36:06.752Z"
 last_activity: "2026-03-09 — Phase 3 complete: Human approved all Phase 3 requirements (EDIT-01–EDIT-05, VIEW-05)"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
   percent: 75
 ---
 
@@ -64,6 +64,7 @@ Progress: [███████░░░] 75%
 | Phase 03-editor P04 | 1 | 2 tasks | 2 files |
 | Phase 03-editor P05 | ~45min | 2 tasks | 2 files |
 | Phase 04-live-reload P01 | 2 | 2 tasks | 2 files |
+| Phase 04-live-reload P02 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 04-live-reload]: Real timers for server SSE tests — chokidar filesystem events require real async IO, fake timers incompatible
 - [Phase 04-live-reload]: EventSource mocked via vi.stubGlobal for jsdom — makes browser SSE API available in client unit tests
 - [Phase 04-live-reload]: Wave 0 TDD: test stubs (RED) written before implementation — watch.test.ts drives Plan 02, useFileWatcher.test.ts drives Plan 03
+- [Phase 04-live-reload]: FileWatcherService owns the write-lock set — avoids circular imports between watcher.ts and files.ts
+- [Phase 04-live-reload]: Fastify inject payloadAsStream:true exposes stream via response.stream() not response.body — test stubs needed correction
 
 ### Pending Todos
 
@@ -118,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T16:31:22.621Z
-Stopped at: Completed 04-live-reload-04-01-PLAN.md
+Last session: 2026-03-09T16:36:06.750Z
+Stopped at: Completed 04-live-reload-04-02-PLAN.md
 Resume file: None
