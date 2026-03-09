@@ -81,7 +81,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. When an external process writes to a file that is open in the app, the preview refreshes immediately without any user action
   2. The file watcher monitors the entire root folder — files created or modified anywhere in the tree are detected, not just files already open in tabs
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Wave 0 failing test stubs (watch.test.ts + useFileWatcher.test.ts)
+- [ ] 04-02-PLAN.md — Server: FileWatcherService (chokidar v5), SSE route, write-lock in PUT
+- [ ] 04-03-PLAN.md — Client: useFileWatcher hook, App.tsx wiring, visual verification checkpoint
 
 ### Phase 5: Search and Tags
 **Goal**: Users can find any content instantly by keyword and filter their knowledge base by topic tags — nothing gets lost in the file tree
@@ -105,5 +110,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Server Foundation | 3/3 | Complete   | 2026-03-06 |
 | 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
 | 3. Editor | 5/5 | Complete   | 2026-03-09 |
-| 4. Live Reload | 0/TBD | Not started | - |
+| 4. Live Reload | 0/3 | Not started | - |
 | 5. Search and Tags | 0/TBD | Not started | - |
