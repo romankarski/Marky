@@ -70,6 +70,7 @@ const filesRoutes: FastifyPluginAsync = async (fastify) => {
         await fs.rename(safe, safeDest);
         return { path: req.body.newPath };
       }
+      fastify.fileWatcher.lock(req.params['*']);
       await fs.writeFile(safe, req.body?.content ?? '');
       return { path: req.params['*'] };
     }
