@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 03-editor-03-04-PLAN.md
-last_updated: "2026-03-09T13:53:17.941Z"
-last_activity: "2026-03-09 — Phase 2 complete: Human approved all 8 Phase 2 requirements (VIEW-01–VIEW-04, DSNG-01–DSNG-04)"
+stopped_at: Completed 03-editor-03-05-PLAN.md
+last_updated: "2026-03-09T15:52:06.252Z"
+last_activity: "2026-03-09 — Phase 3 complete: Human approved all Phase 3 requirements (EDIT-01–EDIT-05, VIEW-05)"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 75
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 2 of 5 (Browser Shell — COMPLETE)
+Phase: 3 of 5 (Editor — COMPLETE)
 Plan: 5 of 5 complete
-Status: Phase 2 complete — proceeding to Phase 3 (Editor)
-Last activity: 2026-03-09 — Phase 2 complete: Human approved all 8 Phase 2 requirements (VIEW-01–VIEW-04, DSNG-01–DSNG-04)
+Status: Phase 3 complete — proceeding to Phase 4 (Full-Text Search)
+Last activity: 2026-03-09 — Phase 3 complete: Human approved all Phase 3 requirements (EDIT-01–EDIT-05, VIEW-05)
 
 Progress: [███████░░░] 75%
 
@@ -62,6 +62,7 @@ Progress: [███████░░░] 75%
 | Phase 03-editor P02 | 8 | 2 tasks | 4 files |
 | Phase 03-editor P03 | 3 | 2 tasks | 4 files |
 | Phase 03-editor P04 | 1 | 2 tasks | 2 files |
+| Phase 03-editor P05 | ~45min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 03-editor]: onSaved excluded from useAutoSave useEffect deps — stable callback responsibility is caller's; avoids infinite loops if not memoized
 - [Phase 03-editor]: Local editContent state in EditorPane (not reducer) prevents cursor-jumping on every keystroke
 - [Phase 03-editor]: window.confirm for dirty-tab close guard matches Phase 1 pattern established in STATE.md
+- [Phase 03-editor]: Per-pane focus isolation: rightActiveTabId local to App.tsx, rightDispatch intercepts FOCUS to set it; all other actions pass to shared reducer
+- [Phase 03-editor]: useAutoSave guarded to only fire when editMode active and user has made changes — prevents spurious saves on tab switch
 
 ### Pending Todos
 
@@ -111,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T13:53:17.938Z
-Stopped at: Completed 03-editor-03-04-PLAN.md
+Last session: 2026-03-09T15:52:06.250Z
+Stopped at: Completed 03-editor-03-05-PLAN.md
 Resume file: None

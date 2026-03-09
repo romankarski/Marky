@@ -19,7 +19,7 @@
 - [x] **VIEW-02**: User can have multiple files open simultaneously in tabs
 - [x] **VIEW-03**: User can switch between open files by clicking tabs
 - [x] **VIEW-04**: User can close tabs individually
-- [ ] **VIEW-05**: User can split the view to see two documents side by side
+- [x] **VIEW-05**: User can split the view to see two documents side by side
 
 ### Editing
 
@@ -27,7 +27,7 @@
 - [x] **EDIT-02**: Editor shows raw markdown; preview updates live as user types
 - [x] **EDIT-03**: Changes are auto-saved automatically after a brief pause
 - [x] **EDIT-04**: Tab shows a dirty state indicator when there are unsaved changes
-- [ ] **EDIT-05**: User can edit two separate files at once in split-screen mode (each pane independent)
+- [x] **EDIT-05**: User can edit two separate files at once in split-screen mode (each pane independent)
 
 ### Live Reload
 
@@ -102,12 +102,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSNG-02 | Phase 2: Browser Shell | Complete |
 | DSNG-03 | Phase 2: Browser Shell | Complete |
 | DSNG-04 | Phase 2: Browser Shell | Complete |
-| VIEW-05 | Phase 3: Editor | Pending |
+| VIEW-05 | Phase 3: Editor | Complete |
 | EDIT-01 | Phase 3: Editor | Complete |
 | EDIT-02 | Phase 3: Editor | Complete |
 | EDIT-03 | Phase 3: Editor | Complete |
 | EDIT-04 | Phase 3: Editor | Complete |
-| EDIT-05 | Phase 3: Editor | Pending |
+| EDIT-05 | Phase 3: Editor | Complete |
 | LIVE-01 | Phase 4: Live Reload | Pending |
 | LIVE-02 | Phase 4: Live Reload | Pending |
 | SRCH-01 | Phase 5: Search and Tags | Pending |
