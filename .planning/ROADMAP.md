@@ -13,7 +13,7 @@ Marky is built in five dependency-driven phases. The server and filesystem layer
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Server Foundation** - Node.js backend + project scaffold: file CRUD API, directory walker, React shell served from same origin (completed 2026-03-06)
-- [ ] **Phase 2: Browser Shell** - File tree, tab system, markdown preview, and full design system — users can read and navigate their knowledge base
+- [x] **Phase 2: Browser Shell** - File tree, tab system, markdown preview, and full design system — users can read and navigate their knowledge base (completed 2026-03-09)
 - [ ] **Phase 3: Editor** - CodeMirror editor below preview, auto-save, dirty-state tracking, and split-screen editing
 - [ ] **Phase 4: Live Reload** - File watcher detects external writes from Claude CLI and auto-refreshes open files
 - [ ] **Phase 5: Search and Tags** - Full-text search across all files and tag-based filtering from frontmatter
@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Server Foundation | 3/3 | Complete   | 2026-03-06 |
-| 2. Browser Shell | 4/5 | In Progress|  |
+| 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
 | 3. Editor | 0/TBD | Not started | - |
 | 4. Live Reload | 0/TBD | Not started | - |
 | 5. Search and Tags | 0/TBD | Not started | - |
