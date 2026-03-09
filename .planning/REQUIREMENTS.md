@@ -31,8 +31,8 @@
 
 ### Live Reload
 
-- [ ] **LIVE-01**: When an external process (Claude CLI) writes to an open file, the preview auto-refreshes immediately
-- [ ] **LIVE-02**: File watcher monitors the entire root folder for external changes
+- [x] **LIVE-01**: When an external process (Claude CLI) writes to an open file, the preview auto-refreshes immediately
+- [x] **LIVE-02**: File watcher monitors the entire root folder for external changes
 
 ### Search
 
@@ -108,8 +108,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-03 | Phase 3: Editor | Complete |
 | EDIT-04 | Phase 3: Editor | Complete |
 | EDIT-05 | Phase 3: Editor | Complete |
-| LIVE-01 | Phase 4: Live Reload | Pending |
-| LIVE-02 | Phase 4: Live Reload | Pending |
+| LIVE-01 | Phase 4: Live Reload | Complete |
+| LIVE-02 | Phase 4: Live Reload | Complete |
 | SRCH-01 | Phase 5: Search and Tags | Pending |
 | SRCH-02 | Phase 5: Search and Tags | Pending |
 | SRCH-03 | Phase 5: Search and Tags | Pending |
