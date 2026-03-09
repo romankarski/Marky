@@ -10,7 +10,7 @@ export function tabReducer(state: TabState, action: TabAction): TabState {
       const existing = state.tabs.find(t => t.path === action.path);
       if (existing) return { ...state, activeTabId: existing.id };
       const id = crypto.randomUUID();
-      const newTab: Tab = { id, path: action.path, label: action.label, content: null, loading: true };
+      const newTab: Tab = { id, path: action.path, label: action.label, content: null, loading: true, dirty: false, editMode: false };
       return { tabs: [...state.tabs, newTab], activeTabId: id };
     }
     case 'CLOSE': {
@@ -31,6 +31,27 @@ export function tabReducer(state: TabState, action: TabAction): TabState {
         ...state,
         tabs: state.tabs.map(t =>
           t.path === action.path ? { ...t, content: action.content, loading: false } : t
+        ),
+      };
+    case 'TOGGLE_EDIT':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.id ? { ...t, editMode: !t.editMode } : t
+        ),
+      };
+    case 'SET_DIRTY':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.id ? { ...t, dirty: true } : t
+        ),
+      };
+    case 'CLEAR_DIRTY':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.id === action.id ? { ...t, dirty: false } : t
         ),
       };
     default:
