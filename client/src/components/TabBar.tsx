@@ -50,6 +50,14 @@ function SortableTab({ tab, isActive, dispatch }: SortableTabProps) {
 
       <span className="max-w-[140px] truncate">{tab.label}</span>
 
+      {/* Dirty indicator dot — visible when tab has unsaved changes */}
+      {tab.dirty && (
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0"
+          title="Unsaved changes"
+        />
+      )}
+
       {/* Close button — always rendered for layout stability, becomes visible on hover/active */}
       <button
         className={`
@@ -61,6 +69,10 @@ function SortableTab({ tab, isActive, dispatch }: SortableTabProps) {
         `}
         onClick={(e) => {
           e.stopPropagation(); // don't trigger FOCUS when closing
+          if (tab.dirty) {
+            const confirmed = window.confirm(`"${tab.label}" has unsaved changes. Close anyway?`);
+            if (!confirmed) return;
+          }
           dispatch({ type: 'CLOSE', id: tab.id });
         }}
         title={`Close ${tab.label}`}
