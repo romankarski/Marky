@@ -4,6 +4,8 @@ export interface Tab {
   label: string;       // filename extracted from path (e.g. "page.md")
   content: string | null;  // raw markdown string; null while loading
   loading: boolean;
+  dirty: boolean;      // true when there are unsaved changes not yet written to disk
+  editMode: boolean;   // true when the CodeMirror editor pane is visible for this tab
 }
 
 export interface TabState {
@@ -16,4 +18,7 @@ export type TabAction =
   | { type: 'CLOSE';       id: string }
   | { type: 'FOCUS';       id: string }
   | { type: 'REORDER';     from: number; to: number }
-  | { type: 'SET_CONTENT'; path: string; content: string };
+  | { type: 'SET_CONTENT'; path: string; content: string }
+  | { type: 'SET_DIRTY';   id: string }
+  | { type: 'CLEAR_DIRTY'; id: string }
+  | { type: 'TOGGLE_EDIT'; id: string };
