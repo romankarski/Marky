@@ -26,7 +26,7 @@ describe('GET /api/watch (SSE)', () => {
     const filePath = path.join(subDir, 'file.md');
     await fs.writeFile(filePath, '# initial');
 
-    // Connect to SSE endpoint — will return 404 until Plan 02 implements the route
+    // Connect to SSE endpoint
     const response = await app.inject({
       method: 'GET',
       url: '/api/watch',
@@ -35,9 +35,9 @@ describe('GET /api/watch (SSE)', () => {
 
     expect(response.statusCode).toBe(200);
 
-    // Collect SSE data events
+    // Collect SSE data events — use response.stream() (correct API for payloadAsStream:true)
     const events: string[] = [];
-    response.body.on('data', (chunk: Buffer) => {
+    response.stream().on('data', (chunk: Buffer) => {
       events.push(chunk.toString());
     });
 
@@ -53,7 +53,7 @@ describe('GET /api/watch (SSE)', () => {
   });
 
   it('LIVE-02 — watcher detects new file creation (add event)', async () => {
-    // Connect to SSE endpoint — will return 404 until Plan 02 implements the route
+    // Connect to SSE endpoint
     const response = await app.inject({
       method: 'GET',
       url: '/api/watch',
@@ -62,9 +62,9 @@ describe('GET /api/watch (SSE)', () => {
 
     expect(response.statusCode).toBe(200);
 
-    // Collect SSE data events
+    // Collect SSE data events — use response.stream() (correct API for payloadAsStream:true)
     const events: string[] = [];
-    response.body.on('data', (chunk: Buffer) => {
+    response.stream().on('data', (chunk: Buffer) => {
       events.push(chunk.toString());
     });
 
@@ -83,7 +83,7 @@ describe('GET /api/watch (SSE)', () => {
     // Create a file to update
     await fs.writeFile(path.join(tmpDir, 'note.md'), '# original');
 
-    // Connect to SSE endpoint — will return 404 until Plan 02 implements the route
+    // Connect to SSE endpoint
     const sseResponse = await app.inject({
       method: 'GET',
       url: '/api/watch',
@@ -92,9 +92,9 @@ describe('GET /api/watch (SSE)', () => {
 
     expect(sseResponse.statusCode).toBe(200);
 
-    // Collect SSE data events
+    // Collect SSE data events — use response.stream() (correct API for payloadAsStream:true)
     const events: string[] = [];
-    sseResponse.body.on('data', (chunk: Buffer) => {
+    sseResponse.stream().on('data', (chunk: Buffer) => {
       events.push(chunk.toString());
     });
 
