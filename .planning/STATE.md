@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 03-editor-03-02-PLAN.md
-last_updated: "2026-03-09T13:45:43.312Z"
+stopped_at: Completed 03-editor-03-03-PLAN.md
+last_updated: "2026-03-09T13:50:34.047Z"
 last_activity: "2026-03-09 — Phase 2 complete: Human approved all 8 Phase 2 requirements (VIEW-01–VIEW-04, DSNG-01–DSNG-04)"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 75
 ---
 
@@ -60,6 +60,7 @@ Progress: [███████░░░] 75%
 | Phase 02-browser-shell P05 | 5 | 1 tasks | 0 files |
 | Phase 03-editor P01 | 8 | 2 tasks | 2 files |
 | Phase 03-editor P02 | 8 | 2 tasks | 4 files |
+| Phase 03-editor P03 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,8 @@ Recent decisions affecting current work:
 - [Phase 03-editor]: CLOSE + dirty guard lives in TabBar event handler (not reducer) — no reducer test needed
 - [Phase 03-editor]: useAutoSave tests use vi.useFakeTimers for deterministic debounce control
 - [Phase 03-editor]: Tab type extended non-breakingly: new fields dirty/editMode added at end, existing fields unchanged
+- [Phase 03-editor]: Global jsdom vitest environment chosen over environmentMatchGlobs — pure reducer tests pass in jsdom, simpler config
+- [Phase 03-editor]: onSaved excluded from useAutoSave useEffect deps — stable callback responsibility is caller's; avoids infinite loops if not memoized
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T13:45:43.310Z
-Stopped at: Completed 03-editor-03-02-PLAN.md
+Last session: 2026-03-09T13:50:34.045Z
+Stopped at: Completed 03-editor-03-03-PLAN.md
 Resume file: None

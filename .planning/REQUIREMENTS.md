@@ -24,7 +24,7 @@
 ### Editing
 
 - [x] **EDIT-01**: User can click Edit to open an editor panel below the preview (both visible simultaneously)
-- [ ] **EDIT-02**: Editor shows raw markdown; preview updates live as user types
+- [x] **EDIT-02**: Editor shows raw markdown; preview updates live as user types
 - [x] **EDIT-03**: Changes are auto-saved automatically after a brief pause
 - [x] **EDIT-04**: Tab shows a dirty state indicator when there are unsaved changes
 - [ ] **EDIT-05**: User can edit two separate files at once in split-screen mode (each pane independent)
@@ -104,7 +104,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSNG-04 | Phase 2: Browser Shell | Complete |
 | VIEW-05 | Phase 3: Editor | Pending |
 | EDIT-01 | Phase 3: Editor | Complete |
-| EDIT-02 | Phase 3: Editor | Pending |
+| EDIT-02 | Phase 3: Editor | Complete |
 | EDIT-03 | Phase 3: Editor | Complete |
 | EDIT-04 | Phase 3: Editor | Complete |
 | EDIT-05 | Phase 3: Editor | Pending |
