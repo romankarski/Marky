@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { FileTree } from './components/FileTree';
 import { TabBar } from './components/TabBar';
+import { SplitTabBar } from './components/SplitTabBar';
 import { TableOfContents } from './components/TableOfContents';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { EditorPane } from './components/EditorPane';
@@ -30,7 +31,28 @@ export default function App() {
   // Split view state
   const [splitMode, setSplitMode] = useState(false);
   const [rightActiveTabId, setRightActiveTabId] = useState<string | null>(null);
+  const [activePaneId, setActivePaneId] = useState<'left' | 'right'>('left');
+  const [pendingRightPath, setPendingRightPath] = useState<string | null>(null);
   const rightTab = tabs.find(t => t.id === rightActiveTabId) ?? null;
+
+  // When a file was opened targeting the right pane, once activeTabId updates, assign it
+  useEffect(() => {
+    if (!pendingRightPath) return;
+    const tab = tabs.find(t => t.path === pendingRightPath);
+    if (tab) {
+      setRightActiveTabId(tab.id);
+      setPendingRightPath(null);
+    }
+  }, [pendingRightPath, tabs]);
+
+  // Left pane dispatch: intercepts FOCUS to update left active tab
+  const leftDispatch = useCallback((action: TabAction) => {
+    if (action.type === 'FOCUS') {
+      dispatch(action); // keeps main activeTabId in sync
+    } else {
+      dispatch(action);
+    }
+  }, [dispatch]);
 
   // Right pane dispatch: intercepts FOCUS to update local state, routes everything else to shared reducer
   const rightDispatch = useCallback((action: TabAction) => {
@@ -38,6 +60,15 @@ export default function App() {
       setRightActiveTabId(action.id);
     } else {
       dispatch(action);
+    }
+  }, [dispatch]);
+
+  // Move a tab to a pane by focusing it there
+  const handleMoveToPane = useCallback((tabId: string, targetPane: 'left' | 'right') => {
+    if (targetPane === 'right') {
+      setRightActiveTabId(tabId);
+    } else {
+      dispatch({ type: 'FOCUS', id: tabId });
     }
   }, [dispatch]);
 
@@ -101,6 +132,11 @@ export default function App() {
     openTab(path);
     const folder = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
     setActiveFolder(folder);
+    // In split mode, direct the newly opened/focused tab to the active pane
+    if (splitMode && activePaneId === 'right') {
+      // After openTab dispatch, the tab's id is path-based — find it next render via useEffect
+      setPendingRightPath(path);
+    }
   };
 
   const handleFolderToggle = (folderPath: string) => {
@@ -204,16 +240,33 @@ export default function App() {
       <div className="flex flex-col flex-1 overflow-hidden">
 
         {/* Tab bar row with split toggle */}
-        <div className="flex items-center border-b border-gray-200/60 bg-gray-50/60 shrink-0">
-          <TabBar tabs={tabs} activeTabId={activeTabId} dispatch={dispatch} />
-          <button
-            onClick={() => setSplitMode(v => !v)}
-            title={splitMode ? 'Single pane' : 'Split view'}
-            className="ml-auto px-3 py-2.5 text-xs text-gray-400 hover:text-orange-500 transition-colors shrink-0"
-          >
-            {splitMode ? '□' : '⊞'}
-          </button>
-        </div>
+        {splitMode ? (
+          <SplitTabBar
+            tabs={tabs}
+            leftActiveTabId={activeTabId}
+            rightActiveTabId={rightActiveTabId}
+            leftDispatch={leftDispatch}
+            rightDispatch={rightDispatch}
+            onReorder={(from, to) => dispatch({ type: 'REORDER', from, to })}
+            onMoveToPane={handleMoveToPane}
+            splitToggle={
+              <button
+                onClick={() => setSplitMode(false)}
+                title="Single pane"
+                className="px-3 py-2.5 text-xs text-gray-400 hover:text-orange-500 transition-colors"
+              >□</button>
+            }
+          />
+        ) : (
+          <div className="flex items-center border-b border-gray-200/60 bg-gray-50/60 shrink-0">
+            <TabBar tabs={tabs} activeTabId={activeTabId} dispatch={dispatch} />
+            <button
+              onClick={() => setSplitMode(true)}
+              title="Split view"
+              className="ml-auto px-3 py-2.5 text-xs text-gray-400 hover:text-orange-500 transition-colors shrink-0"
+            >⊞</button>
+          </div>
+        )}
 
         {/* Content area */}
         <div className="flex-1 overflow-hidden p-4">
@@ -226,6 +279,8 @@ export default function App() {
               dispatch={dispatch}
               rightDispatch={rightDispatch}
               onLinkClick={handleInternalLink}
+              activePaneId={activePaneId}
+              onPaneFocus={setActivePaneId}
             />
           ) : (
             <div
