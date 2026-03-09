@@ -4,17 +4,15 @@ import type { Tab, TabAction } from '../../types/tabs';
 
 // Mock EventSource globally — not available in jsdom
 const mockClose = vi.fn();
-const mockListeners: Record<string, (e: MessageEvent | Event) => void> = {};
-const MockEventSource = vi.fn().mockImplementation((url: string) => ({
-  url,
-  close: mockClose,
-  set onmessage(fn: (e: MessageEvent) => void) {
-    mockListeners['message'] = fn;
-  },
-  set onerror(fn: (e: Event) => void) {
-    mockListeners['error'] = fn;
-  },
-}));
+const mockListeners: Record<string, (e: MessageEvent) => void> = {};
+function MockEventSourceImpl(this: { url: string; close: typeof mockClose; addEventListener: (type: string, fn: (e: MessageEvent) => void) => void }, url: string) {
+  this.url = url;
+  this.close = mockClose;
+  this.addEventListener = (type: string, fn: (e: MessageEvent) => void) => {
+    mockListeners[type] = fn;
+  };
+}
+const MockEventSource = vi.fn().mockImplementation(MockEventSourceImpl);
 vi.stubGlobal('EventSource', MockEventSource);
 
 // Mock fetch globally to return fake file content
@@ -42,8 +40,8 @@ function makeTab(overrides: Partial<Tab> = {}): Tab {
 beforeEach(() => {
   vi.clearAllMocks();
   // Reset mockListeners between tests
-  delete mockListeners['message'];
-  delete mockListeners['error'];
+  delete mockListeners['change'];
+  delete mockListeners['add'];
 });
 
 afterEach(() => {
@@ -59,15 +57,11 @@ describe('useFileWatcher', () => {
     renderHook(() => useFileWatcher([tab], dispatch, refetch));
 
     // Simulate SSE change message for an open tab
-    const messageEvent = new MessageEvent('message', {
+    const changeEvent = new MessageEvent('change', {
       data: JSON.stringify({ path: 'note.md' }),
     });
-    // Manually trigger the message event type via custom event with type field
-    const changeEvent = Object.assign(new MessageEvent('message', {
-      data: JSON.stringify({ path: 'note.md' }),
-    }), { type: 'change' });
 
-    mockListeners['message']?.(changeEvent as MessageEvent);
+    mockListeners['change']?.(changeEvent);
 
     // Wait for the async fetch to resolve
     await new Promise(r => setTimeout(r, 10));
@@ -87,11 +81,11 @@ describe('useFileWatcher', () => {
     renderHook(() => useFileWatcher([tab], dispatch, refetch));
 
     // Simulate SSE message for a file NOT in the open tabs
-    const changeEvent = Object.assign(new MessageEvent('message', {
+    const changeEvent = new MessageEvent('change', {
       data: JSON.stringify({ path: 'other.md' }),
-    }), { type: 'change' });
+    });
 
-    mockListeners['message']?.(changeEvent as MessageEvent);
+    mockListeners['change']?.(changeEvent);
 
     await new Promise(r => setTimeout(r, 10));
 
@@ -107,11 +101,11 @@ describe('useFileWatcher', () => {
     renderHook(() => useFileWatcher([tab], dispatch, refetch));
 
     // Simulate SSE change message for the dirty tab
-    const changeEvent = Object.assign(new MessageEvent('message', {
+    const changeEvent = new MessageEvent('change', {
       data: JSON.stringify({ path: 'note.md' }),
-    }), { type: 'change' });
+    });
 
-    mockListeners['message']?.(changeEvent as MessageEvent);
+    mockListeners['change']?.(changeEvent);
 
     await new Promise(r => setTimeout(r, 10));
 
@@ -126,11 +120,11 @@ describe('useFileWatcher', () => {
     renderHook(() => useFileWatcher([], dispatch, refetch));
 
     // Simulate SSE add message for a newly created file
-    const addEvent = Object.assign(new MessageEvent('message', {
+    const addEvent = new MessageEvent('add', {
       data: JSON.stringify({ path: 'newfile.md' }),
-    }), { type: 'add' });
+    });
 
-    mockListeners['message']?.(addEvent as MessageEvent);
+    mockListeners['add']?.(addEvent);
 
     await new Promise(r => setTimeout(r, 10));
 
