@@ -8,6 +8,7 @@ import { EditorPane } from './components/EditorPane';
 import { SplitView } from './components/SplitView';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
+import { useFileWatcher } from './hooks/useFileWatcher';
 import type { TabAction } from './types/tabs';
 
 const DEFAULT_DIRS = ['knowledge', 'notes'];
@@ -25,6 +26,8 @@ export default function App() {
   const [activeFolder, setActiveFolder] = useState<string>('');
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const { tree, loading: treeLoading, refetch } = useFileTree();
+
+  useFileWatcher(tabs, dispatch, refetch);
   const [includeDirs, setIncludeDirs] = useState<string[]>(DEFAULT_DIRS);
   const [managingFolders, setManagingFolders] = useState(false);
 
