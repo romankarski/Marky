@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { FileTree } from './components/FileTree';
 import { TabBar } from './components/TabBar';
-import { MarkdownPreview } from './components/MarkdownPreview';
 import { TableOfContents } from './components/TableOfContents';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { EditorPane } from './components/EditorPane';
+import { SplitView } from './components/SplitView';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
+import type { TabAction } from './types/tabs';
 
 const DEFAULT_DIRS = ['knowledge', 'notes'];
 const SIDEBAR_DEFAULT = 260;
@@ -24,6 +26,20 @@ export default function App() {
   const { tree, loading: treeLoading, refetch } = useFileTree();
   const [includeDirs, setIncludeDirs] = useState<string[]>(DEFAULT_DIRS);
   const [managingFolders, setManagingFolders] = useState(false);
+
+  // Split view state
+  const [splitMode, setSplitMode] = useState(false);
+  const [rightActiveTabId, setRightActiveTabId] = useState<string | null>(null);
+  const rightTab = tabs.find(t => t.id === rightActiveTabId) ?? null;
+
+  // Right pane dispatch: intercepts FOCUS to update local state, routes everything else to shared reducer
+  const rightDispatch = useCallback((action: TabAction) => {
+    if (action.type === 'FOCUS') {
+      setRightActiveTabId(action.id);
+    } else {
+      dispatch(action);
+    }
+  }, [dispatch]);
 
   // Resizable sidebar and TOC widths (pixels)
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
@@ -68,6 +84,18 @@ export default function App() {
       .then(data => dispatch({ type: 'SET_CONTENT', path: activeTab.path, content: data.content }))
       .catch(() => dispatch({ type: 'SET_CONTENT', path: activeTab.path, content: '> Failed to load file.' }));
   }, [activeTab?.id, activeTab?.path]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch content for right pane tab when it loads
+  useEffect(() => {
+    if (!rightTab || rightTab.content !== null || !rightTab.loading) return;
+    fetch(`/api/files/${rightTab.path}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      })
+      .then(data => dispatch({ type: 'SET_CONTENT', path: rightTab.path, content: data.content }))
+      .catch(() => dispatch({ type: 'SET_CONTENT', path: rightTab.path, content: '> Failed to load file.' }));
+  }, [rightTab?.id, rightTab?.path]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectFile = (path: string) => {
     openTab(path);
@@ -174,26 +202,39 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        <TabBar tabs={tabs} activeTabId={activeTabId} dispatch={dispatch} />
+
+        {/* Tab bar row with split toggle */}
+        <div className="flex items-center border-b border-gray-200/60 bg-gray-50/60 shrink-0">
+          <TabBar tabs={tabs} activeTabId={activeTabId} dispatch={dispatch} />
+          <button
+            onClick={() => setSplitMode(v => !v)}
+            title={splitMode ? 'Single pane' : 'Split view'}
+            className="ml-auto px-3 py-2.5 text-xs text-gray-400 hover:text-orange-500 transition-colors shrink-0"
+          >
+            {splitMode ? '□' : '⊞'}
+          </button>
+        </div>
+
+        {/* Content area */}
         <div className="flex-1 overflow-hidden p-4">
           {tabs.length === 0 ? (
             <WelcomeScreen />
+          ) : splitMode ? (
+            <SplitView
+              leftTab={activeTab}
+              rightTab={rightTab}
+              dispatch={dispatch}
+              rightDispatch={rightDispatch}
+              onLinkClick={handleInternalLink}
+            />
           ) : (
             <div
-              className="h-full overflow-y-auto rounded-xl backdrop-blur-md bg-white/60 border border-white/20 shadow-sm"
+              className="h-full overflow-hidden rounded-xl backdrop-blur-md bg-white/60 border border-white/20 shadow-sm"
               style={{ willChange: 'transform' }}
             >
-              {activeTab?.loading ? (
-                <div className="flex items-center justify-center h-32">
-                  <div className="w-5 h-5 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : activeTab?.content ? (
-                <div className="prose prose-orange max-w-none p-8 pb-16">
-                  <MarkdownPreview content={activeTab.content} onLinkClick={handleInternalLink} />
-                </div>
-              ) : (
-                <div className="p-8 text-gray-400 text-sm">No content</div>
-              )}
+              {activeTab ? (
+                <EditorPane tab={activeTab} dispatch={dispatch} onLinkClick={handleInternalLink} />
+              ) : null}
             </div>
           )}
         </div>
