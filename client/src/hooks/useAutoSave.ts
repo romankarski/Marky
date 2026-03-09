@@ -4,11 +4,13 @@ export function useAutoSave(
   path: string,
   content: string,
   onSaved: () => void,
+  enabled: boolean,
   delayMs = 800,
 ): void {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
       await fetch(`/api/files/${path}`, {
@@ -22,5 +24,5 @@ export function useAutoSave(
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [content, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [content, path, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 }

@@ -29,8 +29,8 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
     dispatch({ type: 'CLEAR_DIRTY', id: tab.id });
   }, [dispatch, tab.id]);
 
-  // Auto-save hook — only fires when editMode is active (content changes drive it)
-  useAutoSave(tab.path, editContent, onSaved);
+  // Auto-save hook — only fires when in edit mode AND the user has made changes
+  useAutoSave(tab.path, editContent, onSaved, tab.editMode && tab.dirty);
 
   function handleChange(value: string) {
     setEditContent(value);
