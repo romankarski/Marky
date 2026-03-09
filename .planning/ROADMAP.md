@@ -65,7 +65,14 @@ Plans:
   3. Changes are auto-saved after a brief pause — the user never has to press save
   4. A tab shows a visible dirty-state indicator when there are unsaved changes
   5. User can split the view to edit two separate files at the same time, each pane fully independent
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Wave 0 test scaffolds (tabReducer-editor + useAutoSave failing tests)
+- [ ] 03-02-PLAN.md — Extend Tab type + tabReducer actions + install CodeMirror libraries
+- [ ] 03-03-PLAN.md — MarkdownEditor component + useAutoSave hook
+- [ ] 03-04-PLAN.md — EditorPane (vertical split) + TabBar dirty indicator
+- [ ] 03-05-PLAN.md — SplitView + App.tsx wiring + visual verification checkpoint
 
 ### Phase 4: Live Reload
 **Goal**: When Claude CLI agents write to files on disk, open previews refresh automatically — users always see the current state of any file without manual reload
@@ -97,6 +104,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Server Foundation | 3/3 | Complete   | 2026-03-06 |
 | 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
-| 3. Editor | 0/TBD | Not started | - |
+| 3. Editor | 0/5 | Not started | - |
 | 4. Live Reload | 0/TBD | Not started | - |
 | 5. Search and Tags | 0/TBD | Not started | - |
