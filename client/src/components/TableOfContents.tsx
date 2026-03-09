@@ -17,7 +17,7 @@ function extractHeadings(markdown: string): Heading[] {
   const lines = markdown.split('\n');
   const headings: Heading[] = [];
   for (const line of lines) {
-    const match = /^(#{1,4})\s+(.+)$/.exec(line);
+    const match = /^(#{1,6})\s+(.+)$/.exec(line);
     if (match) {
       const level = match[1].length;
       const text = match[2].trim();
@@ -52,7 +52,7 @@ export function TableOfContents({ content }: Props) {
     );
 
     // Observe all heading elements rendered by MarkdownPreview in the same document
-    const els = document.querySelectorAll('h1[id], h2[id], h3[id], h4[id]');
+    const els = document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
     els.forEach(el => observerRef.current?.observe(el));
 
     return () => observerRef.current?.disconnect();

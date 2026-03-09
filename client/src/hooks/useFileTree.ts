@@ -6,8 +6,8 @@ export function useFileTree() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTree = useCallback(async () => {
-    setLoading(true);
+  const fetchTree = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await fetch('/api/files');
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -17,11 +17,13 @@ export function useFileTree() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchTree(); }, [fetchTree]);
+  useEffect(() => { fetchTree(false); }, [fetchTree]);
 
-  return { tree, loading, error, refetch: fetchTree };
+  const refetch = useCallback(() => fetchTree(true), [fetchTree]);
+
+  return { tree, loading, error, refetch };
 }

@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkWikiLink from 'remark-wiki-link';
-import { ShikiHighlighter } from 'react-shiki';
+import rehypeSlug from 'rehype-slug';
 
 interface Props {
   content: string;
@@ -18,13 +18,12 @@ export function MarkdownPreview({ content, onLinkClick }: Props) {
         remarkPlugins={[
           remarkGfm,
           remarkFrontmatter,
-          // remark-wiki-link: maps [[PageName]] to a link with href = PageName.md
-          // pageResolver and hrefTemplate are the v2 API
           [remarkWikiLink, {
             pageResolver: (name: string) => [name],
             hrefTemplate: (permalink: string) => `${permalink}.md`,
           }],
         ]}
+        rehypePlugins={[rehypeSlug]}
         components={{
           // Suppress frontmatter YAML node — remark-frontmatter parses it but
           // react-markdown still renders unknown node types unless explicitly silenced
@@ -51,20 +50,20 @@ export function MarkdownPreview({ content, onLinkClick }: Props) {
             );
           },
 
-          // Syntax-highlighted fenced code blocks via Shiki (github-light theme)
-          // github-light chosen per Claude's discretion — complements the warm white background
+          // Fenced code blocks — plain, no syntax highlighting
+          pre: ({ children }) => (
+            <pre className="bg-gray-100 rounded-lg p-4 overflow-x-auto text-sm font-mono text-gray-800 leading-relaxed">
+              {children}
+            </pre>
+          ),
           code: ({ className, children, ...props }) => {
-            const lang = /language-(\w+)/.exec(className || '')?.[1];
-            if (lang && typeof children === 'string') {
-              return (
-                <ShikiHighlighter language={lang} theme="github-light">
-                  {children}
-                </ShikiHighlighter>
-              );
+            // Block code inside <pre> — let pre handle styling
+            if (className?.startsWith('language-')) {
+              return <code className="font-mono" {...props}>{children}</code>;
             }
-            // Inline code — no highlighting
+            // Inline code
             return (
-              <code className="bg-orange-50 text-orange-800 rounded px-1 py-0.5 text-sm font-mono" {...props}>
+              <code className="bg-gray-100 text-gray-800 rounded px-1 py-0.5 text-sm font-mono" {...props}>
                 {children}
               </code>
             );

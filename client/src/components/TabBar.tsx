@@ -1,4 +1,4 @@
-import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Tab, TabAction } from '../types/tabs';
@@ -76,6 +76,10 @@ function SortableTab({ tab, isActive, dispatch }: SortableTabProps) {
 }
 
 export function TabBar({ tabs, activeTabId, dispatch }: TabBarProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -91,7 +95,7 @@ export function TabBar({ tabs, activeTabId, dispatch }: TabBarProps) {
 
   return (
     <div className="flex items-end overflow-x-auto border-b border-gray-200/60 bg-gray-50/60 scrollbar-none">
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={tabs.map(t => t.id)} strategy={horizontalListSortingStrategy}>
           {tabs.map(tab => (
             <SortableTab
