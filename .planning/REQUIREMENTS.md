@@ -48,17 +48,19 @@
 
 ## v1.1 Requirements
 
-### Workspace Persistence
-- [ ] **PERS-01**: Tabs reopen automatically on page reload (paths + active tab saved to localStorage)
-- [ ] **PERS-02**: Recently opened files shown on welcome screen (last 10, click to open)
+### Persistence
+- [ ] **PRST-01**: Tabs reopen automatically on page reload with their previous files
+- [ ] **PRST-02**: Recently opened files shown on welcome screen for quick access
+- [ ] **PRST-03**: Reloaded tabs restore their last scroll position in preview
 
-### Navigation
-- [ ] **NAV-01**: Backlinks section in right panel shows files that link to the current document (collapsible, collapsed by default)
-- [ ] **NAV-02**: Clicking a backlink opens that file in a new tab
+### Backlinks
+- [ ] **BKLN-01**: Right panel shows all files that link to the current document
+- [ ] **BKLN-02**: Clicking a backlink opens that file in a tab
+- [ ] **BKLN-03**: Backlinks panel header shows count of incoming links
 
-### Content
-- [ ] **CONT-01**: Images with relative paths (./img.png, ../img.png) render in markdown preview
-- [ ] **CONT-02**: Images with absolute paths (/notes/img.png) render in markdown preview
+### Images
+- [ ] **IMG-01**: Images with relative paths (./img.png, ../img.png) render in markdown preview using the file's directory as base
+- [ ] **IMG-02**: Images with absolute paths (/Users/... or /notes/img.png) render correctly in markdown preview
 
 ### Templates
 - [ ] **TMPL-01**: User can create a new file from a built-in template (daily note, meeting note, decision record)
@@ -67,8 +69,9 @@
 
 ### Graph View
 - [ ] **GRPH-01**: Graph view shows files as nodes clustered and connected by shared tags
-- [ ] **GRPH-02**: Clicking a node in the graph opens that file
+- [ ] **GRPH-02**: Clicking a node in the graph opens that file in a tab
 - [ ] **GRPH-03**: Active file is highlighted in the graph
+- [ ] **GRPH-04**: Graph lives in a dedicated panel or tab (not a modal)
 
 ## v2 Requirements
 
@@ -128,23 +131,26 @@
 | TAG-01 | Phase 5: Search and Tags | Complete |
 | TAG-02 | Phase 5: Search and Tags | Complete |
 | TAG-03 | Phase 5: Search and Tags | Complete |
-| PERS-01 | Phase 6 (TBD) | Pending |
-| PERS-02 | Phase 6 (TBD) | Pending |
-| NAV-01 | Phase 6 (TBD) | Pending |
-| NAV-02 | Phase 6 (TBD) | Pending |
-| CONT-01 | Phase 7 (TBD) | Pending |
-| CONT-02 | Phase 7 (TBD) | Pending |
-| TMPL-01 | Phase 7 (TBD) | Pending |
-| TMPL-02 | Phase 7 (TBD) | Pending |
-| TMPL-03 | Phase 7 (TBD) | Pending |
-| GRPH-01 | Phase 8 (TBD) | Pending |
-| GRPH-02 | Phase 8 (TBD) | Pending |
-| GRPH-03 | Phase 8 (TBD) | Pending |
+| PRST-01 | — | Pending |
+| PRST-02 | — | Pending |
+| PRST-03 | — | Pending |
+| BKLN-01 | — | Pending |
+| BKLN-02 | — | Pending |
+| BKLN-03 | — | Pending |
+| IMG-01 | — | Pending |
+| IMG-02 | — | Pending |
+| TMPL-01 | — | Pending |
+| TMPL-02 | — | Pending |
+| TMPL-03 | — | Pending |
+| GRPH-01 | — | Pending |
+| GRPH-02 | — | Pending |
+| GRPH-03 | — | Pending |
+| GRPH-04 | — | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total — all Complete
-- v1.1 requirements: 11 total — all Pending (phases TBD by roadmapper)
-- Unmapped v1.1: 0 ✓
+- v1.1 requirements: 15 total — all Pending (phases TBD by roadmapper)
+- Unmapped v1.1: 15 ⚠️
 
 ---
 *Requirements defined: 2026-03-06*

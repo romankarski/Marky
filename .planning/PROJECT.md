@@ -33,17 +33,21 @@ Instant, beautiful markdown reading and editing with full-text + semantic search
 
 ### Active
 
-- [ ] Tabs reopen automatically on page reload
-- [ ] Recently opened files shown on welcome screen
-- [ ] Backlinks panel shows files that link to current document (collapsible)
-- [ ] Clicking a backlink opens that file
-- [ ] Images with relative/absolute paths render in markdown preview
-- [ ] User can create a new file from a built-in template
-- [ ] User can save any file as a custom template
-- [ ] Template picker shown when creating a new file
-- [ ] Graph view shows files as nodes clustered by shared tags
-- [ ] Clicking a graph node opens that file
-- [ ] Active file highlighted in graph
+- [ ] **PRST-01**: Tabs reopen automatically on page reload with their previous files
+- [ ] **PRST-02**: Recently opened files shown on welcome screen for quick access
+- [ ] **PRST-03**: Reloaded tabs restore their last scroll position in preview
+- [ ] **BKLN-01**: Right panel shows all files that link to the current document
+- [ ] **BKLN-02**: Clicking a backlink opens that file in a tab
+- [ ] **BKLN-03**: Backlinks panel header shows count of incoming links
+- [ ] **IMG-01**: Images with relative paths render in preview using the file's directory as base
+- [ ] **IMG-02**: Images with absolute paths render correctly in preview
+- [ ] **TMPL-01**: User can create a new file from a built-in template (daily note, meeting note, decision record)
+- [ ] **TMPL-02**: User can save any file as a custom template
+- [ ] **TMPL-03**: Template picker shown when creating a new file
+- [ ] **GRPH-01**: Graph view shows files as nodes clustered by shared tags
+- [ ] **GRPH-02**: Clicking a graph node opens that file in a tab
+- [ ] **GRPH-03**: Active file is highlighted in the graph
+- [ ] **GRPH-04**: Graph lives in a dedicated panel or tab (not a modal)
 
 ### Out of Scope
 
@@ -76,4 +80,4 @@ Instant, beautiful markdown reading and editing with full-text + semantic search
 | Editor opens below preview (not side) | Keeps preview readable while editing | — Pending |
 
 ---
-*Last updated: 2026-03-06 after initialization*
+*Last updated: 2026-03-10 after milestone v1.1 start*

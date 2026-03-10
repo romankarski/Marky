@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 05-search-and-tags-05-09-PLAN.md
-last_updated: "2026-03-10T14:47:51.165Z"
-last_activity: "2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review"
+milestone: v1.1
+milestone_name: Polish and Navigation
+status: not_started
+stopped_at: null
+last_updated: "2026-03-10T00:00:00.000Z"
+last_activity: "2026-03-10 — Milestone v1.1 started"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 25
-  completed_plans: 25
-  percent: 95
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-06)
+See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Instant, beautiful markdown reading and editing with full-text search across all files — so nothing gets lost and switching between documents is effortless.
-**Current focus:** Phase 2 — Browser Shell (next)
+**Current focus:** Not started (defining requirements)
 
 ## Current Position
 
-Phase: 5 of 5 (Search and Tags — PLAN 05 COMPLETE, GAPS FOUND)
-Plan: 5 of 5 complete (all plans executed; gaps require closure plan)
-Status: Phase 5 all plans complete — gaps found in human review; closure plan needed before phase marked done
-Last activity: 2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-10 — Milestone v1.1 started
 
-Progress: [█████████░] 95%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
