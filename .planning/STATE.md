@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: planning
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-10T16:28:57.051Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-03-10T16:35:14.124Z"
 last_activity: 2026-03-10 — Roadmap created for v1.1 (Phases 6-9)
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 29
-  completed_plans: 26
+  completed_plans: 27
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 
 *Updated after each plan completion*
 | Phase 06-tab-persistence-and-image-rendering P01 | 6 | 3 tasks | 4 files |
+| Phase 06-tab-persistence-and-image-rendering P02 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,8 @@ Recent decisions affecting current work:
 - [Phase 05-09]: setActiveId called immediately on TOC click (optimistic update) before delegating scroll
 - [Phase 06-01]: localStorage key scheme: marky:tabs, marky:scroll, marky:recent — maps directly to CONTEXT.md spec
 - [Phase 06-01]: Scroll map: JSON object keyed by file path for O(1) lookup in Wave 1 implementation
+- [Phase 06-02]: useScrollPersist attached to EditorPane preview container (scroll is pane-level concern)
+- [Phase 06-02]: saveTabState accepts activeTabPath not UUID — caller resolves UUID-to-path (Pitfall 3 from plan)
 
 ### Pending Todos
 
@@ -78,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T16:28:57.048Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-10T16:35:14.122Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
