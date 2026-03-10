@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-search-and-tags-05-01-PLAN.md
-last_updated: "2026-03-10T09:16:51.547Z"
+stopped_at: Completed 05-search-and-tags-05-02-PLAN.md
+last_updated: "2026-03-10T09:20:06.295Z"
 last_activity: "2026-03-10 — Phase 4 complete: Human approved all live reload requirements (LIVE-01, LIVE-02)"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 17
+  completed_plans: 18
   percent: 75
 ---
 
@@ -68,6 +68,7 @@ Progress: [███████░░░] 75%
 | Phase 04-live-reload P03 | 15 | 2 tasks | 3 files |
 | Phase 04-live-reload P03 | 15 | 3 tasks | 10 files |
 | Phase 05-search-and-tags P01 | 10 | 2 tasks | 4 files |
+| Phase 05-search-and-tags P02 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 04-live-reload]: onSaved(content) passes saved content back to reducer — prevents SET_CONTENT from server SSE bouncing back stale content after auto-save
 - [Phase 05-search-and-tags]: MiniSearch.loadJSON used in tests to verify search without adding .search() to SearchService API
 - [Phase 05-search-and-tags]: minisearch added as runtime dependency in server workspace — will be used by SearchService in Plan 03
+- [Phase 05-search-and-tags]: Wave 0 TDD: vi.stubGlobal('fetch', fetchSpy) for useSearch hook tests enables refetchIndex call-count assertion
+- [Phase 05-search-and-tags]: SearchPanel test uses vi.mock for useSearch module; Plan 05 must update stub to prop-based results when component API changes
 
 ### Pending Todos
 
@@ -132,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T09:16:51.545Z
-Stopped at: Completed 05-search-and-tags-05-01-PLAN.md
+Last session: 2026-03-10T09:20:06.293Z
+Stopped at: Completed 05-search-and-tags-05-02-PLAN.md
 Resume file: None
