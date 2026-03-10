@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: "Completed 04-live-reload-04-03-PLAN.md (checkpoint:human-verify pending)"
-last_updated: "2026-03-09T16:41:01.527Z"
+stopped_at: Completed 04-live-reload-04-03-PLAN.md
+last_updated: "2026-03-10T08:02:30.667Z"
 last_activity: "2026-03-09 — Phase 3 complete: Human approved all Phase 3 requirements (EDIT-01–EDIT-05, VIEW-05)"
 progress:
   total_phases: 5
@@ -66,6 +66,7 @@ Progress: [███████░░░] 75%
 | Phase 04-live-reload P01 | 2 | 2 tasks | 2 files |
 | Phase 04-live-reload P02 | 3 | 2 tasks | 5 files |
 | Phase 04-live-reload P03 | 15 | 2 tasks | 3 files |
+| Phase 04-live-reload P03 | 15 | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [Phase 04-live-reload]: addEventListener('change') and ('add') for named SSE events in useFileWatcher — not onmessage (only fires for unnamed frames)
 - [Phase 04-live-reload]: tabsRef pattern: mount-only useEffect with refs keeps EventSource stable while always seeing latest tabs
 - [Phase 04-live-reload]: Test mock for EventSource refactored to addEventListener-based regular function constructor — Object.assign + read-only Event.type caused failures
+- [Phase 04-live-reload]: editMode guard added to live-reload skip condition: dirty OR editMode prevents SET_CONTENT overwriting mid-edit state
+- [Phase 04-live-reload]: watcher.ts switched from glob pattern to directory watch + .md filter + unlink event to match actual chokidar API
+- [Phase 04-live-reload]: onSaved(content) passes saved content back to reducer — prevents SET_CONTENT from server SSE bouncing back stale content after auto-save
 
 ### Pending Todos
 
@@ -125,6 +129,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T16:41:01.524Z
-Stopped at: Completed 04-live-reload-04-03-PLAN.md (checkpoint:human-verify pending)
+Last session: 2026-03-10T08:02:30.664Z
+Stopped at: Completed 04-live-reload-04-03-PLAN.md
 Resume file: None
