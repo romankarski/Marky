@@ -12,6 +12,7 @@ interface FileTreeProps {
   onExpandFolder: (folderPath: string) => void;
   refetch: () => void;
   currentFolder: string;
+  filterPaths?: Set<string> | null;
 }
 
 interface FileNodeProps {
@@ -21,9 +22,10 @@ interface FileNodeProps {
   onToggle: (path: string) => void;
   onSelect: (path: string) => void;
   onRefetch: () => void;
+  filterPaths?: Set<string> | null;
 }
 
-function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, onRefetch }: FileNodeProps) {
+function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, onRefetch, filterPaths }: FileNodeProps) {
   const handleRename = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const newName = window.prompt('New name:', node.name);
@@ -47,6 +49,9 @@ function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, o
     onRefetch();
   };
 
+  // Apply filter: hide nodes not in filterPaths set
+  if (filterPaths != null && !filterPaths.has(node.path)) return null;
+
   if (node.type === 'dir') {
     const expanded = expandedPaths.has(node.path);
     return (
@@ -69,6 +74,7 @@ function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, o
                 onToggle={onToggle}
                 onSelect={onSelect}
                 onRefetch={onRefetch}
+                filterPaths={filterPaths}
               />
             ))}
           </div>
@@ -94,7 +100,7 @@ function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, o
   );
 }
 
-export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolderToggle, onExpandFolder, refetch, currentFolder }: FileTreeProps) {
+export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolderToggle, onExpandFolder, refetch, currentFolder, filterPaths }: FileTreeProps) {
   const [showCreate, setShowCreate] = useState(false);
 
   const handleCreate = async (filePath: string) => {
@@ -146,6 +152,7 @@ export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolde
               onToggle={onFolderToggle}
               onSelect={onSelect}
               onRefetch={refetch}
+              filterPaths={filterPaths}
             />
           ))}
         </div>
