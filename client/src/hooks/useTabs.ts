@@ -10,7 +10,7 @@ export function tabReducer(state: TabState, action: TabAction): TabState {
       const existing = state.tabs.find(t => t.path === action.path);
       if (existing) return { ...state, activeTabId: existing.id };
       const id = crypto.randomUUID();
-      const newTab: Tab = { id, path: action.path, label: action.label, content: null, loading: true, dirty: false, editMode: false };
+      const newTab: Tab = { id, path: action.path, label: action.label, content: null, loading: true, dirty: false, editMode: false, deleted: false };
       return { tabs: [...state.tabs, newTab], activeTabId: id };
     }
     case 'CLOSE': {
@@ -52,6 +52,13 @@ export function tabReducer(state: TabState, action: TabAction): TabState {
         ...state,
         tabs: state.tabs.map(t =>
           t.id === action.id ? { ...t, dirty: false } : t
+        ),
+      };
+    case 'SET_DELETED':
+      return {
+        ...state,
+        tabs: state.tabs.map(t =>
+          t.path === action.path ? { ...t, deleted: true, editMode: false } : t
         ),
       };
     default:

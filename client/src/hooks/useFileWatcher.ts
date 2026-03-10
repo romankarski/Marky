@@ -19,7 +19,7 @@ export function useFileWatcher(
       const { path } = JSON.parse(event.data) as { path: string };
       const match = tabsRef.current.find(t => t.path === path);
       if (!match) return;
-      if (match.dirty) return; // guard: don't overwrite unsaved edits
+      if (match.dirty || match.editMode) return; // guard: don't overwrite unsaved or in-progress edits
       fetch(`/api/files/${path}`)
         .then(res => res.json())
         .then(data => dispatch({ type: 'SET_CONTENT', path, content: data.content }))
@@ -28,6 +28,12 @@ export function useFileWatcher(
 
     es.addEventListener('add', (_event: MessageEvent) => {
       refetchRef.current(); // refresh sidebar tree for new files
+    });
+
+    es.addEventListener('unlink', (event: MessageEvent) => {
+      const { path } = JSON.parse(event.data) as { path: string };
+      dispatch({ type: 'SET_DELETED', path });
+      refetchRef.current(); // refresh sidebar tree for deleted files
     });
 
     return () => es.close();

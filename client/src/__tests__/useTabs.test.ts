@@ -33,6 +33,9 @@ function makeTab(overrides: Partial<Tab> = {}): Tab {
     label: 'page.md',
     content: null,
     loading: true,
+    dirty: false,
+    editMode: false,
+    deleted: false,
     ...overrides,
   };
 }

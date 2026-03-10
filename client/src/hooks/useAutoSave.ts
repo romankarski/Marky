@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 export function useAutoSave(
   path: string,
   content: string,
-  onSaved: () => void,
+  onSaved: (content: string) => void,
   enabled: boolean,
   delayMs = 800,
 ): void {
@@ -18,7 +18,7 @@ export function useAutoSave(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       });
-      onSaved();
+      onSaved(content);
     }, delayMs);
 
     return () => {

@@ -1,6 +1,6 @@
 import { watch, FSWatcher } from 'chokidar';
 
-export type WatchEvent = { type: 'change' | 'add'; path: string };
+export type WatchEvent = { type: 'change' | 'add' | 'unlink'; path: string };
 type Subscriber = (event: WatchEvent) => void;
 
 export class FileWatcherService {
@@ -11,22 +11,19 @@ export class FileWatcherService {
   constructor(rootDir: string) {
     this.watcher = watch(rootDir, {
       ignoreInitial: true,
-      awaitWriteFinish: { stabilityThreshold: 50, pollInterval: 10 },
+      ignored: /(^|[/\\])(\.git|node_modules|\.planning)[/\\]/,
     });
 
-    this.watcher.on('change', (absPath: string) => {
+    const emit = (type: 'change' | 'add' | 'unlink', absPath: string) => {
+      if (!absPath.endsWith('.md')) return;
       const relativePath = absPath.replace(rootDir + '/', '');
       if (this.locked.has(relativePath)) return;
-      const event: WatchEvent = { type: 'change', path: relativePath };
-      this.subscribers.forEach((cb) => cb(event));
-    });
+      this.subscribers.forEach((cb) => cb({ type, path: relativePath }));
+    };
 
-    this.watcher.on('add', (absPath: string) => {
-      const relativePath = absPath.replace(rootDir + '/', '');
-      if (this.locked.has(relativePath)) return;
-      const event: WatchEvent = { type: 'add', path: relativePath };
-      this.subscribers.forEach((cb) => cb(event));
-    });
+    this.watcher.on('change', (absPath: string) => emit('change', absPath));
+    this.watcher.on('add', (absPath: string) => emit('add', absPath));
+    this.watcher.on('unlink', (absPath: string) => emit('unlink', absPath));
   }
 
   subscribe(cb: Subscriber): () => void {

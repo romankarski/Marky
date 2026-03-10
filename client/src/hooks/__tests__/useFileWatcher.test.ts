@@ -33,6 +33,7 @@ function makeTab(overrides: Partial<Tab> = {}): Tab {
     loading: false,
     dirty: false,
     editMode: false,
+    deleted: false,
     ...overrides,
   };
 }

@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 
 // useAutoSave does not exist yet — created in Plan 03.
-// Signature: useAutoSave(path: string, content: string, onSaved: () => void, delayMs?: number): void
+// Signature: useAutoSave(path: string, content: string, onSaved: (content: string) => void, enabled: boolean, delayMs?: number): void
 import { useAutoSave } from '../useAutoSave';
 
 beforeEach(() => {
@@ -23,7 +23,7 @@ describe('useAutoSave — debounce and PUT', () => {
     const onSaved = vi.fn();
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutoSave('notes/page.md', content, onSaved, 800),
+        useAutoSave('notes/page.md', content, onSaved, true, 800),
       { initialProps: { content: '# Hello' } }
     );
 
@@ -50,7 +50,7 @@ describe('useAutoSave — debounce and PUT', () => {
     const onSaved = vi.fn();
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutoSave('notes/page.md', content, onSaved, 800),
+        useAutoSave('notes/page.md', content, onSaved, true, 800),
       { initialProps: { content: '# Hello' } }
     );
 
@@ -66,7 +66,7 @@ describe('useAutoSave — debounce and PUT', () => {
     const onSaved = vi.fn();
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutoSave('notes/page.md', content, onSaved, 800),
+        useAutoSave('notes/page.md', content, onSaved, true, 800),
       { initialProps: { content: '# Hello' } }
     );
 
@@ -83,7 +83,7 @@ describe('useAutoSave — debounce and PUT', () => {
     const onSaved = vi.fn();
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutoSave('notes/page.md', content, onSaved, 800),
+        useAutoSave('notes/page.md', content, onSaved, true, 800),
       { initialProps: { content: '# Hello' } }
     );
 
@@ -100,7 +100,7 @@ describe('useAutoSave — debounce and PUT', () => {
     const onSaved = vi.fn();
     const { rerender, unmount } = renderHook(
       ({ content }: { content: string }) =>
-        useAutoSave('notes/page.md', content, onSaved, 800),
+        useAutoSave('notes/page.md', content, onSaved, true, 800),
       { initialProps: { content: '# Hello' } }
     );
 

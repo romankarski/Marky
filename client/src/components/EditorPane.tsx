@@ -24,10 +24,11 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
     }
   }, [tab.id, tab.editMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Stable callback: clears dirty flag after auto-save completes
-  const onSaved = useCallback(() => {
+  // Stable callback: syncs saved content back to reducer and clears dirty flag
+  const onSaved = useCallback((savedContent: string) => {
+    dispatch({ type: 'SET_CONTENT', path: tab.path, content: savedContent });
     dispatch({ type: 'CLEAR_DIRTY', id: tab.id });
-  }, [dispatch, tab.id]);
+  }, [dispatch, tab.id, tab.path]);
 
   // Auto-save hook — only fires when in edit mode AND the user has made changes
   useAutoSave(tab.path, editContent, onSaved, tab.editMode && tab.dirty);
@@ -54,7 +55,19 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
 
       {/* Content area */}
       <div className="flex-1 overflow-hidden">
-        {tab.loading ? (
+        {tab.deleted ? (
+          // File was deleted externally
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-400">
+            <span className="text-2xl">🗑</span>
+            <p className="text-sm">This file was deleted</p>
+            <button
+              onClick={() => dispatch({ type: 'CLOSE', id: tab.id })}
+              className="text-xs text-orange-500 hover:text-orange-700 transition-colors"
+            >
+              Close tab
+            </button>
+          </div>
+        ) : tab.loading ? (
           // Loading spinner
           <div className="flex items-center justify-center h-full">
             <span className="w-4 h-4 rounded-full bg-orange-400 animate-pulse" />
@@ -81,6 +94,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
           </div>
         )}
       </div>
+
     </div>
   );
 }
