@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Browser Shell** - File tree, tab system, markdown preview, and full design system — users can read and navigate their knowledge base (completed 2026-03-09)
 - [x] **Phase 3: Editor** - CodeMirror editor below preview, auto-save, dirty-state tracking, and split-screen editing (completed 2026-03-09)
 - [x] **Phase 4: Live Reload** - File watcher detects external writes from Claude CLI and auto-refreshes open files (completed 2026-03-09)
-- [ ] **Phase 5: Search and Tags** - Full-text search across all files and tag-based filtering from frontmatter *(all 5 plans complete; 3 UX/bug gaps require closure plan)*
+- [ ] **Phase 5: Search and Tags** - Full-text search across all files and tag-based filtering from frontmatter *(all 5 plans complete; 2 gap closure plans running)*
 
 ## Phase Details
 
@@ -98,7 +98,7 @@ Plans:
   3. App automatically reads YAML frontmatter tags from every markdown file — no manual tagging required
   4. User can filter the file tree by tag to see only files with that tag, across all folders
   5. User can add or edit tags on a file from the UI and the change is written back to the file's frontmatter
-**Plans**: 5 plans
+**Plans**: 7 plans
 
 Plans:
 - [ ] 05-01-PLAN.md — Wave 0 server test stubs (SearchService unit + route integration stubs, RED state)
@@ -106,6 +106,8 @@ Plans:
 - [ ] 05-03-PLAN.md — Server SearchService, search routes, app.ts wiring (turns server stubs GREEN)
 - [ ] 05-04-PLAN.md — Client useSearch and useTags hooks (turns client hook stubs GREEN)
 - [x] 05-05-PLAN.md — SearchPanel, TagFilter, FileTree update, App.tsx wiring + visual checkpoint *(gaps found: tree auto-reveal, tag editor placement, TOC split-view)*
+- [ ] 05-06-PLAN.md — Gap closure: tree auto-reveal on search clear + TOC split-view pane targeting fix (wave 3)
+- [ ] 05-07-PLAN.md — Gap closure: tag editor moved to right panel as FileInfo component above TOC (wave 4)
 
 ## Progress
 
@@ -118,4 +120,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
 | 3. Editor | 5/5 | Complete   | 2026-03-09 |
 | 4. Live Reload | 3/3 | Complete   | 2026-03-10 |
-| 5. Search and Tags | 5/5 | Gaps found — closure plan needed |  |
+| 5. Search and Tags | 5/7 | Gap closure in progress |  |
