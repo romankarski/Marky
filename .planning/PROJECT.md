@@ -8,25 +8,42 @@ Marky is a lightweight, web-based markdown workspace for managing a local knowle
 
 Instant, beautiful markdown reading and editing with full-text + semantic search across all files — so nothing gets lost and switching between documents is effortless.
 
+## Current Milestone: v1.1 Polish and Navigation
+
+**Goal:** Make the workspace feel permanent and connected — tabs survive reloads, files link to each other visibly, images render, templates speed up note creation, and a tag-based graph reveals knowledge structure.
+
+**Target features:**
+- Tab persistence across reloads + recent files on welcome screen
+- Backlinks panel (collapsible, in right panel)
+- Inline image rendering in preview
+- File templates (daily note, meeting note, decision record, custom)
+- Tag-based graph view
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ User can browse files via folder tree + tag-based views — Phase 1–5
+- ✓ Markdown files open in preview mode by default — Phase 2
+- ✓ User can open multiple files in tabs and switch between them — Phase 2
+- ✓ User can split the view to see two documents side by side — Phase 3
+- ✓ Full-text search across all files with instant results — Phase 5
+- ✓ Files auto-refresh when changed externally (Claude CLI writes to them) — Phase 4
+- ✓ User can tag files and filter by tag across folders — Phase 5
 
 ### Active
 
-- [ ] User can browse files via folder tree + tag-based views
-- [ ] Markdown files open in preview mode by default
-- [ ] User can open multiple files in tabs and switch between them
-- [ ] User can split the view to see two documents side by side
-- [ ] Clicking Edit opens an editor panel below the preview (split: preview top, editor bottom) — both visible simultaneously
-- [ ] User can edit two separate files at once in split-screen mode
-- [ ] Full-text search across all files with instant results
-- [ ] Semantic search via Claude API to find content by meaning
-- [ ] Files auto-refresh when changed externally (Claude CLI writes to them)
-- [ ] User can tag files and filter by tag across folders
-- [ ] App is web-based (local-first, but architecture supports future hosting)
+- [ ] Tabs reopen automatically on page reload
+- [ ] Recently opened files shown on welcome screen
+- [ ] Backlinks panel shows files that link to current document (collapsible)
+- [ ] Clicking a backlink opens that file
+- [ ] Images with relative/absolute paths render in markdown preview
+- [ ] User can create a new file from a built-in template
+- [ ] User can save any file as a custom template
+- [ ] Template picker shown when creating a new file
+- [ ] Graph view shows files as nodes clustered by shared tags
+- [ ] Clicking a graph node opens that file
+- [ ] Active file highlighted in graph
 
 ### Out of Scope
 
