@@ -1,24 +1,14 @@
 # Roadmap: Marky
 
-## Overview
+## Milestones
 
-Marky is built in five dependency-driven phases. The server and filesystem layer must exist before the browser can render anything. The browser shell (navigation, preview, design) must exist before the editor integrates into it. The editor's dirty-state tracking must exist before the file watcher can detect conflicts safely. The file watcher's incremental index updates must be in place before search can stay fresh. Each phase delivers a coherent, verifiable capability and gates the next.
+- ✅ **v1.0 MVP** - Phases 1-5 (shipped 2026-03-10)
+- 🚧 **v1.1 Polish and Navigation** - Phases 6-9 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [x] **Phase 1: Server Foundation** - Node.js backend + project scaffold: file CRUD API, directory walker, React shell served from same origin (completed 2026-03-06)
-- [x] **Phase 2: Browser Shell** - File tree, tab system, markdown preview, and full design system — users can read and navigate their knowledge base (completed 2026-03-09)
-- [x] **Phase 3: Editor** - CodeMirror editor below preview, auto-save, dirty-state tracking, and split-screen editing (completed 2026-03-09)
-- [x] **Phase 4: Live Reload** - File watcher detects external writes from Claude CLI and auto-refreshes open files (completed 2026-03-09)
-- [x] **Phase 5: Search and Tags** - Full-text search across all files and tag-based filtering from frontmatter *(all 5 plans complete; 2 gap closure plans running)* (completed 2026-03-10)
-
-## Phase Details
+<details>
+<summary>✅ v1.0 MVP (Phases 1-5) - SHIPPED 2026-03-10</summary>
 
 ### Phase 1: Server Foundation
 **Goal**: A working Node.js + React project that can read, write, and list files — the foundation every subsequent phase builds on
@@ -49,11 +39,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Install Phase 2 libraries, define Tab types and useTabs reducer hook
-- [ ] 02-02-PLAN.md — MarkdownPreview component (react-markdown pipeline) and TableOfContents
-- [ ] 02-03-PLAN.md — TabBar component (dnd-kit sortable) and WelcomeScreen empty state
-- [ ] 02-04-PLAN.md — App.tsx refactor: wire all components into three-column layout with design system
-- [ ] 02-05-PLAN.md — Visual verification checkpoint (human approves all 8 requirements)
+- [x] 02-01-PLAN.md — Install Phase 2 libraries, define Tab types and useTabs reducer hook
+- [x] 02-02-PLAN.md — MarkdownPreview component (react-markdown pipeline) and TableOfContents
+- [x] 02-03-PLAN.md — TabBar component (dnd-kit sortable) and WelcomeScreen empty state
+- [x] 02-04-PLAN.md — App.tsx refactor: wire all components into three-column layout with design system
+- [x] 02-05-PLAN.md — Visual verification checkpoint (human approves all 8 requirements)
 
 ### Phase 3: Editor
 **Goal**: Users can edit any open file in a split view with the preview always visible, changes save automatically, and two files can be edited at once in split-screen mode
@@ -68,11 +58,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Wave 0 test scaffolds (tabReducer-editor + useAutoSave failing tests)
-- [ ] 03-02-PLAN.md — Extend Tab type + tabReducer actions + install CodeMirror libraries
-- [ ] 03-03-PLAN.md — MarkdownEditor component + useAutoSave hook
-- [ ] 03-04-PLAN.md — EditorPane (vertical split) + TabBar dirty indicator
-- [ ] 03-05-PLAN.md — SplitView + App.tsx wiring + visual verification checkpoint
+- [x] 03-01-PLAN.md — Wave 0 test scaffolds (tabReducer-editor + useAutoSave failing tests)
+- [x] 03-02-PLAN.md — Extend Tab type + tabReducer actions + install CodeMirror libraries
+- [x] 03-03-PLAN.md — MarkdownEditor component + useAutoSave hook
+- [x] 03-04-PLAN.md — EditorPane (vertical split) + TabBar dirty indicator
+- [x] 03-05-PLAN.md — SplitView + App.tsx wiring + visual verification checkpoint
 
 ### Phase 4: Live Reload
 **Goal**: When Claude CLI agents write to files on disk, open previews refresh automatically — users always see the current state of any file without manual reload
@@ -98,26 +88,101 @@ Plans:
   3. App automatically reads YAML frontmatter tags from every markdown file — no manual tagging required
   4. User can filter the file tree by tag to see only files with that tag, across all folders
   5. User can add or edit tags on a file from the UI and the change is written back to the file's frontmatter
-**Plans**: 7 plans
+**Plans**: 9 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Wave 0 server test stubs (SearchService unit + route integration stubs, RED state)
-- [ ] 05-02-PLAN.md — Wave 0 client test stubs (useSearch, useTags, SearchPanel test stubs, RED state)
-- [ ] 05-03-PLAN.md — Server SearchService, search routes, app.ts wiring (turns server stubs GREEN)
-- [ ] 05-04-PLAN.md — Client useSearch and useTags hooks (turns client hook stubs GREEN)
-- [x] 05-05-PLAN.md — SearchPanel, TagFilter, FileTree update, App.tsx wiring + visual checkpoint *(gaps found: tree auto-reveal, tag editor placement, TOC split-view)*
-- [ ] 05-06-PLAN.md — Gap closure: tree auto-reveal on search clear + TOC split-view pane targeting fix (wave 3)
-- [ ] 05-07-PLAN.md — Gap closure: tag editor moved to right panel as FileInfo component above TOC (wave 4)
+- [x] 05-01-PLAN.md — Wave 0 server test stubs (SearchService unit + route integration stubs, RED state)
+- [x] 05-02-PLAN.md — Wave 0 client test stubs (useSearch, useTags, SearchPanel test stubs, RED state)
+- [x] 05-03-PLAN.md — Server SearchService, search routes, app.ts wiring (turns server stubs GREEN)
+- [x] 05-04-PLAN.md — Client useSearch and useTags hooks (turns client hook stubs GREEN)
+- [x] 05-05-PLAN.md — SearchPanel, TagFilter, FileTree update, App.tsx wiring + visual checkpoint
+- [x] 05-06-PLAN.md — Gap closure: tree auto-reveal on search clear + TOC split-view pane targeting fix
+- [x] 05-07-PLAN.md — Gap closure: tag editor moved to right panel as FileInfo component above TOC
+- [x] 05-08-PLAN.md — Gap closure: activeFocusedTab derived variable + currentFileTags fix
+- [x] 05-09-PLAN.md — Gap closure: FileInfo filename header + TOC click optimistic update
+
+</details>
+
+### 🚧 v1.1 Polish and Navigation (In Progress)
+
+**Milestone Goal:** Make the workspace feel permanent and connected — tabs survive reloads, files link to each other visibly, images render, templates speed up note creation, and a tag-based graph reveals knowledge structure.
+
+- [ ] **Phase 6: Tab Persistence and Image Rendering** - Tabs survive page reload; recent files on welcome screen; local images render in preview
+- [ ] **Phase 7: File Templates** - New files can be created from built-in and custom templates via a picker modal
+- [ ] **Phase 8: Backlinks Panel** - Right panel shows all files that link to the current document, with click-to-open
+- [ ] **Phase 9: Tag Graph View** - Tag-based graph visualizes knowledge structure; nodes are clickable; active file is highlighted
+
+## Phase Details
+
+### Phase 6: Tab Persistence and Image Rendering
+**Goal**: The workspace remembers where the user left off — tabs reopen on reload with their previous files and scroll positions, recently opened files appear on the welcome screen, and local images render inline in preview
+**Depends on**: Phase 5
+**Requirements**: PRST-01, PRST-02, PRST-03, IMG-01, IMG-02
+**Success Criteria** (what must be TRUE):
+  1. After refreshing the page, all previously open tabs reopen automatically with their files
+  2. After refreshing the page, each restored tab's preview scrolls to its last position
+  3. The welcome screen (no open tabs) shows a list of recently opened files for quick access
+  4. An image with a relative path (e.g., `./screenshot.png`) renders inline in preview using the file's directory as base
+  5. An image with an absolute path (e.g., `/Users/romankarski/notes/img.png`) renders correctly in preview
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01-PLAN.md — TBD
+
+### Phase 7: File Templates
+**Goal**: Users can create structured notes instantly from built-in templates (daily note, meeting note, decision record) or their own saved templates, with a picker shown at new-file creation time
+**Depends on**: Phase 5
+**Requirements**: TMPL-01, TMPL-02, TMPL-03
+**Success Criteria** (what must be TRUE):
+  1. When creating a new file, a template picker appears offering built-in templates (daily note, meeting note, decision record) alongside a blank option
+  2. Selecting a built-in template creates the file pre-filled with the template's structure, with `{{date}}` and `{{title}}` tokens substituted at creation time
+  3. User can save any open file as a custom template, which then appears in the template picker for future use
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01-PLAN.md — TBD
+
+### Phase 8: Backlinks Panel
+**Goal**: The right panel shows every file that links to the current document — users can see their knowledge connections and navigate to linking files with a single click
+**Depends on**: Phase 6
+**Requirements**: BKLN-01, BKLN-02, BKLN-03
+**Success Criteria** (what must be TRUE):
+  1. The right panel shows a "Backlinks" section listing all files that contain a link to the currently active file
+  2. The backlinks section header displays the count of incoming links (e.g., "Backlinks (3)")
+  3. Clicking a backlink entry opens that file in a new tab
+  4. When the active file has no incoming links, the backlinks section shows an empty state (zero count, not hidden)
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01-PLAN.md — TBD
+
+### Phase 9: Tag Graph View
+**Goal**: A persistent tag-based graph view lets users explore their knowledge structure visually — files cluster by shared tags, the active file is highlighted, and clicking any node opens that file
+**Depends on**: Phase 8
+**Requirements**: GRPH-01, GRPH-02, GRPH-03, GRPH-04
+**Success Criteria** (what must be TRUE):
+  1. A graph view is accessible from a persistent panel or tab (not a modal) showing all files as nodes connected by shared tags
+  2. The currently active file is visually highlighted in the graph
+  3. Clicking any node in the graph opens that file in a tab
+  4. Navigating away from the graph and back restores the graph layout without restarting the simulation from scratch
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01-PLAN.md — TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 6 → 7 → 8 → 9
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Server Foundation | 3/3 | Complete   | 2026-03-06 |
-| 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
-| 3. Editor | 5/5 | Complete   | 2026-03-09 |
-| 4. Live Reload | 3/3 | Complete   | 2026-03-10 |
-| 5. Search and Tags | 9/9 | Complete   | 2026-03-10 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Server Foundation | v1.0 | 3/3 | Complete | 2026-03-06 |
+| 2. Browser Shell | v1.0 | 5/5 | Complete | 2026-03-09 |
+| 3. Editor | v1.0 | 5/5 | Complete | 2026-03-09 |
+| 4. Live Reload | v1.0 | 3/3 | Complete | 2026-03-10 |
+| 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
+| 6. Tab Persistence and Image Rendering | v1.1 | 0/TBD | Not started | - |
+| 7. File Templates | v1.1 | 0/TBD | Not started | - |
+| 8. Backlinks Panel | v1.1 | 0/TBD | Not started | - |
+| 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |

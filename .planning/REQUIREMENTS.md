@@ -131,27 +131,27 @@
 | TAG-01 | Phase 5: Search and Tags | Complete |
 | TAG-02 | Phase 5: Search and Tags | Complete |
 | TAG-03 | Phase 5: Search and Tags | Complete |
-| PRST-01 | — | Pending |
-| PRST-02 | — | Pending |
-| PRST-03 | — | Pending |
-| BKLN-01 | — | Pending |
-| BKLN-02 | — | Pending |
-| BKLN-03 | — | Pending |
-| IMG-01 | — | Pending |
-| IMG-02 | — | Pending |
-| TMPL-01 | — | Pending |
-| TMPL-02 | — | Pending |
-| TMPL-03 | — | Pending |
-| GRPH-01 | — | Pending |
-| GRPH-02 | — | Pending |
-| GRPH-03 | — | Pending |
-| GRPH-04 | — | Pending |
+| PRST-01 | Phase 6: Tab Persistence and Image Rendering | Pending |
+| PRST-02 | Phase 6: Tab Persistence and Image Rendering | Pending |
+| PRST-03 | Phase 6: Tab Persistence and Image Rendering | Pending |
+| IMG-01 | Phase 6: Tab Persistence and Image Rendering | Pending |
+| IMG-02 | Phase 6: Tab Persistence and Image Rendering | Pending |
+| TMPL-01 | Phase 7: File Templates | Pending |
+| TMPL-02 | Phase 7: File Templates | Pending |
+| TMPL-03 | Phase 7: File Templates | Pending |
+| BKLN-01 | Phase 8: Backlinks Panel | Pending |
+| BKLN-02 | Phase 8: Backlinks Panel | Pending |
+| BKLN-03 | Phase 8: Backlinks Panel | Pending |
+| GRPH-01 | Phase 9: Tag Graph View | Pending |
+| GRPH-02 | Phase 9: Tag Graph View | Pending |
+| GRPH-03 | Phase 9: Tag Graph View | Pending |
+| GRPH-04 | Phase 9: Tag Graph View | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total — all Complete
-- v1.1 requirements: 15 total — all Pending (phases TBD by roadmapper)
-- Unmapped v1.1: 15 ⚠️
+- v1.1 requirements: 15 total — all mapped to Phases 6-9
+- Unmapped v1.1: 0 (coverage 15/15)
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-10 after v1.1 milestone start*
+*Last updated: 2026-03-10 after v1.1 roadmap created*
