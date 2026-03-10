@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Browser Shell** - File tree, tab system, markdown preview, and full design system — users can read and navigate their knowledge base (completed 2026-03-09)
 - [x] **Phase 3: Editor** - CodeMirror editor below preview, auto-save, dirty-state tracking, and split-screen editing (completed 2026-03-09)
 - [x] **Phase 4: Live Reload** - File watcher detects external writes from Claude CLI and auto-refreshes open files (completed 2026-03-09)
-- [ ] **Phase 5: Search and Tags** - Full-text search across all files and tag-based filtering from frontmatter *(all 5 plans complete; 2 gap closure plans running)*
+- [x] **Phase 5: Search and Tags** - Full-text search across all files and tag-based filtering from frontmatter *(all 5 plans complete; 2 gap closure plans running)* (completed 2026-03-10)
 
 ## Phase Details
 
@@ -120,4 +120,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
 | 3. Editor | 5/5 | Complete   | 2026-03-09 |
 | 4. Live Reload | 3/3 | Complete   | 2026-03-10 |
-| 5. Search and Tags | 6/7 | In Progress|  |
+| 5. Search and Tags | 7/7 | Complete   | 2026-03-10 |

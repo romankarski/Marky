@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-search-and-tags-05-06-PLAN.md
-last_updated: "2026-03-10T11:55:40.995Z"
+stopped_at: Completed 05-search-and-tags-05-07-PLAN.md
+last_updated: "2026-03-10T11:58:53.664Z"
 last_activity: "2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 23
-  completed_plans: 22
+  completed_plans: 23
   percent: 95
 ---
 
@@ -73,6 +73,7 @@ Progress: [█████████░] 95%
 | Phase 05-search-and-tags P04 | 2 | 2 tasks | 4 files |
 | Phase 05-search-and-tags P05 | 8 | 2 tasks | 5 files |
 | Phase 05-search-and-tags P06 | 2 | 2 tasks | 4 files |
+| Phase 05-search-and-tags P07 | 7 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,8 @@ Recent decisions affecting current work:
 - [Phase 05-06]: onHeadingClick prop delegates scroll to App.tsx — TableOfContents fires event, parent executes DOM operation; data-pane attribute scopes split-view querySelector without threading refs
 - [Phase 05-06]: prevQueryRef tracks previous query value to detect non-empty→empty transition in useEffect without adding expandFolder/activeTab to deps
 - [Phase 05-06]: IntersectionObserver stubbed locally via vi.stubGlobal in beforeEach — not in global vitest setup, keeps mock scope tight per test file
+- [Phase 05-07]: FileInfo placed in right TOC panel above TableOfContents — associates tag editing with file metadata context, not sidebar navigation controls
+- [Phase 05-07]: TagFilter slimmed to 3 props (allTags, activeTag, onTagClick) — single responsibility: global tag filter only, no per-file editing
 
 ### Pending Todos
 
@@ -154,6 +157,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T11:55:40.992Z
-Stopped at: Completed 05-search-and-tags-05-06-PLAN.md
+Last session: 2026-03-10T11:58:53.662Z
+Stopped at: Completed 05-search-and-tags-05-07-PLAN.md
 Resume file: None
