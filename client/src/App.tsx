@@ -8,6 +8,7 @@ import { EditorPane } from './components/EditorPane';
 import { SplitView } from './components/SplitView';
 import SearchPanel from './components/SearchPanel';
 import { TagFilter } from './components/TagFilter';
+import { FileInfo } from './components/FileInfo';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
 import { useFileWatcher } from './hooks/useFileWatcher';
@@ -341,9 +342,6 @@ export default function App() {
               allTags={allTags}
               activeTag={activeTag}
               onTagClick={setActiveTag}
-              activeFilePath={activeTab?.path ?? null}
-              currentFileTags={currentFileTags}
-              onTagsUpdated={refetchIndex}
             />
           </>
         )}
@@ -428,6 +426,11 @@ export default function App() {
         className="flex flex-col bg-gray-50 border-l border-gray-200 shrink-0 overflow-hidden"
         style={{ width: tocWidth }}
       >
+        <FileInfo
+          activeFilePath={activeTab?.path ?? null}
+          currentFileTags={currentFileTags}
+          onTagsUpdated={refetchIndex}
+        />
         {tocContent ? (
           <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
         ) : (
