@@ -279,6 +279,7 @@ export default function App() {
       resolved = dir ? `${dir}/${href.slice(2)}` : href.slice(2);
     }
     openTab(resolved);
+    expandFolder(resolved);
   };
 
   return (
@@ -345,7 +346,7 @@ export default function App() {
             <div className="flex-1 overflow-auto">
               <FileTree
                 nodes={filteredTree}
-                selectedPath={activeTab?.path ?? null}
+                selectedPath={activeFocusedTab?.path ?? null}
                 activeFolder={activeFolder}
                 expandedPaths={expandedPaths}
                 onSelect={handleSelectFile}
@@ -442,6 +443,7 @@ export default function App() {
         <FileInfo
           activeFilePath={activeFocusedTab?.path ?? null}
           currentFileTags={currentFileTags}
+          allTags={allTags}
           onTagsUpdated={refetchIndex}
         />
         {tocContent ? (

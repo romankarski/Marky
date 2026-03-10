@@ -16,6 +16,7 @@ const mockResult = {
   score: 1,
   match: {},
   terms: ['hello'],
+  queryTerms: ['hello'],
 };
 
 // ---------------------------------------------------------------------------

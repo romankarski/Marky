@@ -1,24 +1,45 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface FileInfoProps {
   activeFilePath: string | null;
   currentFileTags: string[];
+  allTags: string[];
   onTagsUpdated: () => void;
 }
 
-export function FileInfo({ activeFilePath, currentFileTags, onTagsUpdated }: FileInfoProps) {
+export function FileInfo({ activeFilePath, currentFileTags, allTags, onTagsUpdated }: FileInfoProps) {
   const [localTags, setLocalTags] = useState<string[]>(currentFileTags);
-  const [showInput, setShowInput] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [showPicker, setShowPicker] = useState(false);
+  const [filterText, setFilterText] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   // Sync local tags when active file changes
   const [prevPath, setPrevPath] = useState(activeFilePath);
   if (prevPath !== activeFilePath) {
     setPrevPath(activeFilePath);
     setLocalTags(currentFileTags);
-    setShowInput(false);
-    setInputValue('');
+    setShowPicker(false);
+    setFilterText('');
   }
+
+  // Close picker on outside click
+  useEffect(() => {
+    if (!showPicker) return;
+    const handler = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowPicker(false);
+        setFilterText('');
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showPicker]);
+
+  // Focus input when picker opens
+  useEffect(() => {
+    if (showPicker) inputRef.current?.focus();
+  }, [showPicker]);
 
   if (activeFilePath === null) return null;
 
@@ -36,35 +57,57 @@ export function FileInfo({ activeFilePath, currentFileTags, onTagsUpdated }: Fil
   };
 
   const handleRemoveTag = (tag: string) => {
-    const updated = localTags.filter((t) => t !== tag);
-    void patchTags(updated);
+    void patchTags(localTags.filter((t) => t !== tag));
   };
 
-  const handleAddTag = () => {
-    const trimmed = inputValue.trim();
+  const handlePickTag = (tag: string) => {
+    if (!localTags.includes(tag)) {
+      void patchTags([...localTags, tag]);
+    }
+    setFilterText('');
+    inputRef.current?.focus();
+  };
+
+  const handleAddNew = () => {
+    const trimmed = filterText.trim();
     if (trimmed && !localTags.includes(trimmed)) {
       void patchTags([...localTags, trimmed]);
     }
-    setInputValue('');
-    setShowInput(false);
+    setFilterText('');
+    inputRef.current?.focus();
   };
+
+  // Tags available to pick: all known tags minus already applied, filtered by search
+  const suggestions = allTags
+    .filter(t => !localTags.includes(t))
+    .filter(t => t.toLowerCase().includes(filterText.toLowerCase()));
+
+  // Show "create new" option when filterText is non-empty and not an exact existing tag
+  const canCreateNew =
+    filterText.trim().length > 0 &&
+    !localTags.includes(filterText.trim()) &&
+    !allTags.some(t => t.toLowerCase() === filterText.trim().toLowerCase());
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleAddTag();
+      const exact = suggestions.find(t => t.toLowerCase() === filterText.trim().toLowerCase());
+      if (exact) handlePickTag(exact);
+      else handleAddNew();
     } else if (e.key === 'Escape') {
-      setInputValue('');
-      setShowInput(false);
+      setShowPicker(false);
+      setFilterText('');
     }
   };
 
   return (
-    <div className="px-4 py-3 border-b border-gray-200 shrink-0">
+    <div className="px-4 py-3 border-b border-gray-200">
       <p className="text-xs font-medium text-gray-500 truncate mb-1" title={activeFilePath}>
         {fileName}
       </p>
       <p className="text-sm font-semibold text-gray-700 mb-2">Tags</p>
-      <div className="flex flex-wrap gap-1">
+
+      {/* Applied tags */}
+      <div className="flex flex-wrap gap-1 mb-2">
         {localTags.map((tag) => (
           <span
             key={tag}
@@ -80,26 +123,49 @@ export function FileInfo({ activeFilePath, currentFileTags, onTagsUpdated }: Fil
             </button>
           </span>
         ))}
-        {showInput ? (
-          <input
-            autoFocus
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onBlur={() => { setInputValue(''); setShowInput(false); }}
-            className="rounded-full text-xs px-2 py-0.5 border border-orange-300 focus:outline-none w-full"
-            placeholder="Enter tag name"
-          />
-        ) : (
-          <button
-            onClick={() => setShowInput(true)}
-            className="rounded-full text-xs px-2 py-0.5 bg-gray-100 text-gray-500 hover:bg-gray-200"
-          >
-            + Add tag
-          </button>
-        )}
+        <button
+          onClick={() => setShowPicker(v => !v)}
+          className="rounded-full text-xs px-2 py-0.5 bg-gray-100 text-gray-500 hover:bg-gray-200"
+        >
+          + Add tag
+        </button>
       </div>
+
+      {/* Searchable picker */}
+      {showPicker && (
+        <div ref={pickerRef}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search or create tag…"
+            className="w-full text-xs rounded border border-orange-300 px-2 py-1 focus:outline-none mb-1"
+          />
+          {(suggestions.length > 0 || canCreateNew) && (
+            <div className="border border-gray-200 rounded bg-white shadow-sm max-h-40 overflow-y-auto">
+              {suggestions.map(tag => (
+                <button
+                  key={tag}
+                  onMouseDown={(e) => { e.preventDefault(); handlePickTag(tag); }}
+                  className="w-full text-left text-xs px-2 py-1 hover:bg-orange-50 hover:text-orange-700 text-gray-700"
+                >
+                  {tag}
+                </button>
+              ))}
+              {canCreateNew && (
+                <button
+                  onMouseDown={(e) => { e.preventDefault(); handleAddNew(); }}
+                  className="w-full text-left text-xs px-2 py-1 hover:bg-gray-100 text-gray-400 border-t border-gray-100"
+                >
+                  Create "{filterText.trim()}"
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
