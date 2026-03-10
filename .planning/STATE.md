@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-search-and-tags-05-07-PLAN.md
-last_updated: "2026-03-10T11:58:53.664Z"
+stopped_at: Completed 05-search-and-tags-05-08-PLAN.md
+last_updated: "2026-03-10T13:32:17.925Z"
 last_activity: "2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review"
 progress:
   total_phases: 5
-  completed_phases: 5
-  total_plans: 23
-  completed_plans: 23
+  completed_phases: 4
+  total_plans: 25
+  completed_plans: 24
   percent: 95
 ---
 
@@ -74,6 +74,7 @@ Progress: [█████████░] 95%
 | Phase 05-search-and-tags P05 | 8 | 2 tasks | 5 files |
 | Phase 05-search-and-tags P06 | 2 | 2 tasks | 4 files |
 | Phase 05-search-and-tags P07 | 7 | 2 tasks | 4 files |
+| Phase 05-search-and-tags P08 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,8 @@ Recent decisions affecting current work:
 - [Phase 05-06]: IntersectionObserver stubbed locally via vi.stubGlobal in beforeEach — not in global vitest setup, keeps mock scope tight per test file
 - [Phase 05-07]: FileInfo placed in right TOC panel above TableOfContents — associates tag editing with file metadata context, not sidebar navigation controls
 - [Phase 05-07]: TagFilter slimmed to 3 props (allTags, activeTag, onTagClick) — single responsibility: global tag filter only, no per-file editing
+- [Phase 05-08]: activeFocusedTab derived variable as single source of truth for focused pane's active tab in split/single mode — avoids pane ternaries throughout JSX
+- [Phase 05-08]: currentFileTags useMemo moved after activeFocusedTab declaration to avoid TDZ runtime error — JS const semantics require sequential declaration even when TypeScript build passes
 
 ### Pending Todos
 
@@ -157,6 +160,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T11:58:53.662Z
-Stopped at: Completed 05-search-and-tags-05-07-PLAN.md
+Last session: 2026-03-10T13:32:17.922Z
+Stopped at: Completed 05-search-and-tags-05-08-PLAN.md
 Resume file: None
