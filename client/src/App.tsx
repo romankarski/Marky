@@ -29,7 +29,7 @@ export default function App() {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
 
   const { query, results, search, indexPayload, refetchIndex } = useSearch();
-  const { activeTag, setActiveTag, filterPaths, allTags } = useTags(indexPayload);
+  const { activeTags, toggleTag, clearTags, filterPaths, allTags } = useTags(indexPayload);
 
   const [activeFolder, setActiveFolder] = useState<string>('');
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
@@ -340,8 +340,9 @@ export default function App() {
             {/* TagFilter — directly below search input, always visible when tags exist */}
             <TagFilter
               allTags={allTags}
-              activeTag={activeTag}
-              onTagClick={setActiveTag}
+              activeTags={activeTags}
+              onToggleTag={toggleTag}
+              onClearTags={clearTags}
             />
             <div className="flex-1 overflow-auto">
               <FileTree

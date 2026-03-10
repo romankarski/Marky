@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FileNode } from '@marky/shared';
 import { FolderPickerModal } from './FolderPickerModal';
 
@@ -23,9 +23,10 @@ interface FileNodeProps {
   onSelect: (path: string) => void;
   onRefetch: () => void;
   filterPaths?: Set<string> | null;
+  onSelectedRef?: (el: HTMLDivElement | null) => void;
 }
 
-function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, onRefetch, filterPaths }: FileNodeProps) {
+function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, onRefetch, filterPaths, onSelectedRef }: FileNodeProps) {
   const handleRename = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const newName = window.prompt('New name:', node.name);
@@ -75,6 +76,7 @@ function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, o
                 onSelect={onSelect}
                 onRefetch={onRefetch}
                 filterPaths={filterPaths}
+                onSelectedRef={onSelectedRef}
               />
             ))}
           </div>
@@ -86,6 +88,7 @@ function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, o
   const isSelected = node.path === selectedPath;
   return (
     <div
+      ref={isSelected ? onSelectedRef : undefined}
       className={`group flex items-center justify-between px-3 py-1 text-sm cursor-pointer ${
         isSelected ? 'bg-orange-50 text-orange-700' : 'hover:bg-gray-100 text-gray-700'
       }`}
@@ -102,6 +105,12 @@ function FileNodeItem({ node, selectedPath, expandedPaths, onToggle, onSelect, o
 
 export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolderToggle, onExpandFolder, refetch, currentFolder, filterPaths }: FileTreeProps) {
   const [showCreate, setShowCreate] = useState(false);
+  const selectedElRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll selected file into view whenever it changes
+  useEffect(() => {
+    selectedElRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selectedPath]);
 
   const handleCreate = async (filePath: string) => {
     const res = await fetch(`/api/files/${filePath}`, {
@@ -153,6 +162,7 @@ export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolde
               onSelect={onSelect}
               onRefetch={refetch}
               filterPaths={filterPaths}
+              onSelectedRef={el => { selectedElRef.current = el; }}
             />
           ))}
         </div>
