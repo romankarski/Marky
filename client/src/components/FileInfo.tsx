@@ -22,6 +22,8 @@ export function FileInfo({ activeFilePath, currentFileTags, onTagsUpdated }: Fil
 
   if (activeFilePath === null) return null;
 
+  const fileName = activeFilePath.split('/').pop() ?? activeFilePath;
+
   const patchTags = async (updatedTags: string[]) => {
     if (!activeFilePath) return;
     setLocalTags(updatedTags);
@@ -58,6 +60,9 @@ export function FileInfo({ activeFilePath, currentFileTags, onTagsUpdated }: Fil
 
   return (
     <div className="px-4 py-3 border-b border-gray-200 shrink-0">
+      <p className="text-xs font-medium text-gray-500 truncate mb-1" title={activeFilePath}>
+        {fileName}
+      </p>
       <p className="text-sm font-semibold text-gray-700 mb-2">Tags</p>
       <div className="flex flex-wrap gap-1">
         {localTags.map((tag) => (
@@ -83,8 +88,8 @@ export function FileInfo({ activeFilePath, currentFileTags, onTagsUpdated }: Fil
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={() => { setInputValue(''); setShowInput(false); }}
-            className="rounded-full text-xs px-2 py-0.5 border border-orange-300 focus:outline-none w-24"
-            placeholder="tag name"
+            className="rounded-full text-xs px-2 py-0.5 border border-orange-300 focus:outline-none w-full"
+            placeholder="Enter tag name"
           />
         ) : (
           <button
