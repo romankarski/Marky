@@ -98,7 +98,14 @@ Plans:
   3. App automatically reads YAML frontmatter tags from every markdown file — no manual tagging required
   4. User can filter the file tree by tag to see only files with that tag, across all folders
   5. User can add or edit tags on a file from the UI and the change is written back to the file's frontmatter
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Wave 0 server test stubs (SearchService unit + route integration stubs, RED state)
+- [ ] 05-02-PLAN.md — Wave 0 client test stubs (useSearch, useTags, SearchPanel test stubs, RED state)
+- [ ] 05-03-PLAN.md — Server SearchService, search routes, app.ts wiring (turns server stubs GREEN)
+- [ ] 05-04-PLAN.md — Client useSearch and useTags hooks (turns client hook stubs GREEN)
+- [ ] 05-05-PLAN.md — SearchPanel, TagFilter, FileTree update, App.tsx wiring + visual checkpoint
 
 ## Progress
 
@@ -111,4 +118,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Browser Shell | 5/5 | Complete   | 2026-03-09 |
 | 3. Editor | 5/5 | Complete   | 2026-03-09 |
 | 4. Live Reload | 3/3 | Complete   | 2026-03-10 |
-| 5. Search and Tags | 0/TBD | Not started | - |
+| 5. Search and Tags | 0/5 | Not started | - |
