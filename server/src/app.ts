@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import filesRoutes from './routes/files.js';
 import watchRoutes from './routes/watch.js';
 import searchRoutes from './routes/search.js';
+import { imagesRoutes } from './routes/images.js';
 import { FileWatcherService } from './lib/watcher.js';
 import { SearchService } from './lib/search.js';
 
@@ -36,5 +37,6 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await fastify.register(filesRoutes);
   await fastify.register(watchRoutes);
   await fastify.register(searchRoutes);
+  await fastify.register(imagesRoutes);
   return fastify;
 }
