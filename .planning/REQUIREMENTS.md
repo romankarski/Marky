@@ -49,9 +49,9 @@
 ## v1.1 Requirements
 
 ### Persistence
-- [ ] **PRST-01**: Tabs reopen automatically on page reload with their previous files
-- [ ] **PRST-02**: Recently opened files shown on welcome screen for quick access
-- [ ] **PRST-03**: Reloaded tabs restore their last scroll position in preview
+- [x] **PRST-01**: Tabs reopen automatically on page reload with their previous files
+- [x] **PRST-02**: Recently opened files shown on welcome screen for quick access
+- [x] **PRST-03**: Reloaded tabs restore their last scroll position in preview
 
 ### Backlinks
 - [ ] **BKLN-01**: Right panel shows all files that link to the current document
@@ -59,8 +59,8 @@
 - [ ] **BKLN-03**: Backlinks panel header shows count of incoming links
 
 ### Images
-- [ ] **IMG-01**: Images with relative paths (./img.png, ../img.png) render in markdown preview using the file's directory as base
-- [ ] **IMG-02**: Images with absolute paths (/Users/... or /notes/img.png) render correctly in markdown preview
+- [x] **IMG-01**: Images with relative paths (./img.png, ../img.png) render in markdown preview using the file's directory as base
+- [x] **IMG-02**: Images with absolute paths (/Users/... or /notes/img.png) render correctly in markdown preview
 
 ### Templates
 - [ ] **TMPL-01**: User can create a new file from a built-in template (daily note, meeting note, decision record)
@@ -131,11 +131,11 @@
 | TAG-01 | Phase 5: Search and Tags | Complete |
 | TAG-02 | Phase 5: Search and Tags | Complete |
 | TAG-03 | Phase 5: Search and Tags | Complete |
-| PRST-01 | Phase 6: Tab Persistence and Image Rendering | Pending |
-| PRST-02 | Phase 6: Tab Persistence and Image Rendering | Pending |
-| PRST-03 | Phase 6: Tab Persistence and Image Rendering | Pending |
-| IMG-01 | Phase 6: Tab Persistence and Image Rendering | Pending |
-| IMG-02 | Phase 6: Tab Persistence and Image Rendering | Pending |
+| PRST-01 | Phase 6: Tab Persistence and Image Rendering | Complete |
+| PRST-02 | Phase 6: Tab Persistence and Image Rendering | Complete |
+| PRST-03 | Phase 6: Tab Persistence and Image Rendering | Complete |
+| IMG-01 | Phase 6: Tab Persistence and Image Rendering | Complete |
+| IMG-02 | Phase 6: Tab Persistence and Image Rendering | Complete |
 | TMPL-01 | Phase 7: File Templates | Pending |
 | TMPL-02 | Phase 7: File Templates | Pending |
 | TMPL-03 | Phase 7: File Templates | Pending |

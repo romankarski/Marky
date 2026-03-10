@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect, type RefObject } from 'react';
 
 const SCROLL_KEY = 'marky:scroll';
 const DEBOUNCE_MS = 200;
@@ -52,7 +52,7 @@ export function getScrollPosition(filePath: string): number | undefined {
 export function useScrollPersist(
   filePath: string,
   content: string | null,
-): React.RefObject<HTMLDivElement> {
+): RefObject<HTMLDivElement | null> {
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousContentRef = useRef<string | null>(null);

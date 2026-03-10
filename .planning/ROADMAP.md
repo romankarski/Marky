@@ -107,7 +107,7 @@ Plans:
 
 **Milestone Goal:** Make the workspace feel permanent and connected — tabs survive reloads, files link to each other visibly, images render, templates speed up note creation, and a tag-based graph reveals knowledge structure.
 
-- [ ] **Phase 6: Tab Persistence and Image Rendering** - Tabs survive page reload; recent files on welcome screen; local images render in preview
+- [x] **Phase 6: Tab Persistence and Image Rendering** - Tabs survive page reload; recent files on welcome screen; local images render in preview (completed 2026-03-10)
 - [ ] **Phase 7: File Templates** - New files can be created from built-in and custom templates via a picker modal
 - [ ] **Phase 8: Backlinks Panel** - Right panel shows all files that link to the current document, with click-to-open
 - [ ] **Phase 9: Tag Graph View** - Tag-based graph visualizes knowledge structure; nodes are clickable; active file is highlighted
@@ -185,7 +185,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Editor | v1.0 | 5/5 | Complete | 2026-03-09 |
 | 4. Live Reload | v1.0 | 3/3 | Complete | 2026-03-10 |
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
-| 6. Tab Persistence and Image Rendering | 3/4 | In Progress|  | - |
+| 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-10 | - |
 | 7. File Templates | v1.1 | 0/TBD | Not started | - |
 | 8. Backlinks Panel | v1.1 | 0/TBD | Not started | - |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
