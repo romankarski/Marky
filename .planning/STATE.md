@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-search-and-tags-05-04-PLAN.md
-last_updated: "2026-03-10T09:35:30.695Z"
-last_activity: "2026-03-10 — Phase 4 complete: Human approved all live reload requirements (LIVE-01, LIVE-02)"
+stopped_at: Completed 05-search-and-tags-05-05-PLAN.md (gaps found — requires closure plan)
+last_updated: "2026-03-10T09:50:00.000Z"
+last_activity: "2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 20
-  percent: 75
+  completed_plans: 21
+  percent: 95
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 4 of 5 (Live Reload — COMPLETE)
-Plan: 3 of 3 complete
-Status: Phase 4 complete — proceeding to Phase 5 (Search and Tags)
-Last activity: 2026-03-10 — Phase 4 complete: Human approved all live reload requirements (LIVE-01, LIVE-02)
+Phase: 5 of 5 (Search and Tags — PLAN 05 COMPLETE, GAPS FOUND)
+Plan: 5 of 5 complete (all plans executed; gaps require closure plan)
+Status: Phase 5 all plans complete — gaps found in human review; closure plan needed before phase marked done
+Last activity: 2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review
 
-Progress: [███████░░░] 75%
+Progress: [█████████░] 95%
 
 ## Performance Metrics
 
@@ -71,6 +71,7 @@ Progress: [███████░░░] 75%
 | Phase 05-search-and-tags P02 | 2 | 2 tasks | 3 files |
 | Phase 05-search-and-tags P03 | 9 | 2 tasks | 5 files |
 | Phase 05-search-and-tags P04 | 2 | 2 tasks | 4 files |
+| Phase 05-search-and-tags P05 | 8 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -129,6 +130,10 @@ Recent decisions affecting current work:
 - [Phase 05-search-and-tags]: Fastify 5 wildcard restriction: /api/files/*/tags not supported; registered as /api/files/* PATCH with /tags suffix stripped from param
 - [Phase 05-search-and-tags]: MiniSearch.loadJSON called with JSON.stringify(payload.index) — loadJSON takes string input not raw object
 - [Phase 05-search-and-tags]: version counter in useSearch (useState(0)) for refetchIndex pattern — cleaner than boolean flag, useEffect([version]) re-triggers on increment
+- [Phase 05-search-and-tags]: SearchPanel receives results as props — vi.mock stub from Plan 02 replaced with explicit prop-passing; cleaner test interface
+- [Phase 05-search-and-tags]: afterEach(cleanup) required in SearchPanel.test.tsx — vitest jsdom without globals:true skips @testing-library/react auto-cleanup, causing multiple-element match failures
+- [Phase 05-search-and-tags]: TAG-03 gap — tag editor placed in sidebar per plan spec but human review found it unintuitive; closure plan should move it to right TOC panel as File Info section
+- [Phase 05-search-and-tags]: SRCH-03 gap — tree auto-reveal after search clear not implemented; closure plan needs expandFolder(activeTab.path) on query→empty transition
 
 ### Pending Todos
 
@@ -139,9 +144,12 @@ None yet.
 - Phase 2: For resizable panels, prefer react-resizable-panels over allotment (better maintained)
 - Phase 2: Tailwind v4 CSS-first config is now confirmed working (used in Phase 1 with no issues)
 - Phase 5+: FlexSearch 0.7.x version needs npm verification before install — MiniSearch is a fallback
+- Phase 5 gap (SRCH-03): Tree auto-reveal after search clear — active file's ancestor folders not expanded when query cleared; needs expandFolder call in App.tsx
+- Phase 5 gap (TAG-03): Tag editor placement — currently in left sidebar, human review found it unintuitive; should move to right TOC panel as "File Info" section above TOC links
+- Phase 5 gap (pre-existing): TOC split-view bug — TOC links always target first pane's file, not focused pane's file; introduced in Phase 2/3 split-view work
 
 ## Session Continuity
 
-Last session: 2026-03-10T09:35:25.690Z
-Stopped at: Completed 05-search-and-tags-05-04-PLAN.md
+Last session: 2026-03-10T09:50:00.000Z
+Stopped at: Completed 05-search-and-tags-05-05-PLAN.md (gaps found — closure plan needed)
 Resume file: None
