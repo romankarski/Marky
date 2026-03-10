@@ -37,6 +37,7 @@ export function TableOfContents({ content, onHeadingClick }: Props) {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    setActiveId(null); // reset highlight when file changes
     // Disconnect previous observer before reconnecting (pitfall 7 from research)
     if (observerRef.current) observerRef.current.disconnect();
 
@@ -79,6 +80,7 @@ export function TableOfContents({ content, onHeadingClick }: Props) {
               }`}
               onClick={(e) => {
                 e.preventDefault();
+                setActiveId(h.id);  // optimistic update — highlight immediately on click
                 if (onHeadingClick) {
                   onHeadingClick(h.id);
                 } else {
