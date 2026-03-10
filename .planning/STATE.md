@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: planning
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-10T16:05:32.109Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-10T16:28:57.051Z"
 last_activity: 2026-03-10 — Roadmap created for v1.1 (Phases 6-9)
 progress:
   total_phases: 9
   completed_phases: 5
-  total_plans: 25
-  completed_plans: 25
+  total_plans: 29
+  completed_plans: 26
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 - Trend: Stable
 
 *Updated after each plan completion*
+| Phase 06-tab-persistence-and-image-rendering P01 | 6 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ Recent decisions affecting current work:
 - [Phase 05-07]: FileInfo placed in right TOC panel above TableOfContents — tag editing with file metadata context
 - [Phase 05-08]: activeFocusedTab derived variable as single source of truth for focused pane's active tab
 - [Phase 05-09]: setActiveId called immediately on TOC click (optimistic update) before delegating scroll
+- [Phase 06-01]: localStorage key scheme: marky:tabs, marky:scroll, marky:recent — maps directly to CONTEXT.md spec
+- [Phase 06-01]: Scroll map: JSON object keyed by file path for O(1) lookup in Wave 1 implementation
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T16:05:32.105Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-tab-persistence-and-image-rendering/06-CONTEXT.md
+Last session: 2026-03-10T16:28:57.048Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None
