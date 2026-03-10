@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-search-and-tags-05-05-PLAN.md (gaps found — requires closure plan)
-last_updated: "2026-03-10T09:50:00.000Z"
+stopped_at: Completed 05-search-and-tags-05-06-PLAN.md
+last_updated: "2026-03-10T11:55:40.995Z"
 last_activity: "2026-03-10 — Phase 5 Plan 05 complete with gaps: SearchPanel + TagFilter built; 3 UX/bug gaps found in human review"
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 21
-  completed_plans: 21
+  total_plans: 23
+  completed_plans: 22
   percent: 95
 ---
 
@@ -72,6 +72,7 @@ Progress: [█████████░] 95%
 | Phase 05-search-and-tags P03 | 9 | 2 tasks | 5 files |
 | Phase 05-search-and-tags P04 | 2 | 2 tasks | 4 files |
 | Phase 05-search-and-tags P05 | 8 | 2 tasks | 5 files |
+| Phase 05-search-and-tags P06 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -134,6 +135,9 @@ Recent decisions affecting current work:
 - [Phase 05-search-and-tags]: afterEach(cleanup) required in SearchPanel.test.tsx — vitest jsdom without globals:true skips @testing-library/react auto-cleanup, causing multiple-element match failures
 - [Phase 05-search-and-tags]: TAG-03 gap — tag editor placed in sidebar per plan spec but human review found it unintuitive; closure plan should move it to right TOC panel as File Info section
 - [Phase 05-search-and-tags]: SRCH-03 gap — tree auto-reveal after search clear not implemented; closure plan needs expandFolder(activeTab.path) on query→empty transition
+- [Phase 05-06]: onHeadingClick prop delegates scroll to App.tsx — TableOfContents fires event, parent executes DOM operation; data-pane attribute scopes split-view querySelector without threading refs
+- [Phase 05-06]: prevQueryRef tracks previous query value to detect non-empty→empty transition in useEffect without adding expandFolder/activeTab to deps
+- [Phase 05-06]: IntersectionObserver stubbed locally via vi.stubGlobal in beforeEach — not in global vitest setup, keeps mock scope tight per test file
 
 ### Pending Todos
 
@@ -150,6 +154,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T09:50:00.000Z
-Stopped at: Completed 05-search-and-tags-05-05-PLAN.md (gaps found — closure plan needed)
+Last session: 2026-03-10T11:55:40.992Z
+Stopped at: Completed 05-search-and-tags-05-06-PLAN.md
 Resume file: None
