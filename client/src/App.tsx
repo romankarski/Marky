@@ -14,6 +14,13 @@ import { useTabs } from './hooks/useTabs';
 import { useFileWatcher } from './hooks/useFileWatcher';
 import { useSearch } from './hooks/useSearch';
 import { useTags } from './hooks/useTags';
+import {
+  loadPersistedTabs,
+  loadPersistedActiveTabPath,
+  saveTabState,
+  updateRecentFiles,
+  getRecentFiles,
+} from './hooks/useTabPersistence';
 import type { TabAction } from './types/tabs';
 
 const DEFAULT_DIRS = ['knowledge', 'notes'];
@@ -27,6 +34,45 @@ const TOC_MAX = 400;
 export default function App() {
   const { tabs, activeTabId, openTab, dispatch } = useTabs();
   const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
+
+  // Restore persisted tabs on mount
+  useEffect(() => {
+    const persisted = loadPersistedTabs();
+    if (persisted.length === 0) return;
+
+    const activeTabPath = loadPersistedActiveTabPath();
+
+    // Dispatch OPEN for each persisted tab
+    for (const entry of persisted) {
+      dispatch({ type: 'OPEN', path: entry.path, label: entry.label });
+    }
+
+    // After dispatching, the reducer will have assigned fresh UUIDs.
+    // We can't read the new state immediately here (stale closure).
+    // Instead, store the activeTabPath and match it on the next render via a ref.
+    if (activeTabPath) {
+      pendingActivePath.current = activeTabPath;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track which path should be focused after persistence restore
+  const pendingActivePath = useRef<string | null>(null);
+
+  // Focus the restored active tab once tabs are populated
+  useEffect(() => {
+    if (!pendingActivePath.current) return;
+    const target = tabs.find(t => t.path === pendingActivePath.current);
+    if (target) {
+      dispatch({ type: 'FOCUS', id: target.id });
+      pendingActivePath.current = null;
+    }
+  }, [tabs, dispatch]);
+
+  // Save tab state whenever tabs or activeTabId changes
+  useEffect(() => {
+    const activeTabPath = tabs.find(t => t.id === activeTabId)?.path ?? null;
+    saveTabState(tabs, activeTabPath);
+  }, [tabs, activeTabId]);
 
   const { query, results, search, indexPayload, refetchIndex } = useSearch();
   const { activeTags, toggleTag, clearTags, filterPaths, allTags } = useTags(indexPayload);
@@ -225,6 +271,7 @@ export default function App() {
 
   const handleSelectFile = (path: string) => {
     openTab(path);
+    updateRecentFiles(path);
     const folder = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
     setActiveFolder(folder);
   };
@@ -294,6 +341,7 @@ export default function App() {
       resolved = dir ? `${dir}/${href.slice(2)}` : href.slice(2);
     }
     openTab(resolved);
+    updateRecentFiles(resolved);
     expandFolder(resolved);
   };
 
@@ -431,7 +479,13 @@ export default function App() {
         {/* Content area */}
         <div className="flex-1 overflow-hidden p-4">
           {tabs.length === 0 ? (
-            <WelcomeScreen />
+            <WelcomeScreen
+              recentFiles={getRecentFiles().map(path => ({
+                path,
+                label: path.split('/').pop() ?? path,
+              }))}
+              onOpen={p => { openTab(p); updateRecentFiles(p); expandFolder(p); }}
+            />
           ) : splitMode ? (
             <SplitView
               leftTab={leftTab}

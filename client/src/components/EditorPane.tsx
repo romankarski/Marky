@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { Tab, TabAction } from '../types/tabs';
 import { useAutoSave } from '../hooks/useAutoSave';
+import { useScrollPersist } from '../hooks/useScrollPersist';
 import { MarkdownEditor } from './MarkdownEditor';
 import { MarkdownPreview } from './MarkdownPreview';
 
@@ -16,6 +17,9 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
   // Initialized from tab.content when editMode becomes true.
   // NOT written to reducer on every keystroke (prevents cursor-jumping).
   const [editContent, setEditContent] = useState<string>('');
+
+  // Scroll persistence: saves/restores preview scroll position per file
+  const scrollRef = useScrollPersist(tab.path, tab.content);
 
   // Reset editContent when switching tabs or when edit mode activates
   useEffect(() => {
@@ -89,7 +93,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
           </Group>
         ) : (
           // Preview-only mode
-          <div className="h-full overflow-y-auto">
+          <div ref={scrollRef} className="h-full overflow-y-auto">
             <MarkdownPreview content={tab.content ?? ''} onLinkClick={onLinkClick} />
           </div>
         )}
