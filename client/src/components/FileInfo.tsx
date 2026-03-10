@@ -13,12 +13,19 @@ export function FileInfo({ activeFilePath, currentFileTags, allTags, onTagsUpdat
   const [filterText, setFilterText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  // Track in-flight writes so index refresh doesn't clobber optimistic state
+  const pendingWriteRef = useRef(false);
 
-  // Sync local tags when active file changes
+  // Sync local tags from index whenever path or index-derived tags change
+  useEffect(() => {
+    if (pendingWriteRef.current) return;
+    setLocalTags(currentFileTags);
+  }, [activeFilePath, currentFileTags]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset picker state on file switch
   const [prevPath, setPrevPath] = useState(activeFilePath);
   if (prevPath !== activeFilePath) {
     setPrevPath(activeFilePath);
-    setLocalTags(currentFileTags);
     setShowPicker(false);
     setFilterText('');
   }
@@ -47,12 +54,14 @@ export function FileInfo({ activeFilePath, currentFileTags, allTags, onTagsUpdat
 
   const patchTags = async (updatedTags: string[]) => {
     if (!activeFilePath) return;
+    pendingWriteRef.current = true;
     setLocalTags(updatedTags);
     await fetch(`/api/files/${activeFilePath}/tags`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tags: updatedTags }),
     });
+    pendingWriteRef.current = false;
     onTagsUpdated();
   };
 
