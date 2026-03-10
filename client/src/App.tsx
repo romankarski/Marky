@@ -148,6 +148,21 @@ export default function App() {
     }
   }, [leftActiveTabId, rightActiveTabId, dispatch]);
 
+  // Collapsible panels
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('marky-sidebar-collapsed') === 'true');
+  const [tocCollapsed, setTocCollapsed] = useState(() => localStorage.getItem('marky-toc-collapsed') === 'true');
+
+  const toggleSidebar = () => setSidebarCollapsed(v => {
+    const next = !v;
+    localStorage.setItem('marky-sidebar-collapsed', String(next));
+    return next;
+  });
+  const toggleToc = () => setTocCollapsed(v => {
+    const next = !v;
+    localStorage.setItem('marky-toc-collapsed', String(next));
+    return next;
+  });
+
   // Resizable sidebar and TOC widths (pixels)
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
   const [tocWidth, setTocWidth] = useState(TOC_DEFAULT);
@@ -287,86 +302,107 @@ export default function App() {
 
       {/* Left sidebar */}
       <div
-        className="flex flex-col bg-gray-50 border-r border-gray-200 shrink-0 overflow-hidden"
-        style={{ width: sidebarWidth }}
+        className="flex flex-col bg-gray-50 border-r border-gray-200 shrink-0 overflow-hidden transition-all duration-200"
+        style={{ width: sidebarCollapsed ? 32 : sidebarWidth }}
       >
-        <div className="px-3 py-2 border-b border-gray-200 flex items-center justify-between shrink-0">
-          <span className="text-sm font-semibold text-gray-700">Marky</span>
-          <button
-            onClick={() => setManagingFolders(v => !v)}
-            className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
-            title="Manage visible folders"
-          >⚙</button>
-        </div>
-
-        {managingFolders && (
-          <div className="px-3 py-2 border-b border-gray-100 bg-white/60 shrink-0">
-            <p className="text-xs text-gray-500 mb-2 font-medium">Visible folders</p>
-            {allTopDirs.map(name => (
-              <label key={name} className="flex items-center gap-2 text-xs text-gray-700 py-0.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeDirs.includes(name)}
-                  onChange={e =>
-                    setIncludeDirs(prev =>
-                      e.target.checked ? [...prev, name] : prev.filter(d => d !== name)
-                    )
-                  }
-                  className="accent-orange-500"
-                />
-                {name}
-              </label>
-            ))}
+        {sidebarCollapsed ? (
+          <div className="flex flex-col items-center pt-2 gap-2">
+            <button
+              onClick={toggleSidebar}
+              title="Expand sidebar"
+              className="text-gray-400 hover:text-orange-500 transition-colors text-xs p-1"
+            >▶</button>
           </div>
-        )}
-
-        {/* Search input */}
-        <div className="px-3 py-2 border-b border-gray-100 shrink-0">
-          <input
-            type="text"
-            value={query}
-            onChange={e => search(e.target.value)}
-            placeholder="Search..."
-            className="w-full text-sm bg-transparent focus:outline-none text-gray-700 placeholder-gray-300"
-          />
-        </div>
-
-        {query.trim() ? (
-          <SearchPanel results={results} onOpen={openTab} />
-        ) : treeLoading ? (
-          <p className="text-xs text-gray-400 px-3 py-2">Loading...</p>
         ) : (
           <>
-            {/* TagFilter — directly below search input, always visible when tags exist */}
-            <TagFilter
-              allTags={allTags}
-              activeTags={activeTags}
-              onToggleTag={toggleTag}
-              onClearTags={clearTags}
-            />
-            <div className="flex-1 overflow-auto">
-              <FileTree
-                nodes={filteredTree}
-                selectedPath={activeFocusedTab?.path ?? null}
-                activeFolder={activeFolder}
-                expandedPaths={expandedPaths}
-                onSelect={handleSelectFile}
-                onFolderToggle={handleFolderToggle}
-                onExpandFolder={expandFolder}
-                refetch={refetch}
-                currentFolder={activeFolder}
-                filterPaths={filterPaths}
+            <div className="px-3 py-2 border-b border-gray-200 flex items-center justify-between shrink-0">
+              <span className="text-sm font-semibold text-gray-700">Marky</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setManagingFolders(v => !v)}
+                  className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
+                  title="Manage visible folders"
+                >⚙</button>
+                <button
+                  onClick={toggleSidebar}
+                  title="Collapse sidebar"
+                  className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
+                >◀</button>
+              </div>
+            </div>
+
+            {managingFolders && (
+              <div className="px-3 py-2 border-b border-gray-100 bg-white/60 shrink-0">
+                <p className="text-xs text-gray-500 mb-2 font-medium">Visible folders</p>
+                {allTopDirs.map(name => (
+                  <label key={name} className="flex items-center gap-2 text-xs text-gray-700 py-0.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={includeDirs.includes(name)}
+                      onChange={e =>
+                        setIncludeDirs(prev =>
+                          e.target.checked ? [...prev, name] : prev.filter(d => d !== name)
+                        )
+                      }
+                      className="accent-orange-500"
+                    />
+                    {name}
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {/* Search input */}
+            <div className="px-3 py-2 border-b border-gray-100 shrink-0">
+              <input
+                type="text"
+                value={query}
+                onChange={e => search(e.target.value)}
+                placeholder="Search..."
+                className="w-full text-sm bg-transparent focus:outline-none text-gray-700 placeholder-gray-300"
               />
             </div>
+
+            {query.trim() ? (
+              <SearchPanel results={results} onOpen={openTab} />
+            ) : treeLoading ? (
+              <p className="text-xs text-gray-400 px-3 py-2">Loading...</p>
+            ) : (
+              <>
+                {/* TagFilter — directly below search input, always visible when tags exist */}
+                <TagFilter
+                  allTags={allTags}
+                  activeTags={activeTags}
+                  onToggleTag={toggleTag}
+                  onClearTags={clearTags}
+                />
+                <div className="flex-1 overflow-auto">
+                  <FileTree
+                    nodes={filteredTree}
+                    selectedPath={activeFocusedTab?.path ?? null}
+                    activeFolder={activeFolder}
+                    expandedPaths={expandedPaths}
+                    onSelect={handleSelectFile}
+                    onFolderToggle={handleFolderToggle}
+                    onExpandFolder={expandFolder}
+                    refetch={refetch}
+                    currentFolder={activeFolder}
+                    filterPaths={filterPaths}
+                  />
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
 
-      {/* Sidebar drag handle */}
-      <div
-        className="w-1 shrink-0 bg-gray-200 hover:bg-orange-400 transition-colors cursor-col-resize"
-        onMouseDown={onMouseDown('sidebar')}
-      />
+      {/* Sidebar drag handle — hidden when collapsed */}
+      {!sidebarCollapsed && (
+        <div
+          className="w-1 shrink-0 bg-gray-200 hover:bg-orange-400 transition-colors cursor-col-resize"
+          onMouseDown={onMouseDown('sidebar')}
+        />
+      )}
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -430,27 +466,49 @@ export default function App() {
         </div>
       </div>
 
-      {/* TOC drag handle */}
-      <div
-        className="w-1 shrink-0 bg-gray-200 hover:bg-orange-400 transition-colors cursor-col-resize"
-        onMouseDown={onMouseDown('toc')}
-      />
+      {/* TOC drag handle — hidden when collapsed */}
+      {!tocCollapsed && (
+        <div
+          className="w-1 shrink-0 bg-gray-200 hover:bg-orange-400 transition-colors cursor-col-resize"
+          onMouseDown={onMouseDown('toc')}
+        />
+      )}
 
       {/* Right TOC panel */}
       <div
-        className="flex flex-col bg-gray-50 border-l border-gray-200 shrink-0 overflow-hidden"
-        style={{ width: tocWidth }}
+        className="flex flex-col bg-gray-50 border-l border-gray-200 shrink-0 overflow-hidden transition-all duration-200"
+        style={{ width: tocCollapsed ? 32 : tocWidth }}
       >
-        <FileInfo
-          activeFilePath={activeFocusedTab?.path ?? null}
-          currentFileTags={currentFileTags}
-          allTags={allTags}
-          onTagsUpdated={refetchIndex}
-        />
-        {tocContent ? (
-          <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
+        {tocCollapsed ? (
+          <div className="flex flex-col items-center pt-2">
+            <button
+              onClick={toggleToc}
+              title="Expand panel"
+              className="text-gray-400 hover:text-orange-500 transition-colors text-xs p-1"
+            >◀</button>
+          </div>
         ) : (
-          <div className="p-4 text-xs text-gray-300">No document open</div>
+          <>
+            <div className="px-3 py-2 border-b border-gray-200 flex items-center justify-between shrink-0">
+              <span className="text-xs text-gray-400 uppercase tracking-wide">Info</span>
+              <button
+                onClick={toggleToc}
+                title="Collapse panel"
+                className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
+              >▶</button>
+            </div>
+            <FileInfo
+              activeFilePath={activeFocusedTab?.path ?? null}
+              currentFileTags={currentFileTags}
+              allTags={allTags}
+              onTagsUpdated={refetchIndex}
+            />
+            {tocContent ? (
+              <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
+            ) : (
+              <div className="p-4 text-xs text-gray-300">No document open</div>
+            )}
+          </>
         )}
       </div>
 
