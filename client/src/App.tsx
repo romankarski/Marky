@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { FileTree } from './components/FileTree';
 import { TabBar } from './components/TabBar';
 import { SplitTabBar } from './components/SplitTabBar';
@@ -6,9 +6,13 @@ import { TableOfContents } from './components/TableOfContents';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { EditorPane } from './components/EditorPane';
 import { SplitView } from './components/SplitView';
+import SearchPanel from './components/SearchPanel';
+import { TagFilter } from './components/TagFilter';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
 import { useFileWatcher } from './hooks/useFileWatcher';
+import { useSearch } from './hooks/useSearch';
+import { useTags } from './hooks/useTags';
 import type { TabAction } from './types/tabs';
 
 const DEFAULT_DIRS = ['knowledge', 'notes'];
@@ -22,6 +26,16 @@ const TOC_MAX = 400;
 export default function App() {
   const { tabs, activeTabId, openTab, dispatch } = useTabs();
   const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
+
+  const { query, results, search, indexPayload, refetchIndex } = useSearch();
+  const { activeTag, setActiveTag, filterPaths, allTags } = useTags(indexPayload);
+
+  const currentFileTags = useMemo(() => {
+    if (!activeTab || !indexPayload) return [];
+    return Object.entries(indexPayload.tagMap)
+      .filter(([, paths]) => paths.includes(activeTab.path))
+      .map(([tag]) => tag);
+  }, [activeTab?.path, indexPayload]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [activeFolder, setActiveFolder] = useState<string>('');
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
@@ -266,22 +280,46 @@ export default function App() {
           </div>
         )}
 
-        {treeLoading ? (
+        {/* Search input */}
+        <div className="px-3 py-2 border-b border-gray-100 shrink-0">
+          <input
+            type="text"
+            value={query}
+            onChange={e => search(e.target.value)}
+            placeholder="Search..."
+            className="w-full text-sm bg-transparent focus:outline-none text-gray-700 placeholder-gray-300"
+          />
+        </div>
+
+        {query.trim() ? (
+          <SearchPanel results={results} onOpen={openTab} />
+        ) : treeLoading ? (
           <p className="text-xs text-gray-400 px-3 py-2">Loading...</p>
         ) : (
-          <div className="flex-1 overflow-auto">
-            <FileTree
-              nodes={filteredTree}
-              selectedPath={activeTab?.path ?? null}
-              activeFolder={activeFolder}
-              expandedPaths={expandedPaths}
-              onSelect={handleSelectFile}
-              onFolderToggle={handleFolderToggle}
-              onExpandFolder={expandFolder}
-              refetch={refetch}
-              currentFolder={activeFolder}
+          <>
+            <div className="flex-1 overflow-auto">
+              <FileTree
+                nodes={filteredTree}
+                selectedPath={activeTab?.path ?? null}
+                activeFolder={activeFolder}
+                expandedPaths={expandedPaths}
+                onSelect={handleSelectFile}
+                onFolderToggle={handleFolderToggle}
+                onExpandFolder={expandFolder}
+                refetch={refetch}
+                currentFolder={activeFolder}
+                filterPaths={filterPaths}
+              />
+            </div>
+            <TagFilter
+              allTags={allTags}
+              activeTag={activeTag}
+              onTagClick={setActiveTag}
+              activeFilePath={activeTab?.path ?? null}
+              currentFileTags={currentFileTags}
+              onTagsUpdated={refetchIndex}
             />
-          </div>
+          </>
         )}
       </div>
 
