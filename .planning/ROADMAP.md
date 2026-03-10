@@ -124,10 +124,13 @@ Plans:
   3. The welcome screen (no open tabs) shows a list of recently opened files for quick access
   4. An image with a relative path (e.g., `./screenshot.png`) renders inline in preview using the file's directory as base
   5. An image with an absolute path (e.g., `/Users/romankarski/notes/img.png`) renders correctly in preview
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — TBD
+- [ ] 06-01-PLAN.md — Wave 0 test stubs: useTabPersistence, useScrollPersist, MarkdownPreview img, images route (RED)
+- [ ] 06-02-PLAN.md — Persistence hooks (useTabPersistence + useScrollPersist) + WelcomeScreen recent files + App.tsx wiring
+- [ ] 06-03-PLAN.md — Fastify image proxy route (/api/image) + MarkdownPreview img override with proxy URLs
+- [ ] 06-04-PLAN.md — Full test suite run + visual verification checkpoint
 
 ### Phase 7: File Templates
 **Goal**: Users can create structured notes instantly from built-in templates (daily note, meeting note, decision record) or their own saved templates, with a picker shown at new-file creation time
@@ -182,7 +185,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Editor | v1.0 | 5/5 | Complete | 2026-03-09 |
 | 4. Live Reload | v1.0 | 3/3 | Complete | 2026-03-10 |
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
-| 6. Tab Persistence and Image Rendering | v1.1 | 0/TBD | Not started | - |
+| 6. Tab Persistence and Image Rendering | v1.1 | 0/4 | In progress | - |
 | 7. File Templates | v1.1 | 0/TBD | Not started | - |
 | 8. Backlinks Panel | v1.1 | 0/TBD | Not started | - |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
