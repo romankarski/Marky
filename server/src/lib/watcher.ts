@@ -31,7 +31,7 @@ export class FileWatcherService {
     return () => this.subscribers.delete(cb);
   }
 
-  lock(filePath: string, ttlMs = 200): void {
+  lock(filePath: string, ttlMs = 500): void {
     this.locked.add(filePath);
     setTimeout(() => this.locked.delete(filePath), ttlMs);
   }
