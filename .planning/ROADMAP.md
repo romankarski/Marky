@@ -84,9 +84,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Wave 0 failing test stubs (watch.test.ts + useFileWatcher.test.ts)
-- [ ] 04-02-PLAN.md — Server: FileWatcherService (chokidar v5), SSE route, write-lock in PUT
-- [ ] 04-03-PLAN.md — Client: useFileWatcher hook, App.tsx wiring, visual verification checkpoint
+- [x] 04-01-PLAN.md — Wave 0 failing test stubs (watch.test.ts + useFileWatcher.test.ts)
+- [x] 04-02-PLAN.md — Server: FileWatcherService (chokidar v5), SSE route, write-lock in PUT
+- [x] 04-03-PLAN.md — Client: useFileWatcher hook, App.tsx wiring, visual verification checkpoint
 
 ### Phase 5: Search and Tags
 **Goal**: Users can find any content instantly by keyword and filter their knowledge base by topic tags — nothing gets lost in the file tree
