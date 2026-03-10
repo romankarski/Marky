@@ -1,17 +1,17 @@
 # Project Research Summary
 
 **Project:** Marky — local-first web markdown knowledge base
-**Domain:** Single-user web app serving a local filesystem of markdown files
-**Researched:** 2026-03-06
-**Confidence:** MEDIUM
+**Domain:** PKM / markdown workspace — v1.1 Polish and Navigation
+**Researched:** 2026-03-10
+**Confidence:** HIGH (all research based on direct codebase analysis + verified npm versions)
 
 ## Executive Summary
 
-Marky is a local-first markdown knowledge base with a specific constraint that differentiates it from generic editors: it must coexist with Claude CLI agents writing files to the same filesystem in real time. This makes the file watcher and conflict detection logic first-class architectural concerns, not afterthoughts. The well-established pattern for this type of tool is a thin Node.js server that owns filesystem access + a browser client that owns rendering and UI state, communicating over HTTP REST and WebSocket. This architecture is used by Hedgedoc, siyuan-note, Zettlr, and similar tools, and is the correct choice here.
+Marky v1.1 is a polish-and-navigation milestone on top of a fully-built React 19 + Fastify 5 markdown workspace. The five features in scope — tab persistence, image rendering, file templates, backlinks panel, and tag-based graph view — are well-understood PKM patterns with clear implementation paths identified in existing code. All but one feature (graph view) require zero new npm packages; the entire milestone adds only `react-force-graph-2d` to the dependency tree. The recommended build order is isolation-first: start with the two zero-server-change features (tab persistence and image rendering), then templates (independent), then backlinks (server-side SearchService extension), and finally graph view (depends on knowing the right panel's final shape after backlinks are added).
 
-The recommended stack is React 19 + Vite 6 + TypeScript 5 on the frontend, Fastify 4 + chokidar 3 + FlexSearch on the backend, with CodeMirror 6 as the editor. The strongest differentiator — and the primary reason to build Marky instead of using VS Code — is semantic search via the Claude API (LLM-as-reranker pattern over FlexSearch candidates). All other tool choices are well-established with high confidence; the Anthropic SDK version number should be verified against npm before installation.
+The biggest risk cluster is correctness, not complexity. Three of the ten critical and moderate pitfalls involve data getting out of sync: localStorage tab state serializing too much (causing dirty-state bugs on reload), the backlink index diverging from the search index if built as a separate service, and wikilink parsing producing different results on client vs. server. Each has a clear prevention strategy: persist only paths (not content or flags), extend `SearchService._readDoc` rather than creating a parallel index, and extract link parsing into `shared/` so both sides use identical logic.
 
-The critical risks are all implementation-level: file watcher race conditions causing silent data loss, full-text search re-indexing everything on every change, and semantic search triggering API calls without an embedding cache. All three are entirely preventable with upfront design decisions (dirty-state tracking, incremental FlexSearch updates, SQLite embedding cache keyed by content hash). The build order is strictly dependency-driven: server foundation first, then browser shell, then editor, then file watcher, then search — each layer depends on the previous one being solid.
+The second risk cluster is graph view architecture. Two pitfalls — D3 force simulation not stopped on unmount and graph data reference instability restarting the layout — are classic React + D3 integration traps preventable by using `react-force-graph-2d` (which manages the simulation lifecycle) and memoizing graph data with a content hash. The graph must also be implemented as a persistent right-panel mode from day one, not a modal, because GRPH-04 is an explicit requirement and retrofitting panel layout is costly.
 
 ---
 
@@ -19,172 +19,105 @@ The critical risks are all implementation-level: file watcher race conditions ca
 
 ### Recommended Stack
 
-The stack is a conventional two-package npm workspace (frontend + backend) with no Turborepo overhead. React + Vite + TypeScript handle the frontend; Fastify with chokidar and WebSocket handles the backend. CodeMirror 6 is the correct editor choice — Obsidian uses it, it handles large files via virtualized rendering, and its extension API supports vim mode, themes, and markdown-specific behavior. Monaco is explicitly wrong for this use case (4MB bundle, designed for LSP/code, markdown is second-class).
-
-Full-text search runs in-process via FlexSearch (no external search service). Semantic search uses the LLM-as-reranker pattern: FlexSearch returns top 20 candidates, Claude (haiku) re-ranks them by meaning. This is the correct pattern because the Claude API does not expose an embeddings endpoint — vector similarity via Claude is not possible; only reranking is. Tags live in YAML frontmatter parsed by `gray-matter`, never in a sidecar database.
+The existing stack handles all v1.1 features. `localStorage` (browser built-in) covers tab persistence using the pattern already established in `App.tsx`. `@fastify/static` (already installed but not yet registered for images) handles the image proxy. `gray-matter` (already installed) parses custom template frontmatter. The only new package is `react-force-graph-2d@1.29.1` for graph rendering — canvas-based, actively maintained, compatible with React 19, and significantly lighter than alternatives. Zustand, `remark` + `unist-util-visit` on the server, `cytoscape.js`, and any template engine are all explicitly rejected.
 
 **Core technologies:**
-- React 19 + Vite 6 + TypeScript 5: frontend framework — dominant ecosystem, first-class Vite HMR, necessary for complex tab/split-pane state
-- CodeMirror 6: markdown editor — purpose-built for browser text editing, virtualized rendering, markdown language package, used by Obsidian
-- Fastify 4: HTTP server — faster than Express, built-in schema validation, better TypeScript support
-- chokidar 3: file watcher — de facto Node.js standard, wraps native OS events (FSEvents/inotify), handles macOS rename-event bugs that plague raw `fs.watch`
-- FlexSearch 0.7.x: full-text search — fastest in-process JS search library, incremental add/update/remove, no external service
-- Zustand 5: UI state — minimal, TypeScript-friendly, avoids Redux boilerplate for tab list + active file state
-- `allotment`: split-pane layout — maintained React component for resizable panels (`react-split-pane` is abandoned)
-- `gray-matter`: frontmatter parsing — de facto standard for YAML frontmatter in Node.js
-- `better-sqlite3`: embedding cache — synchronous API fits Node.js well, zero-config, file-based
-- `@anthropic-ai/sdk`: Claude API client — LLM-as-reranker for semantic search, verify version before install
-- Tailwind CSS 4: styling — CSS-first config (no tailwind.config.js), fastest path to polished UI
-- `marked` + DOMPurify: markdown rendering — fast, CommonMark compliant, DOMPurify required to prevent XSS
+- `localStorage` (browser API): tab persistence and scroll position — follows established App.tsx pattern, no library needed
+- `@fastify/static@^8.0.0` (already installed): image proxy endpoint — register for `/api/images/*`, reuse existing `pathSecurity.ts`
+- `react-force-graph-2d@1.29.1`: graph view canvas rendering — the only new install for the entire milestone
+- `gray-matter` (already installed): parse custom template frontmatter
+- `SearchService` extension (existing): backlink index built inside `_readDoc`, no new service or package
 
 ### Expected Features
 
-The research surveyed Obsidian, Notion, Typora, Notable, Zettlr, and iA Writer to establish what users expect. Marky's specific context (single user, AI agent collaboration, semantic search differentiator) shapes the MVP scope tightly.
+All five v1.1 features are confirmed scope. Build order derived from dependency analysis and risk level.
 
 **Must have (table stakes):**
-- File tree with folder browser — without navigation, product is unusable
-- Markdown preview with full GFM (tables, checkboxes, fenced code blocks)
-- Simultaneous preview + editor split layout (no mode toggle) — core product promise
-- Syntax highlighting in editor — regression vs VS Code without it
-- Auto-save with debounce (500ms idle) — users must never lose work
-- Full-text search, sub-100ms perceived response — second most important feature after reading
-- Tab-based multi-file open — working across multiple documents is standard
-- External file watcher + auto-refresh — required for the Claude agent workflow that defines Marky's unique context
-- Internal link navigation (click `[text](file.md)` to open)
-- Frontmatter parsing (tags)
+- Tab persistence across reloads (PRST-01, PRST-02) — every multi-tab tool restores state on reload; losing tabs feels like a crash; zero server changes required
+- Inline image rendering (IMG-01, IMG-02) — local images currently show a placeholder stub with a comment deferring this to a later phase; one new server route, high visual impact
 
-**Should have (differentiators):**
-- Semantic search via Claude API — Marky's primary justification for existing over VS Code
-- Tag-based cross-folder filtering — required given the portal-hub knowledge base structure
-- Scroll sync between editor and preview panels
-- Recent files list
-- Dark/light theme toggle
+**Should have (PKM differentiators):**
+- Backlinks panel (BKLN-01, BKLN-02, BKLN-03) — surfaces knowledge graph without graph view; Obsidian and Logseq treat this as a first-class feature; requires `SearchService` extension
+- File templates (TMPL-01, TMPL-02, TMPL-03) — speeds structured note creation; daily note / meeting note / decision record cover 80% of structured needs; completely independent of other features
+- Tag-based graph view (GRPH-01, GRPH-02, GRPH-03, GRPH-04) — makes tag system visual; `tagMap` already available client-side; most complex feature but no new server data needed
 
-**Defer to v2:**
-- Backlinks / graph view
-- Command palette (Cmd+K)
-- File outline / TOC panel
-- Drag-and-drop file organization
-- Persistent layout memory
-- Focus/distraction-free mode
-
-**Never build:**
-- Real-time collaboration, cloud sync, plugin system, mobile layout, block-based editor, WYSIWYG-only mode
+**Defer to v1.2:**
+- Scroll position restore (PRST-03) — valuable but lower urgency; ships as fast follow after core persistence
+- Link-based graph edges — defer until backlink index is proven accurate in production
+- Tab pinning — redundant once basic persistence is in place
 
 ### Architecture Approach
 
-Marky follows the local server + browser client pattern: a Node.js process owns all filesystem operations and search indexing; the browser handles rendering and UI state. Communication is HTTP REST for request/response and WebSocket for push notifications (file-change events). The server is intentionally thin — it does not cache file contents in memory (read from disk on request) and does not own UI state. The browser owns tabs, active file, scroll positions, and search result cache. File path is the universal document ID across all systems (tabs, watcher events, search index) — this is critical for the external-write use case where Claude CLI identifies files by path.
+All five features integrate into the existing 3-column layout (Sidebar / Main Content / Right Panel) and Fastify server without restructuring either. The right panel gains a `BacklinksPanel` stacked below `FileInfo` and above `TableOfContents`, plus a graph mode toggle that replaces the TOC + Backlinks view with `GraphView`. `App.tsx` remains the single state orchestrator. Server changes are purely additive: three new routes (`GET /api/images/*`, `GET /api/backlinks/:path`, `GET /api/graph`) and one new module (`server/src/lib/templates.ts`). Four new client components are created; twelve existing files are modified.
 
 **Major components:**
-1. File Tree (browser) — renders folder hierarchy, tag grouping, click-to-open; reads from GET /api/tree
-2. Tab Bar + Client State (browser) — tracks open files, dirty state, active tab via Zustand
-3. Editor Pane (browser) — CodeMirror 6 wrapper, debounced auto-save to PUT /api/file
-4. Preview Pane (browser) — renders markdown via `marked`, subscribes to Client State by file path (no direct Editor coupling)
-5. Search Panel (browser) — full-text and semantic search UI; calls POST /api/search/fts and POST /api/search/semantic
-6. API Layer (Node.js) — Fastify routes for file CRUD, search, WebSocket endpoint
-7. File System Layer (Node.js) — fs.readFile/writeFile, directory walker
-8. File Watcher (Node.js) — chokidar with `awaitWriteFinish`, pushes WS events to browser and triggers incremental search index updates
-9. Search Index (Node.js) — FlexSearch in-memory index, incremental updates on file change, built async at startup
-10. Claude API Client (Node.js) — LLM-as-reranker for semantic search; embedding cache in SQLite keyed by (path, content_hash)
+1. `hooks/useTabs.ts` (modified) — add `RESTORE` and `SET_SCROLL` actions; localStorage init and persistence with slim snapshot only (`{ paths, activeTabId }`)
+2. `server/src/lib/search.ts` (modified) — extend `SearchDoc` with `links: string[]`; populate in `_readDoc`; add `getBacklinks()` method
+3. `client/src/components/GraphView.tsx` (new) — `react-force-graph-2d` canvas; receives `indexPayload.tagMap`; active file highlighted; calls `openTab` on node click
+4. `client/src/components/BacklinksPanel.tsx` (new) — fetches `/api/backlinks/:path` on active file change; count in header; click to open
+5. `client/src/components/TemplatePickerModal.tsx` (new) — modal inserted into `FileTree` new-file flow after filename input
+6. `MarkdownPreview.tsx` (modified) — add `filePath` prop; replace image placeholder stub with `/api/images/` proxy
 
 ### Critical Pitfalls
 
-1. **File watcher race condition on external writes** — track dirty state per file; on external change event, if dirty show conflict prompt instead of auto-reloading; if clean, auto-reload silently. Configure chokidar with `awaitWriteFinish: { stabilityThreshold: 100 }`. Address in Phase 1 — getting this wrong requires a state management rewrite.
+1. **Serializing full Tab objects to localStorage** — persist only `{ paths: string[], activeTabId }`, never `content`, `dirty`, or `loading`; add a `marky-tabs-v1` version key and wrap parse in `try/catch`; validate restored paths against file tree before dispatching `OPEN` to prevent error tabs for deleted files
 
-2. **Full-text search re-indexes entire vault on every change** — design incremental indexing from day one: on `change`/`add` events, index only the affected file and merge into the existing FlexSearch index. Never call `indexAllFiles()` from a watcher callback.
+2. **Backlink index built as a separate service** — extend `SearchService._readDoc` directly so the link index stays in sync with the search index through the same `updateDoc` / `removeDoc` lifecycle; a synchronous O(n) scan of `SearchService.docs` on each `/api/backlinks/` request is sufficient for vaults under 500 files
 
-3. **Semantic search calls embedding API without cache** — pre-compute and persist embeddings in SQLite keyed by `(path, content_hash)`. Only re-embed when content changes. At query time, embed only the query string (one API call). Debounce search input 300–500ms. Retrofitting this cache is painful; design before implementing semantic search.
+3. **Wikilink parsing divergence between client and server** — extract a single link-parsing utility in `shared/` used by both sides; handle `[[WikiLink]]`, `[[WikiLink|alias]]`, `[text](./path.md)`, ignore `https://` links; normalize paths to lowercase to account for macOS case-insensitive filesystem
 
-4. **Preview re-renders entire document on every keystroke** — debounce preview updates 100–200ms; preserve scroll position before/after re-render; use CodeMirror 6's built-in virtualized rendering for the editor.
+4. **Image path resolution losing source file context** — pass `filePath` as a prop to `MarkdownPreview`; construct the full root-relative path client-side before building the `/api/images/` URL; always pass image paths through the existing `resolveSafePath` in `pathSecurity.ts` to prevent directory traversal
 
-5. **Tag system stored outside frontmatter** — tags must live exclusively in YAML frontmatter (`tags: [...]`) parsed by `gray-matter`. A sidecar JSON file diverges from file content when Claude agents write files externally. This is a filesystem-as-source-of-truth violation that breaks the entire knowledge base contract.
+5. **D3 force simulation not stopped on unmount** — use `react-force-graph-2d` which manages the simulation lifecycle internally; set `cooldownTicks={100}` to stop the simulation after 100 ticks; verify cleanup on unmount; CPU elevation after navigating away from graph is the warning sign
+
+6. **Graph data reference instability restarting layout** — memoize graph data with a content hash of `tagMap`, not reference equality; never construct `{ nodes, links }` inline in render; use `react-force-graph-2d`'s `nodeId` prop to key nodes by file path so D3 merges positions on re-render
 
 ---
 
 ## Implications for Roadmap
 
-The architecture research explicitly defines a 6-phase build order based on strict dependency chains. Each phase depends on the previous being complete. This ordering is the correct one.
+Based on research, the five features map cleanly to four phases ordered by isolation (zero risk first) through increasingly cross-cutting changes.
 
-### Phase 1: Server Foundation + Project Scaffold
+### Phase 1: Tab Persistence and Image Rendering
+**Rationale:** Two features requiring no coordination with each other and delivering immediate daily-use quality improvements. Tab persistence is pure client localStorage. Image rendering is one new server route plus one component prop. Both validate infrastructure before touching the more complex SearchService. Starting here de-risks the milestone and ships visible improvements fast.
+**Delivers:** Tabs survive reload; recent files on welcome screen; local images render in preview
+**Addresses:** PRST-01, PRST-02, IMG-01, IMG-02
+**Avoids:** Pitfall 1 (stale Tab serialization) — the localStorage contract must be correct before anything else builds on it; Pitfall 4 (image path security) — `resolveSafePath` used from day one
 
-**Rationale:** Everything downstream depends on a working Node.js server that can read/write files and serve the frontend from the same origin. CORS issues (Pitfall 8) must be resolved at the scaffold level — they cannot be fixed later without breaking API callers. The split-pane library choice must also be made here since it cascades into every layout decision.
+### Phase 2: File Templates
+**Rationale:** Completely independent of all other v1.1 features. New server module plus new modal component plugged into the existing `FileTree` new-file flow. Low risk, medium value. Isolating this to its own phase keeps the SearchService change in Phase 3 clean and unambiguous.
+**Delivers:** Built-in daily note / meeting note / decision record templates; template picker modal in new-file flow; `{{date}}` and `{{title}}` interpolation at creation time
+**Addresses:** TMPL-01, TMPL-02, TMPL-03
+**Avoids:** Pitfall 8 (template token not interpolated) — interpolation defined at `createFile` call, not at template definition
 
-**Delivers:** Running Fastify server with GET /api/tree, GET /api/file, PUT /api/file; React + Vite app served from same origin; `allotment`-based split-pane layout shell; TypeScript configured for both packages.
+### Phase 3: Backlinks Panel
+**Rationale:** Requires the most consequential server-side change of the milestone — extending `SearchService._readDoc`. Building after templates means the only active change is the SearchService extension and its derived route and UI panel. This phase establishes the right panel's final layout (FileInfo + BacklinksPanel + TOC) that graph view needs to know before building its toggle.
+**Delivers:** Link index in `SearchService`; `GET /api/backlinks/:path` route; collapsible `BacklinksPanel` with count header in right panel; click-to-open
+**Addresses:** BKLN-01, BKLN-02, BKLN-03
+**Avoids:** Pitfall 2 (index divergence), Pitfall 3 (parsing mismatch — shared link extractor in `shared/`), Pitfall 9 (right panel overcrowding — collapsible with auto-collapse at zero count)
 
-**Addresses:** File tree browser, basic file read/write, responsive desktop layout.
-
-**Avoids:** CORS issues (P8), split-pane resize bugs (P5 — use `allotment` from the start).
-
-### Phase 2: Browser Shell (File Tree + Tabs + Preview)
-
-**Rationale:** Users need to navigate and read before they can edit. The File Tree + Tab Bar + Preview Pane are the minimum product. Building these before the editor means the preview rendering pipeline (marked + DOMPurify) is proven before the editor is wired to it.
-
-**Delivers:** Clickable file tree, tab-based multi-file navigation, markdown preview with GFM, internal link click handling, readable typography.
-
-**Addresses:** File tree browser, markdown preview, tab system, external link handling, basic frontmatter display.
-
-**Avoids:** Preview full-re-render on keystroke (P6 — debounce from the start), tight Editor/Preview coupling (Anti-Pattern 4 — Preview reads from Client State by file path, not from Editor directly).
-
-### Phase 3: Editor + Auto-Save
-
-**Rationale:** CodeMirror 6 is the most complex single component. Isolating it to its own phase allows the editor integration to be proven (including scroll sync with the existing Preview Pane) without search or watcher complexity.
-
-**Delivers:** CodeMirror 6 editor pane in split layout, syntax highlighting, auto-save (500ms debounce), dirty-state tracking in Zustand, frontmatter preservation on save.
-
-**Addresses:** Edit mode, syntax highlighting, auto-save, tab dirty indicator.
-
-**Avoids:** CodeMirror version mismatch (P11 — use `@codemirror/` namespace packages only, `@uiw/react-codemirror` for React wrapper), file content corruption on save.
-
-### Phase 4: File Watcher + Live Reload
-
-**Rationale:** This phase implements the core differentiating behavior for the AI agent workflow. It must come after the editor (Phase 3) because conflict detection requires dirty-state tracking, which is built in Phase 3. The WebSocket infrastructure added here is also required for search index freshness in Phase 5.
-
-**Delivers:** chokidar watcher with `awaitWriteFinish`, WebSocket endpoint in Fastify, browser WS client, silent auto-reload for clean tabs, conflict prompt for dirty tabs, symlink handling.
-
-**Addresses:** External file watcher + auto-refresh (the Claude CLI use case).
-
-**Avoids:** Race condition on external writes (P1 — dirty-state check before reload), polling anti-pattern (P2 — chokidar with native OS events), symlink infinite loops (P13 — `followSymlinks: false`).
-
-### Phase 5: Full-Text Search + Tag System
-
-**Rationale:** FlexSearch index should be built after the File Watcher (Phase 4) so incremental updates work from day one. Building search without the watcher produces a stale index that requires app restarts. The tag system belongs in this phase because it shares the same index infrastructure (frontmatter parsed at index time).
-
-**Delivers:** FlexSearch index built async at startup, incremental updates on file change events, POST /api/search/fts endpoint, Search Panel in browser, tag extraction from frontmatter, tag-based filtering in File Tree.
-
-**Addresses:** Full-text search, tag-based cross-folder filtering, recent files list.
-
-**Avoids:** Full re-index on every change (P3 — incremental FlexSearch add/update/remove), search index not warmed on startup (P10 — async background indexing with partial results), tags stored outside frontmatter (P7 — `gray-matter` + frontmatter-only).
-
-### Phase 6: Semantic Search
-
-**Rationale:** Semantic search is Marky's strongest differentiator and highest-complexity feature. It can only be built after full-text search (Phase 5) because it uses FlexSearch as a pre-filter (top 20 candidates). The embedding cache in SQLite must be designed first before any API calls are made.
-
-**Delivers:** SQLite embedding cache (path + content_hash keying), background embedding generation at startup, POST /api/search/semantic endpoint (query embedding + LLM reranking via Claude haiku), semantic toggle in Search Panel, cache model-version validation on startup.
-
-**Addresses:** Semantic search via Claude API — the primary differentiator justifying Marky's existence.
-
-**Avoids:** API calls per keystroke (P4 — pre-computed embeddings, 300ms debounce on query), embedding dimension mismatch on model change (P12 — model name stored in cache metadata, validated on startup).
+### Phase 4: Tag Graph View
+**Rationale:** Most complex feature. Placed last because its layout integration (right panel mode toggle) depends on knowing the final shape of the BacklinksPanel-extended right panel from Phase 3. `tagMap` data is already available client-side — no new server data needed beyond a `GET /api/graph` endpoint. The graph must be a persistent panel mode from the first implementation; rejecting any modal-based approach is an implementation gate.
+**Delivers:** `react-force-graph-2d` canvas graph; files as nodes; shared-tag edges; active file highlighted; node click opens tab; right panel mode toggle (TOC mode vs. Graph mode)
+**Addresses:** GRPH-01, GRPH-02, GRPH-03, GRPH-04
+**Avoids:** Pitfall 5 (simulation cleanup), Pitfall 6 (reference instability), Pitfall 10 (modal implementation — explicit rejection gate before code is written)
 
 ### Phase Ordering Rationale
 
-- Server must precede browser (browser has nothing to call without it).
-- Preview must precede editor (proves render pipeline; prevents tight coupling).
-- Editor must precede file watcher (conflict detection requires dirty-state from editor).
-- File watcher must precede search (otherwise index goes stale immediately).
-- Full-text search must precede semantic search (semantic uses FTS as pre-filter; FTS infrastructure must be proven first).
-- Tags belong in Phase 5 (not Phase 2) because tag filtering requires the search index infrastructure.
+- Phases 1 and 2 have zero cross-feature dependencies and can be built in parallel by separate developers; tab persistence localStorage pattern must be correct before anything else depends on it
+- Phase 3 touches `SearchService`, the core server index — isolating this change to a single phase limits blast radius and makes rollback clean
+- Phase 4 depends on Phase 3 because the right panel layout with `BacklinksPanel` in place determines the graph toggle integration point
+- Every phase delivers a shippable increment with visible user value; no phase is a pure setup phase
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 6 (Semantic Search):** Claude API shape for the LLM-as-reranker pattern should be verified against current Anthropic docs before implementation. The SDK version number in STACK.md is LOW confidence. The Voyage embedding API (mentioned in PITFALLS.md as an alternative) needs clarification — Claude does not expose embeddings directly; if a vector approach is preferred over reranking, a separate embedding provider (Voyage, OpenAI) must be chosen.
-- **Phase 4 (File Watcher):** chokidar `awaitWriteFinish` configuration values (stabilityThreshold, pollInterval) should be validated against the actual write patterns of Claude CLI agents on macOS before tuning.
+Phases with well-documented patterns (standard implementation, skip deeper research):
+- **Phase 1 (Tab Persistence + Images):** Pure localStorage and a static file proxy — both are standard, well-documented patterns with established precedents in the existing codebase; no novel integration needed
+- **Phase 2 (Templates):** Server-side string interpolation plus modal component — no complex patterns; straightforward additive work with clear integration point in `FileTree.handleCreate`
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (Server Foundation):** Fastify + Vite + TypeScript setup is extremely well-documented.
-- **Phase 2 (Browser Shell):** React component patterns for file tree and tab management are standard.
-- **Phase 3 (Editor):** CodeMirror 6 React integration has official documentation and `@uiw/react-codemirror` wrapper.
-- **Phase 5 (Full-Text Search):** FlexSearch incremental indexing is well-documented; frontmatter with `gray-matter` is a solved problem.
+Phases benefiting from careful implementation review (not pre-research, but validation during build):
+- **Phase 3 (Backlinks):** The shared `extractLinks` utility in `shared/` should have unit tests before the panel is built; link path normalization edge cases (spaces in wiki link names, relative path resolution) must be verified with real vault content
+- **Phase 4 (Graph View):** Read `react-force-graph-2d` README and type definitions before starting; `nodeCanvasObject`, `cooldownTicks`, and simulation lifecycle props need to be understood before writing the component; the panel mode toggle layout decision should be reviewed against the Phase 3 result before building
 
 ---
 
@@ -192,43 +125,42 @@ Phases with standard patterns (skip research-phase):
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | MEDIUM | Core choices (React, Vite, TypeScript, CodeMirror 6, Fastify, chokidar) are HIGH confidence. Package version numbers for FlexSearch, allotment, Zustand 5, better-sqlite3, and @anthropic-ai/sdk should be verified via `npm show` before installation. Training data cutoff Aug 2025. |
-| Features | MEDIUM | Based on training knowledge of Obsidian, Notion, Typora, Notable, Zettlr, iA Writer. Feature classifications are reliable; no live verification of competitor current state. |
-| Architecture | HIGH | Local server + browser client pattern is well-established across multiple open-source projects (Hedgedoc, siyuan-note, Zettlr). Component boundaries and data flow are standard. |
-| Pitfalls | HIGH | Race conditions, incremental indexing requirements, and embedding cache design are well-documented failure modes from open-source project issue trackers. |
+| Stack | HIGH | All versions verified via `npm info` in live environment on 2026-03-10; only one new package; all others already installed and working |
+| Features | HIGH | Codebase inspected directly; deferred stubs and comments in source confirm planned integration points match existing code; feature scope matches PKM ecosystem norms |
+| Architecture | HIGH | All integration points verified against actual source files; modified-file list is concrete and traceable to specific functions and line numbers |
+| Pitfalls | HIGH (critical) / MEDIUM (library-specific) | Critical pitfalls derived from direct codebase analysis; library pitfalls (D3 simulation lifecycle, react-force-graph reference instability) confirmed across multiple community sources |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Anthropic SDK version + embedding API shape:** STACK.md rates `@anthropic-ai/sdk` version as LOW confidence. Verify current SDK version and confirm LLM-as-reranker API shape before Phase 6 planning. Check whether Claude haiku model names have changed since Aug 2025.
-- **FlexSearch 0.7.x stability:** STACK.md notes this needs verification. If 0.7.x is not the latest stable release, evaluate whether the API has changed. MiniSearch is a valid fallback with a simpler API.
-- **allotment maintenance status:** STACK.md rates this MEDIUM. Verify the library is still actively maintained before Phase 1. `react-resizable-panels` (by Brian Vaughn, who maintains react-virtualized) is a well-supported alternative.
-- **Scroll sync implementation complexity:** FEATURES.md defers this to v2, but PITFALLS.md flags it as a moderate concern for Phase 1/2. Clarify during Phase 3 planning whether the CodeMirror 6 + marked combination supports line-number source maps for sync, or whether percentage-based heuristic is acceptable.
-- **Tailwind v4 CSS-first config:** Rated MEDIUM. Verify Tailwind v4 is stable and the CSS-first config (no tailwind.config.js) is production-ready before Phase 1.
+- **Scroll position restore timing (PRST-03):** The `useLayoutEffect` plus async content load interaction needs a working prototype verified against real long documents — the fix is simple but the timing edge case (scroll applied before content renders) must be confirmed not just reasoned about
+- **Link path normalization edge cases:** `[[Wiki Link With Spaces]]` to file path mapping needs explicit unit test coverage; the regex handles common cases but the normalization rules (lowercase, slug vs. display form) should be codified in the shared utility with tests before Phase 3 ships
+- **Graph performance ceiling:** `react-force-graph-2d` is documented as fast at 200+ nodes; Marky vaults are unlikely to exceed 500 files in v1.1 usage, but a performance check during Phase 4 development with a synthetic large dataset is prudent before declaring the feature done
+- **Right panel height budget:** The three-section right panel (FileInfo + BacklinksPanel + TOC) at default window height needs a visual design review after Phase 3 to confirm all three sections are usable before Phase 4 adds the graph toggle
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- CodeMirror 6 official documentation — editor architecture, extension API, markdown language package
-- chokidar GitHub (paulmillr/chokidar) — file watching configuration, `awaitWriteFinish`, platform behavior
-- gray-matter GitHub (jonschlinkert/gray-matter) — frontmatter parsing API
-- Anthropic API reference (as of Aug 2025) — Claude API capabilities, confirmed no embeddings endpoint
+- Direct codebase analysis (2026-03-10): `client/src/hooks/useTabs.ts`, `client/src/App.tsx`, `client/src/components/MarkdownPreview.tsx`, `server/src/lib/search.ts`, `server/src/lib/pathSecurity.ts`, `server/src/routes/files.ts`, `server/package.json`
+- `npm info react-force-graph-2d version peerDependencies` — version 1.29.1, `react: '*'` (verified 2026-03-10)
+- `npm info zustand version peerDependencies` — 5.0.11 (verified and rejected)
+- `server/package.json` — confirmed `@fastify/static@^8.0.0` already present and unused for images
 
 ### Secondary (MEDIUM confidence)
-- Obsidian developer documentation — CodeMirror 6 usage, frontmatter/tag conventions
-- Hedgedoc, siyuan-note, Zettlr, Foam architecture — local server + browser client pattern validation
-- FlexSearch, MiniSearch documentation — incremental indexing API
-- react-resizable-panels, allotment GitHub — split-pane library comparison
-- Zustand v5 release notes — breaking changes from v4
-- Tailwind CSS v4 announcement — CSS-first config
+- vasturiano/react-force-graph GitHub — actively maintained, canvas-based, knowledge graph use cases documented
+- MDN Web Storage API — localStorage patterns for tab and scroll persistence
+- Obsidian graph view documentation — PKM graph view UX patterns and norms
+- Obsidian scroll restore forum thread (90+ replies, open since 2020) — confirms scroll restore is an expected but difficult feature
+- D3 simulation cleanup pitfall — confirmed across multiple React + D3 community sources and open GitHub issues
+- Josh W. Comeau: persisting React state in localStorage — schema versioning pattern applicable to `marky-tabs-v1` design
 
 ### Tertiary (LOW confidence)
-- General pitfall patterns from Obsidian, Foam, Dendron, Notable open-source issue trackers — observed patterns, not specific issue citations
-- npm download trends for FlexSearch vs MiniSearch vs Fuse.js — training data inference
+- Obsidian backlink implementation patterns (community forum) — used for UX pattern validation only; implementation is codebase-specific
+- Obsidian vs Logseq comparison 2025 — PKM feature baseline expectations
 
 ---
-*Research completed: 2026-03-06*
+*Research completed: 2026-03-10*
 *Ready for roadmap: yes*

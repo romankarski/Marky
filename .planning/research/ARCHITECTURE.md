@@ -1,319 +1,536 @@
-# Architecture Patterns
+# Architecture Research
 
-**Project:** Marky — local-first web markdown knowledge base
-**Domain:** Single-user web app serving a local filesystem of markdown files
-**Researched:** 2026-03-06
-**Confidence:** HIGH (well-established pattern from Obsidian, Hedgedoc, Dendron, Foam, Zettlr, and similar tools)
+**Domain:** v1.1 feature integration — existing Fastify + React markdown workspace
+**Researched:** 2026-03-10
+**Confidence:** HIGH (based on direct codebase analysis; all integration points verified against actual source files)
 
 ---
 
-## Recommended Architecture
+> **Note:** This file supersedes the original v1.0 ARCHITECTURE.md (which was written before the app existed).
+> The app is now fully built. This document maps each v1.1 feature to exact integration points in the actual codebase.
 
-Marky follows the **local server + browser client** pattern used by all successful local-first web markdown tools (Hedgedoc, Joplin web clipper server, Zettlr, siyuan-note). A Node.js process owns the filesystem; the browser handles rendering and editing. Communication happens over HTTP + WebSocket.
+---
+
+## System Overview
+
+Current architecture as built (verified against source):
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  Browser (localhost:PORT)                                        │
-│                                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────┐│
-│  │  File Tree  │  │   Tab Bar   │  │   Search Panel           ││
-│  │  Component  │  │  + Tabs     │  │   (full-text + semantic)  ││
-│  └──────┬──────┘  └──────┬──────┘  └──────────┬───────────────┘│
-│         │                │                     │                │
-│  ┌──────▼────────────────▼─────────────────────▼───────────────┐│
-│  │              Main Content Area                               ││
-│  │  ┌─────────────────────┐  ┌──────────────────────────────┐  ││
-│  │  │   Preview Pane      │  │   Editor Pane                │  ││
-│  │  │   (markdown render) │  │   (CodeMirror or ProseMirror)│  ││
-│  │  └─────────────────────┘  └──────────────────────────────┘  ││
-│  └──────────────────────────────────────────────────────────────┘│
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────────┐│
-│  │  Client State (React/Svelte store)                           ││
-│  │  - Open files + dirty state                                  ││
-│  │  - Tab list + active tab                                     ││
-│  │  - Search results cache                                      ││
-│  └───────────────────────────┬──────────────────────────────────┘│
-└───────────────────────────────┼─────────────────────────────────┘
-                                │ HTTP REST + WebSocket
-┌───────────────────────────────┼─────────────────────────────────┐
-│  Node.js Server (localhost)   │                                  │
-│                               │                                  │
-│  ┌────────────────────────────▼───────────────────────────────┐ │
-│  │  API Layer (Express / Fastify)                             │ │
-│  │  GET  /api/tree           — folder tree                    │ │
-│  │  GET  /api/file?path=...  — file content                   │ │
-│  │  PUT  /api/file?path=...  — save file                      │ │
-│  │  POST /api/search/fts     — full-text search               │ │
-│  │  POST /api/search/semantic— semantic search (Claude API)   │ │
-│  │  WS   /ws/changes         — file-change events             │ │
-│  └──────────┬──────────────────────────┬───────────────────────┘ │
-│             │                          │                          │
-│  ┌──────────▼──────────┐   ┌───────────▼──────────────────────┐ │
-│  │  File System Layer  │   │  Search Index Layer              │ │
-│  │  - fs.readFile      │   │  - FlexSearch / Lunr (FTS)       │ │
-│  │  - fs.writeFile     │   │  - In-memory or SQLite index     │ │
-│  │  - Directory walker │   │  - Embeddings cache (SQLite)     │ │
-│  └──────────┬──────────┘   └───────────┬──────────────────────┘ │
-│             │                          │                          │
-│  ┌──────────▼──────────┐   ┌───────────▼──────────────────────┐ │
-│  │  File Watcher       │   │  Claude API Client               │ │
-│  │  - chokidar         │   │  - Embeddings via claude-3-haiku │ │
-│  │  - Emits: change,   │   │    or text-embedding-3-small     │ │
-│  │    add, unlink      │   │  - Similarity search over stored │ │
-│  │  - Triggers index   │   │    vectors                       │ │
-│  │    rebuild + WS push│   └──────────────────────────────────┘ │
-│  └─────────────────────┘                                         │
-└──────────────────────────────────────────────────────────────────┘
-                                │
-                    ┌───────────▼───────────────┐
-                    │  Local Filesystem          │
-                    │  /Users/.../portal-hub/    │
-                    │  knowledge/                │
-                    │  notes/                    │
-                    └───────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│  Browser (React 19 + Vite 6)                                         │
+│                                                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐ │
+│  │  App.tsx  (orchestrator — all state lives here)                 │ │
+│  │  - useTabs()        → tabs[], activeTabId, dispatch             │ │
+│  │  - useSearch()      → indexPayload, tagMap, refetchIndex        │ │
+│  │  - useTags()        → activeTags, filterPaths, allTags          │ │
+│  │  - useFileWatcher() → SSE listener, triggers dispatch/refetch   │ │
+│  │  - useFileTree()    → tree nodes                                │ │
+│  └──────┬──────────────┬───────────────────────┬───────────────────┘ │
+│         │              │                       │                      │
+│  ┌──────▼───┐  ┌───────▼──────────────┐  ┌────▼──────────────────┐  │
+│  │ Sidebar  │  │    Main Content      │  │   Right Panel         │  │
+│  │ FileTree │  │  TabBar + EditorPane │  │  FileInfo (tags)      │  │
+│  │ TagFilter│  │  SplitView (opt)     │  │  TableOfContents      │  │
+│  │ Search   │  │  WelcomeScreen       │  │                       │  │
+│  └──────────┘  └──────────────────────┘  └───────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+                              │ REST + SSE
+┌─────────────────────────────▼────────────────────────────────────────┐
+│  Fastify 5 Server (Node.js)                                          │
+│                                                                       │
+│  app.ts decorators:                                                  │
+│    fastify.rootDir       — resolved filesystem root                  │
+│    fastify.fileWatcher   — FileWatcherService (chokidar)             │
+│    fastify.searchService — SearchService (MiniSearch + tags)         │
+│                                                                       │
+│  Routes:                                                              │
+│    GET/POST/PUT/DELETE  /api/files/*  — file CRUD                    │
+│    PATCH                /api/files/*  — tag frontmatter update       │
+│    GET                  /api/watch    — SSE file-change stream       │
+│    GET                  /api/search/index — full index payload       │
+└──────────────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────▼────────────────┐
+              │  Local Filesystem (rootDir)    │
+              │  knowledge/ + notes/           │
+              └────────────────────────────────┘
 ```
 
 ---
 
-## Component Boundaries
+## Existing Component Inventory
 
-| Component | Responsibility | Lives In | Communicates With |
-|-----------|---------------|----------|-------------------|
-| **File Tree** | Render folder/file hierarchy, tag grouping, click to open | Browser | API Layer (GET /tree), Client State |
-| **Tab Bar** | Track open files, active tab, dirty state indicator | Browser | Client State |
-| **Preview Pane** | Render markdown as HTML (markdown-it or unified), handle internal link clicks | Browser | API Layer (GET /file), Editor Pane |
-| **Editor Pane** | Code editor for raw markdown, auto-save on change | Browser | API Layer (PUT /file), Preview Pane |
-| **Search Panel** | Input, results list, highlight matches | Browser | API Layer (/search/fts, /search/semantic) |
-| **Client State** | React/Svelte store: open tabs, file contents, search cache | Browser | All browser components |
-| **API Layer** | HTTP endpoints + WebSocket server | Node.js | File System Layer, Search Index, Claude API Client |
-| **File System Layer** | Read/write markdown files, walk directory tree | Node.js | Local filesystem |
-| **File Watcher** | Detect external writes (Claude CLI changes), push updates | Node.js | File System Layer, API Layer (WS), Search Index |
-| **Search Index** | Full-text index over markdown content | Node.js | File System Layer, Claude API Client |
-| **Claude API Client** | Generate embeddings, execute semantic similarity search | Node.js | Claude/OpenAI API (external), Search Index |
+Key facts for integration decisions:
 
----
-
-## Data Flow
-
-### Opening a File
-
-```
-User clicks file in tree
-  → Client sends GET /api/file?path=...
-  → File System Layer reads from disk
-  → Returns raw markdown string
-  → Preview Pane renders with markdown-it
-  → Tab added to Tab Bar in Client State
-```
-
-### Editing and Saving
-
-```
-User types in Editor Pane
-  → Client State marks tab as dirty
-  → Debounced auto-save (500ms after last keystroke)
-  → Client sends PUT /api/file with new content
-  → File System Layer writes to disk
-  → Preview Pane re-renders (triggered by content change event)
-```
-
-### External File Change (Claude CLI writes file)
-
-```
-Claude CLI writes file on disk
-  → chokidar emits 'change' event
-  → File Watcher notifies Search Index (re-index file)
-  → File Watcher pushes WS message to browser: { type: 'file-changed', path }
-  → Browser receives WS event
-  → If file is open in a tab: fetch fresh content, re-render Preview Pane
-  → If tab has unsaved edits: show conflict prompt (keep mine / reload)
-```
-
-### Full-Text Search
-
-```
-User types in Search Panel
-  → Debounced (200ms) POST /api/search/fts with query string
-  → Search Index runs FlexSearch query against pre-built index
-  → Returns ranked results with snippet excerpts
-  → Search Panel renders results list
-  → User clicks result → opens file and scrolls to match
-```
-
-### Semantic Search
-
-```
-User submits semantic query
-  → POST /api/search/semantic with query string
-  → Claude API Client generates embedding for query
-  → Compare against stored file embeddings (cosine similarity)
-  → Return top-N files sorted by relevance score
-  → Search Panel renders results (no snippet — concept match)
-  → Embeddings for files computed on first index build, cached in SQLite
-```
-
-### Tag Filtering
-
-```
-Tags extracted from frontmatter (---\ntags: [...]\n---) at index time
-  → Stored alongside file path in index
-  → File Tree renders tag view as virtual folder
-  → Clicking tag filters file list via in-memory index lookup (no API call)
-```
+| Component | File | State Home | Notes |
+|-----------|------|------------|-------|
+| Tab state | `hooks/useTabs.ts` | `useReducer` in App.tsx | `tabs[]` + `activeTabId`; Tab has `id`, `path`, `content`, `dirty`, `editMode`, `deleted` |
+| Tab type | `types/tabs.ts` | — | No `scrollPosition` field yet; no `createdAt` field |
+| Search index | `hooks/useSearch.ts` | `useRef` + `useState` | Fetches `/api/search/index` on mount and on `version` bump; `indexPayload` has `{ index, tags, tagMap }` |
+| File watcher | `hooks/useFileWatcher.ts` | SSE in effect | Listens to `/api/watch`; dispatches `SET_CONTENT` / `SET_DELETED` / triggers `refetch` |
+| Preview | `components/MarkdownPreview.tsx` | stateless | `img` handler explicitly deferred: returns placeholder span for local images |
+| Right panel | App.tsx inline | `useState` | `FileInfo` (tags) + `TableOfContents` stacked vertically; panel is collapsible |
+| File create | `components/FileTree.tsx` | local | `POST /api/files/*` with `{ content: '' }`; no template support |
+| Welcome screen | `components/WelcomeScreen.tsx` | stateless | Static text only; no recent files list |
+| SearchService | `server/src/lib/search.ts` | in-process | Stores `SearchDoc { id, name, path, text, tags }`; no link/backlink extraction |
+| Panel collapse | App.tsx | `localStorage` | `marky-sidebar-collapsed`, `marky-toc-collapsed` keys already written |
 
 ---
 
-## Suggested Build Order (Phase Dependencies)
+## v1.1 Feature Integration Map
 
-Dependencies flow strictly: each layer must exist before the one above it uses it.
+### Feature 1: Tab Persistence (PRST-01, PRST-02, PRST-03)
+
+**What needs to change:**
+
+| Layer | Change | New vs Modified |
+|-------|--------|-----------------|
+| `types/tabs.ts` | Add `scrollPosition?: number` to `Tab` | MODIFIED |
+| `hooks/useTabs.ts` | Add `RESTORE` action and `SET_SCROLL` action to `tabReducer`; wrap `useReducer` initializer to load from `localStorage` | MODIFIED |
+| `components/WelcomeScreen.tsx` | Accept `recentPaths: string[]` prop and `onOpen` callback; render clickable recent files list | MODIFIED |
+| `App.tsx` | Pass `recentPaths` to WelcomeScreen; add `useEffect` to persist `{ tabs: [{path, label}], activeTabId }` to localStorage on state change | MODIFIED |
+| `components/EditorPane.tsx` / `MarkdownPreview.tsx` | Track `scrollTop` of the preview scroll container in a ref; on blur or tab switch, call `SET_SCROLL`; on tab focus, restore `scrollTop` | MODIFIED |
+
+**localStorage key design:**
 
 ```
-Phase 1: Server foundation
-  File System Layer → API Layer (GET /tree, GET /file, PUT /file) → Static serving
-
-Phase 2: Browser shell
-  Client State → File Tree → Tab Bar → Preview Pane
-  (Can wire to API Layer from Phase 1 immediately)
-
-Phase 3: Editor
-  Editor Pane → connects to existing Preview Pane + auto-save to existing PUT endpoint
-  (Preview/Editor split layout)
-
-Phase 4: File Watcher + live reload
-  File Watcher → WebSocket endpoint in API Layer → Browser WS client handler
-  (Requires Phase 1 server + Phase 2 browser to be meaningful)
-
-Phase 5: Full-text search
-  Search Index (FlexSearch) built at startup + updated by File Watcher
-  → POST /api/search/fts endpoint
-  → Search Panel in browser
-  (Requires Phase 4 File Watcher for index freshness)
-
-Phase 6: Semantic search
-  Claude API Client → embedding generation + vector store in SQLite
-  → POST /api/search/semantic endpoint
-  → Extend Search Panel with semantic toggle
-  (Requires Phase 5 infrastructure; can be isolated module)
+marky-tabs          → JSON: { paths: string[], activeIndex: number }
+marky-recent        → JSON: string[]  (last 10 opened paths, newest first)
 ```
 
-**Critical dependency:** File Watcher must come before full-text search (otherwise index goes stale when Claude CLI writes files). Full-text search must be proven before semantic search is layered on.
+Do NOT persist `content` in localStorage — file content is large and always fresh from disk. Persist only `path` and `label`. On restore, dispatch `OPEN` for each saved path to trigger the existing fetch-on-demand logic.
+
+**Restore flow:**
+
+```
+App mounts
+  → read marky-tabs from localStorage
+  → dispatch OPEN for each saved path (lazy content fetch as today)
+  → dispatch FOCUS for saved activeTabId
+  → useEffect on indexPayload to verify paths still exist; close tabs for missing files
+```
+
+**Scroll position pattern:**
+
+Use a `ref` on the scrollable container inside `MarkdownPreview`. On `activeTabId` change in parent, read `scrollContainerRef.current.scrollTop`, dispatch `SET_SCROLL { id, scrollTop }`. On mount / tab switch in, apply the stored value via `scrollContainerRef.current.scrollTop = tab.scrollPosition`.
 
 ---
 
-## Patterns to Follow
+### Feature 2: Backlinks Panel (BKLN-01, BKLN-02, BKLN-03)
 
-### Pattern 1: File path as universal document ID
+**What needs to change:**
 
-**What:** Use the absolute or root-relative file path as the key for all state — tabs, cache entries, watcher events, search results.
-**When:** Always — never invent internal IDs for files.
-**Why:** External writers (Claude CLI) identify files by path. Using path as ID means watcher events automatically map to open tabs without a translation layer.
+| Layer | Change | New vs Modified |
+|-------|--------|-----------------|
+| `server/src/lib/search.ts` | Add `links: string[]` field to `SearchDoc`; extract `[[wiki-link]]` and `[text](./relative.md)` patterns from content at index time; add `getBacklinks(path)` method | MODIFIED |
+| `server/src/routes/search.ts` | Add `GET /api/backlinks/:path` route that calls `searchService.getBacklinks(path)` | NEW route in existing file |
+| `shared/src/types.ts` | Add `BacklinksResponse { links: Array<{ path: string; label: string }> }` | MODIFIED |
+| `client/src/components/BacklinksPanel.tsx` | New component: fetches `/api/backlinks/${activeFilePath}`, renders list, clicking calls `onOpen(path)` | NEW |
+| App.tsx right panel | Render `BacklinksPanel` above `FileInfo` and below the panel header; pass `activeFocusedTab?.path` and `openTab` | MODIFIED |
+
+**Link extraction approach (server-side):**
+
+Parse during `_readDoc` in `SearchService`. Use two regex patterns against `parsed.content`:
+- `[[wiki-link]]` → extract `wiki-link`, normalize to `wiki-link.md`
+- `[text](./path.md)` or `[text](path.md)` → extract the href if it ends in `.md` or lacks a protocol
+
+Store extracted paths (normalized to root-relative) in `SearchDoc.links`. `getBacklinks(targetPath)` iterates all docs and returns docs where `links` includes `targetPath`.
+
+**Data flow for backlinks:**
+
+```
+User switches to file X
+  → activeFocusedTab.path changes
+  → BacklinksPanel useEffect fires
+  → GET /api/backlinks/knowledge/page.md
+  → server iterates searchService.docs, finds docs with links.includes(path)
+  → returns [{ path, label }]
+  → BacklinksPanel renders list with count in header
+  → user clicks → openTab(path)
+```
+
+**Watcher integration:** No extra work needed. When a file changes, `searchService.updateDoc` already re-parses the file. The backlinks computed from `getBacklinks` will reflect the updated index automatically.
+
+**Right panel layout (existing structure to extend):**
+
+```
+Right panel (vertical flex column)
+  ├── FileInfo (tags) — existing, stays at top
+  ├── BacklinksPanel — NEW, inserted below FileInfo
+  └── TableOfContents — existing, stays at bottom
+```
+
+The panel already has `overflow-hidden` and `flex-col`. `BacklinksPanel` should have `shrink-0` with a max-height or be scrollable itself if many backlinks exist.
+
+---
+
+### Feature 3: Inline Image Rendering (IMG-01, IMG-02)
+
+**What needs to change:**
+
+| Layer | Change | New vs Modified |
+|-------|--------|-----------------|
+| `server/src/routes/files.ts` | Add `GET /api/images/*` route: resolves path relative to `rootDir`, sets `Content-Type` header, streams binary with `reply.sendFile` (using existing `@fastify/static` which is already installed) | NEW route in existing file |
+| `client/src/components/MarkdownPreview.tsx` | Replace placeholder `img` handler: for local `src`, resolve relative to active file's directory, prepend `/api/images/`, render real `<img>` | MODIFIED |
+
+**Image URL resolution (client-side):**
+
+`MarkdownPreview` currently receives `content: string` but not the file's path. It needs a `filePath: string` prop added so it can resolve relative image paths.
 
 ```typescript
-// Good
-const tabKey = '/knowledge/current/decisions.md'
-tabs[tabKey] = { content, dirty, scrollPos }
-
-// Bad — internal ID breaks watcher-to-tab mapping
-const tabKey = uuid()
+// In MarkdownPreview.tsx, img component override:
+img: ({ src, alt }) => {
+  if (!src) return null;
+  const isRemote = src.startsWith('http://') || src.startsWith('https://');
+  if (isRemote) return <img src={src} alt={alt} className="max-w-full rounded-lg" />;
+  // Resolve relative path against file's directory
+  const dir = filePath.includes('/') ? filePath.substring(0, filePath.lastIndexOf('/')) : '';
+  const resolved = src.startsWith('./') ? `${dir}/${src.slice(2)}` : (src.startsWith('/') ? src.slice(1) : `${dir}/${src}`);
+  return <img src={`/api/images/${resolved}`} alt={alt} className="max-w-full rounded-lg" />;
+}
 ```
 
-### Pattern 2: Optimistic UI with conflict detection
+**Server route pattern:**
 
-**What:** Save immediately (optimistic), but when File Watcher fires a change event for a file with `dirty: true`, show a conflict prompt.
-**When:** Any file with unsaved edits that receives an external change event.
-**Why:** Claude CLI agents write files frequently. Without conflict detection, silent overwrites will happen.
+```typescript
+// In server/src/routes/files.ts (existing file):
+fastify.get<{ Params: { '*': string } }>('/api/images/*', async (req, reply) => {
+  const safe = await resolveSafePath(req.params['*'], getRoot()).catch(() => {
+    reply.code(400); return null;
+  });
+  if (!safe) return;
+  // reply.sendFile is available via @fastify/static already registered
+  return reply.sendFile(path.basename(safe), path.dirname(safe));
+});
+```
 
-### Pattern 3: Single index, incremental updates
+`@fastify/static` is already in `server/package.json` as a dependency. The `reply.sendFile` approach handles binary MIME types and range requests automatically.
 
-**What:** Build the full-text index once at startup. File Watcher triggers incremental add/update/remove for changed files only.
-**When:** Search index management.
-**Why:** Full rebuild on every change is O(n) for a large knowledge base. FlexSearch supports incremental updates natively.
+**Callers to update:** `EditorPane.tsx` renders `MarkdownPreview` and must pass `filePath={tab.path}`. `SplitView.tsx` also renders `MarkdownPreview` and needs the same prop.
 
-### Pattern 4: Embeddings are expensive — cache aggressively
+---
 
-**What:** Store embeddings in SQLite keyed by `(path, content_hash)`. Only call Claude API when content hash changes.
-**When:** Semantic search index management.
-**Why:** Claude API has latency and cost. A 500-file knowledge base with full rebuild on every startup would be unusable.
+### Feature 4: File Templates (TMPL-01, TMPL-02, TMPL-03)
 
-### Pattern 5: Markdown rendering is client-side only
+**What needs to change:**
 
-**What:** Server returns raw markdown strings. Browser renders with markdown-it or unified. Never render HTML server-side.
-**When:** All file display.
-**Why:** Keeps server stateless for file reads. Allows future features (custom themes, plugins) to live entirely in the browser.
+| Layer | Change | New vs Modified |
+|-------|--------|-----------------|
+| `server/src/routes/files.ts` | Add `GET /api/templates` route returning list of available templates; add `GET /api/templates/:name` route returning template content | NEW routes |
+| `server/src/lib/templates.ts` | New module: `BUILTIN_TEMPLATES` record (daily-note, meeting-note, decision-record); `getTemplateContent(name)` fills date placeholder using current date | NEW file |
+| `client/src/components/TemplatePickerModal.tsx` | New modal: fetches `/api/templates`, shows list, user picks, calls `onConfirm(content)` | NEW |
+| `client/src/components/FileTree.tsx` | Modify "New File" button flow: after user enters filename, show `TemplatePickerModal`; pass selected template content to `POST /api/files/*` body | MODIFIED |
+
+**Template storage decision: in-memory on server (no filesystem)**
+
+Builtin templates are static strings in `server/src/lib/templates.ts`. Custom templates (TMPL-02) can be implemented as a special filesystem directory (e.g., `templates/` under rootDir) in a later pass. For v1.1 scope, builtins-only is sufficient for TMPL-01 and TMPL-03; TMPL-02 (save as template) can be deferred if needed.
+
+**Built-in template content:**
+
+```typescript
+// server/src/lib/templates.ts
+export const BUILTIN_TEMPLATES: Record<string, { label: string; content: string }> = {
+  'daily-note': {
+    label: 'Daily Note',
+    content: '---\ntags: [daily]\ndate: {{DATE}}\n---\n\n# {{DATE}}\n\n## Today\n\n## Notes\n\n## Action Items\n',
+  },
+  'meeting-note': {
+    label: 'Meeting Note',
+    content: '---\ntags: [meeting]\ndate: {{DATE}}\n---\n\n# Meeting: \n**Date:** {{DATE}}\n**Attendees:** \n\n## Agenda\n\n## Notes\n\n## Decisions\n\n## Action Items\n',
+  },
+  'decision-record': {
+    label: 'Decision Record',
+    content: '---\ntags: [decision]\ndate: {{DATE}}\n---\n\n# Decision: \n**Date:** {{DATE}}\n**Status:** Proposed\n\n## Context\n\n## Decision\n\n## Rationale\n\n## Consequences\n',
+  },
+};
+```
+
+`{{DATE}}` is replaced server-side at request time with the current ISO date string (`new Date().toISOString().slice(0, 10)`).
+
+**Modal flow integration in FileTree:**
+
+The current `FolderPickerModal` handles filename input. The simplest path is to show `TemplatePickerModal` after `FolderPickerModal` confirms the path, before the POST request is sent. `FileTree.handleCreate` currently POSTs with `{ content: '' }` — change it to POST with `{ content: templateContent }`.
+
+---
+
+### Feature 5: Tag-Based Graph View (GRPH-01, GRPH-02, GRPH-03, GRPH-04)
+
+**What needs to change:**
+
+| Layer | Change | New vs Modified |
+|-------|--------|-----------------|
+| `client/src/components/GraphView.tsx` | New component: `react-force-graph-2d` canvas rendering nodes (files) and edges (shared tags); active file highlighted; node click calls `onOpen(path)` | NEW |
+| App.tsx | Add "Graph" panel toggle button to TabBar area or TOC panel header; render `GraphView` as an overlay panel or replace TOC panel content | MODIFIED |
+| `server/src/routes/search.ts` | Add `GET /api/graph` route that transforms `searchService.getTagMap()` into `{ nodes, links }` graph data | NEW route |
+
+**Graph data model — tag-based clustering:**
+
+GRPH-01 specifies files as nodes clustered by shared tags. The data shape for `react-force-graph-2d`:
+
+```typescript
+interface GraphData {
+  nodes: Array<{ id: string; label: string; tags: string[]; val: number }>;
+  links: Array<{ source: string; target: string; tag: string }>;
+}
+```
+
+Build server-side from the existing `tagMap`:
+
+```
+For each pair of files sharing at least one tag:
+  → add a link { source: pathA, target: pathB, tag: sharedTag }
+```
+
+Node `val` (size) = number of tags on the file (more connected = larger node).
+
+**Graph placement (GRPH-04: dedicated panel or tab, not a modal):**
+
+Best approach for the current layout: add a toggle button to the right panel header that switches the right panel between "TOC + Backlinks" mode and "Graph" mode. This fits inside the existing collapsible right panel without adding a fourth layout column.
+
+```
+Right panel modes (toggled by button in panel header):
+  Mode A (default): FileInfo → BacklinksPanel → TableOfContents
+  Mode B: GraphView (full panel height)
+```
+
+This avoids adding a new split column or modal, keeps graph persistent during a session, and satisfies GRPH-04.
+
+**Package to add:**
+
+`react-force-graph-2d` (latest: 1.29.x, actively maintained, canvas-based, no WebGL required for 2D). It uses `d3-force` internally and is significantly lighter than the full `react-force-graph` package which includes 3D/VR variants.
+
+```bash
+# client only
+npm install react-force-graph-2d
+```
+
+`force-graph` (the underlying vanilla JS package) is ~300KB. Acceptable for a desktop-only tool; no lazy-loading needed unless graph view is rarely used (which it likely is — consider dynamic import).
+
+**Active file highlighting (GRPH-03):**
+
+Pass `activeFilePath` prop into `GraphView`. In the `nodeCanvasObject` callback, paint the node with a different color when `node.id === activeFilePath`.
+
+**Data refresh:** Graph data fetched once on mount. On file change SSE events, call `refetchGraph()` (same pattern as `refetchIndex` in `useSearch`). The graph rerenders when data changes.
+
+---
+
+## New Files Summary
+
+| File | Purpose |
+|------|---------|
+| `server/src/lib/templates.ts` | Builtin template definitions and date interpolation |
+| `client/src/components/BacklinksPanel.tsx` | Backlinks list with count header, clickable entries |
+| `client/src/components/TemplatePickerModal.tsx` | Modal for selecting template when creating a new file |
+| `client/src/components/GraphView.tsx` | Tag-based force graph using react-force-graph-2d |
+
+---
+
+## Modified Files Summary
+
+| File | What Changes |
+|------|-------------|
+| `shared/src/types.ts` | Add `BacklinksResponse` type |
+| `types/tabs.ts` | Add `scrollPosition?: number` to `Tab` |
+| `hooks/useTabs.ts` | Add `RESTORE`, `SET_SCROLL` actions; localStorage init and persistence |
+| `server/src/lib/search.ts` | Add `links[]` to `SearchDoc`, link extraction in `_readDoc`, `getBacklinks()` method |
+| `server/src/routes/files.ts` | Add `GET /api/images/*` and `GET/POST /api/templates/*` routes |
+| `server/src/routes/search.ts` | Add `GET /api/backlinks/:path` and `GET /api/graph` routes |
+| `components/MarkdownPreview.tsx` | Add `filePath` prop, fix `img` handler to proxy through `/api/images/` |
+| `components/EditorPane.tsx` | Pass `filePath` to `MarkdownPreview`, wire scroll position save/restore |
+| `components/SplitView.tsx` | Pass `filePath` to `MarkdownPreview` in both panes |
+| `components/FileTree.tsx` | Wire `TemplatePickerModal` into "New File" flow |
+| `components/WelcomeScreen.tsx` | Add `recentPaths` prop and recent files list |
+| `App.tsx` | Tab persistence useEffect, pass `recentPaths` to WelcomeScreen, add `BacklinksPanel`, add graph panel toggle |
+
+---
+
+## Data Flow Changes
+
+### Tab Persistence on Reload
+
+```
+App mounts
+  → read 'marky-tabs' from localStorage → { paths[], activeIndex }
+  → dispatch OPEN for each path (creates tabs in loading state)
+  → dispatch FOCUS for activeTabId
+  → existing content-fetch useEffect fires for each active tab
+  → tabs populate as they always did, no new network patterns needed
+
+State changes
+  → useEffect [tabs, activeTabId] persists slim snapshot to localStorage
+  → only { path, label } per tab, NOT content (content is always re-fetched)
+```
+
+### Backlinks on Tab Switch
+
+```
+activeFocusedTab.path changes in App.tsx
+  → BacklinksPanel receives new activeFilePath prop
+  → useEffect fires, fetches GET /api/backlinks/knowledge/page.md
+  → server: searchService.getBacklinks(path) — O(n) scan of in-memory docs
+  → returns { links: [{ path, label }] }
+  → BacklinksPanel renders list; header shows count
+```
+
+### Image Rendering
+
+```
+MarkdownPreview receives content + filePath
+  → react-markdown encounters ![alt](./images/fig.png)
+  → img component: src is relative, not remote
+  → resolves: dir = 'knowledge/current', resolved = 'knowledge/current/images/fig.png'
+  → renders <img src="/api/images/knowledge/current/images/fig.png" />
+  → browser fetches /api/images/...
+  → server: resolveSafePath → reply.sendFile (binary, correct Content-Type)
+```
+
+### Template File Creation
+
+```
+User clicks "+ New" in FileTree
+  → FolderPickerModal: user enters filename + folder
+  → TemplatePickerModal: user selects template (or "Blank")
+  → FileTree.handleCreate(filePath, templateName)
+  → GET /api/templates/:name (if not blank)
+  → server fills {{DATE}}, returns content string
+  → POST /api/files/knowledge/new-file.md { content: templateContent }
+  → file created, watcher fires 'add', index updated
+  → tree refetches, new tab opens
+```
+
+### Graph View Data
+
+```
+User clicks "Graph" toggle in right panel
+  → GraphView mounts, fetches GET /api/graph
+  → server: builds nodes from all docs, links from shared tags in tagMap
+  → returns { nodes, links }
+  → react-force-graph-2d renders canvas with force simulation
+  → active file node highlighted by matching node.id === activeFilePath
+  → user clicks node → onOpen(path) → openTab(path)
+```
+
+---
+
+## Build Order for v1.1
+
+Dependencies flow from least to most cross-cutting:
+
+```
+1. Image rendering (IMG-01, IMG-02)
+   Deps: none — self-contained server route + MarkdownPreview fix
+   Risk: low — @fastify/static already installed, pattern is standard
+
+2. Tab persistence (PRST-01, PRST-02, PRST-03)
+   Deps: none — localStorage layer wrapping existing useTabs hook
+   Risk: low — well-understood pattern; only tricky part is scroll restoration
+   Note: do PRST-01/02 first, PRST-03 (scroll) last within this feature
+
+3. File templates (TMPL-01, TMPL-02, TMPL-03)
+   Deps: none — new server module + modal component, plugs into existing FileTree flow
+   Risk: low — purely additive
+
+4. Backlinks panel (BKLN-01, BKLN-02, BKLN-03)
+   Deps: SearchService must be updated before route, route before UI component
+   Risk: medium — requires SearchService change (re-parse all docs to extract links);
+         test that updateDoc correctly re-extracts links on file change
+
+5. Graph view (GRPH-01, GRPH-02, GRPH-03, GRPH-04)
+   Deps: tagMap already exists in SearchService (no server changes needed beyond GET /api/graph)
+   Risk: medium — react-force-graph-2d bundle size; panel layout integration;
+         force simulation performance with large vaults
+   Note: build last because it depends on understanding the right-panel layout
+         after BacklinksPanel has been added
+```
+
+**Rationale for this order:**
+- Image rendering and tab persistence are fully isolated — either can go first; doing them first delivers visible quality improvements quickly.
+- Templates are similarly isolated and low-risk.
+- Backlinks require a SearchService change that touches the core index — ship this after low-risk features are stable.
+- Graph view is last because its layout placement (right panel toggle) depends on knowing the final shape of the BacklinksPanel-extended right panel.
+
+---
+
+## Architectural Patterns for v1.1
+
+### Pattern: Slim localStorage Persistence
+
+Persist only the minimal snapshot needed to restore state — paths and active index, not content. Content is cheap to re-fetch from a local server (no network latency). Persisting content would inflate localStorage and create a stale-content problem.
+
+**When to use:** Any state that survives page reload but has a cheap server-side source of truth.
+
+### Pattern: Server-Owns-Index, Client-Fetches-Derived-Data
+
+The existing pattern (client fetches `/api/search/index` and runs MiniSearch client-side) is extended for backlinks and graph — but backlinks and graph are computed server-side and returned as simple JSON, not raw index data. The client does not need to re-implement backlink traversal logic.
+
+**Rationale:** Backlink traversal is O(n) over all docs — fine server-side (single process, in-memory), wasteful to ship the full index to the client just for this.
+
+### Pattern: Prop-Threaded filePath for Preview Context
+
+`MarkdownPreview` needs `filePath` for image resolution. Rather than reaching up to a context, thread it as a prop. `MarkdownPreview` is always rendered by `EditorPane` or `SplitView` which already have `tab.path` available.
+
+**When to use:** Context is only justified when the same data is needed by many deeply-nested components. For a single component (MarkdownPreview), prop-threading is cleaner.
+
+### Pattern: Panel Mode Toggle (not modal)
+
+Graph view lives inside the existing right panel (toggle between TOC mode and Graph mode) rather than in a full-screen modal or a new layout column. This keeps the 3-column layout stable and avoids a fourth split.
+
+**When to use:** When a secondary view is useful but not constantly needed — toggle visibility within existing real estate rather than expanding the layout.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Polling for file changes
+### Anti-Pattern: Persisting Tab Content in localStorage
 
-**What:** Browser calls GET /api/file every N seconds to check for updates.
-**Why bad:** Wastes I/O, introduces lag, doesn't scale to many open tabs, creates unnecessary server load.
-**Instead:** Use chokidar + WebSocket push. Server notifies browser exactly when a file changes.
+**What people do:** Serialize the full `tabs` array including `content` to localStorage.
+**Why it's wrong:** Content can be megabytes; localStorage has a ~5MB limit; content goes stale when files change externally.
+**Do this instead:** Persist only `{ path, label }` per tab. Re-fetch content on restore (same as normal open).
 
-### Anti-Pattern 2: Storing file content in server memory
+### Anti-Pattern: Client-Side Backlink Computation
 
-**What:** Server reads all files into RAM at startup and serves from cache.
-**Why bad:** Memory bloat for large knowledge bases, stale cache bugs when files change on disk, complex invalidation logic.
-**Instead:** Read from disk on request (fast enough for local SSD), use File Watcher only for search index updates.
+**What people do:** Ship the full search index to the client and compute backlinks in the browser.
+**Why it's wrong:** The full index JSON is already sent to the client for search — but backlink computation iterates ALL docs checking their `links` array. This is simpler to do server-side where the index lives.
+**Do this instead:** Add a dedicated `/api/backlinks/:path` endpoint. Client fetches backlinks for the current file only.
 
-### Anti-Pattern 3: Blocking the API on embedding generation
+### Anti-Pattern: Full Index Rebuild When Adding link Extraction
 
-**What:** POST /api/search/semantic waits for real-time embedding of query + all files.
-**Why bad:** First-time semantic search takes minutes for a large corpus.
-**Instead:** Pre-compute file embeddings at index time (background on startup, incremental on change). Only embed the query at search time.
+**What people do:** When changing `SearchDoc` to add `links[]`, trigger a `buildFromDir` rebuild.
+**Why it's wrong:** `buildFromDir` is called on startup already. The existing `updateDoc` method handles incremental updates. The migration path is: update `_readDoc` to extract links, then restart the server (which calls `buildFromDir`). No special migration needed.
+**Do this instead:** Modify `_readDoc`, restart once to rebuild. The watcher keeps links current thereafter via incremental `updateDoc` calls.
 
-### Anti-Pattern 4: Tight coupling between Editor and Preview
+### Anti-Pattern: Re-fetching /api/graph on Every Keypress
 
-**What:** Editor directly calls Preview's render function or shares internal state.
-**Why bad:** Makes split-screen (two different files open side by side) impossible or deeply complicated.
-**Instead:** Both panes subscribe to Client State by file path. Editor writes to state; Preview reads from state. No direct coupling.
-
-### Anti-Pattern 5: One monolithic frontend component
-
-**What:** Single React component that handles file tree, tabs, editor, preview, search.
-**Why bad:** Impossible to implement split-screen layouts, hard to add tab-per-file state.
-**Instead:** Each pane is a standalone component parameterized by `filePath`. The layout shell composes them.
+**What people do:** Tie graph data refetch to the same `refetchIndex` call used for tags.
+**Why it's wrong:** Graph computation iterates all doc pairs — it's more expensive than tag list. Tag updates happen frequently (user adds/removes tags).
+**Do this instead:** Refetch graph data on `add`/`unlink` SSE events (structural changes) and on a button-press "refresh" affordance. For tag changes, the existing `refetchIndex` path is sufficient; graph can be stale between structural updates.
 
 ---
 
-## Scalability Considerations
+## Integration Points Summary
 
-Marky is single-user, local-first. "Scalability" here means handling large knowledge bases gracefully, not concurrent users.
-
-| Concern | At 100 files | At 1,000 files | At 10,000 files |
-|---------|-------------|----------------|-----------------|
-| FTS index build time | <1s | ~2-5s | ~30s (async, non-blocking) |
-| FTS index size in memory | ~1MB | ~10MB | ~100MB (consider SQLite FTS5) |
-| Embedding generation (first time) | ~10s | ~2min | ~20min (background job, cache essential) |
-| Embedding storage (SQLite) | <1MB | ~5MB | ~50MB (fine) |
-| File tree render | instant | instant | consider virtual scroll if >5,000 nodes |
-| Watcher overhead | negligible | negligible | negligible (chokidar handles 10k+ files) |
-
-**Decision point at ~1,000 files:** Replace in-memory FlexSearch index with SQLite FTS5 (full-text search built into SQLite). FlexSearch is faster for small corpora; SQLite FTS5 handles large corpora without memory pressure and persists across restarts.
-
----
-
-## Technology Choices (Architecture-Level)
-
-| Concern | Choice | Rationale |
-|---------|--------|-----------|
-| File watcher | chokidar | Industry standard for Node.js, handles macOS FSEvents, cross-platform |
-| Full-text search | FlexSearch (small) / SQLite FTS5 (large) | FlexSearch is zero-dependency, fast; FTS5 is persistent and scales |
-| Markdown rendering | markdown-it | Fastest, extensible, supports plugins for task lists, frontmatter, etc. |
-| Editor widget | CodeMirror 6 | Best markdown editing DX, lightweight, no framework dependency |
-| WebSocket | ws (Node.js) | Minimal, stable, no unnecessary abstractions |
-| Embedding cache | SQLite (better-sqlite3) | Zero-config, file-based, synchronous API fits Node.js well |
-| Client framework | React or Svelte | Either works; Svelte produces smaller bundles and simpler state |
-| API framework | Express or Fastify | Fastify is faster and has better TypeScript support |
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| `useTabs` ↔ `localStorage` | Read on init, write on state change | Slim snapshot only: `[{path, label}]` + `activeIndex` |
+| `BacklinksPanel` ↔ server | `GET /api/backlinks/:path` on `activeFilePath` change | New endpoint, server-side backlink traversal |
+| `MarkdownPreview` ↔ server | `GET /api/images/*` for local image src | New route; `@fastify/static` already available |
+| `FileTree` ↔ `TemplatePickerModal` | Modal callback returns template content before POST | UI-only boundary; server provides template content |
+| `GraphView` ↔ server | `GET /api/graph` on mount + structural SSE events | New endpoint; tag data already in `searchService` |
+| `SearchService` ↔ `links[]` | Internal: extracted during `_readDoc`, queried by `getBacklinks()` | No new external protocol; server-side only |
+| Right panel ↔ `App.tsx` | `panelMode` state toggle in App.tsx; conditional render | No new component boundary; mode toggle only |
 
 ---
 
 ## Sources
 
-- Architecture pattern: established conventions from Hedgedoc, siyuan-note, Zettlr, Foam (VSCode extension), Obsidian plugin server model — MEDIUM confidence (training data, pre-August 2025, no live verification possible in this session)
-- chokidar capabilities: HIGH confidence (stable, widely documented library)
-- FlexSearch vs SQLite FTS5 tradeoffs: HIGH confidence (well-established pattern in Node.js search tooling)
-- CodeMirror 6 for markdown: HIGH confidence (official CodeMirror docs, stable API since 2021)
-- Claude API for embeddings: MEDIUM confidence (API shape may have evolved; verify current embedding endpoint before implementation)
+- Direct codebase analysis (all source files read 2026-03-10): HIGH confidence
+- `react-force-graph-2d` GitHub (vasturiano/react-force-graph): version 1.29.x, actively maintained — HIGH confidence
+- `@fastify/static` already in `server/package.json`: verified — HIGH confidence
+- `localStorage` tab persistence pattern (multiple React community sources): MEDIUM confidence — standard approach, no library needed
+- Scroll position save/restore via `ref.scrollTop`: MEDIUM confidence — standard DOM pattern, React-specific timing considerations apply
+- Server-side backlink extraction with regex: HIGH confidence — `remark-wiki-link` (already in client) confirms `[[wiki-link]]` syntax; regex approach sufficient for index without full AST parse
+
+---
+*Architecture research for: Marky v1.1 Polish and Navigation*
+*Researched: 2026-03-10*

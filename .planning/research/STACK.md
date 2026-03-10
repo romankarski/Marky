@@ -1,236 +1,213 @@
-# Technology Stack
+# Stack Research — v1.1 Polish and Navigation
 
 **Project:** Marky — local-first web markdown knowledge base
-**Researched:** 2026-03-06
-**Confidence:** MEDIUM (training data through Aug 2025; external verification tools unavailable in this session — flag for version-pinning before install)
+**Milestone:** v1.1 (tab persistence, backlinks, image rendering, file templates, graph view)
+**Researched:** 2026-03-10
+**Confidence:** HIGH (all versions verified via `npm info` in live environment)
 
 ---
 
-## Recommended Stack
+## Context: What Already Exists
 
-### Frontend Framework
+This is a subsequent-milestone research file. The following stack is already in production and must NOT be re-researched or replaced:
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| React | 19.x | UI component model | Largest ecosystem, best library support for editor/tab/split-pane primitives. Signals-style concurrent rendering handles real-time file-watch updates cleanly. |
-| Vite | 6.x | Dev server + bundler | Fastest HMR for local dev. First-class React support, minimal config. Not Webpack — Webpack's config overhead is unjustified for a single-dev tool. |
-| TypeScript | 5.x | Type safety | Non-negotiable for a project with complex state (tabs, split panes, file tree, search indices). Catches refactor bugs early. |
+| Already Installed | Package | Version |
+|-------------------|---------|---------|
+| Editor | `@uiw/react-codemirror`, `@codemirror/lang-markdown` | 4.25.x / 6.5.x |
+| Preview | `react-markdown`, `remark-gfm`, `remark-frontmatter`, `remark-wiki-link`, `rehype-slug` | 10.x |
+| Server | `fastify`, `@fastify/cors`, `@fastify/static`, `chokidar`, `gray-matter` | 5.x |
+| Search | `minisearch` (client + server) | 7.2.x |
+| Layout | `react-resizable-panels`, `dnd-kit` | 4.x / 6-10.x |
+| Styling | Tailwind CSS v4 | 4.x |
+| Tests | `vitest` | 4.x (client), 2.x (server) |
 
-### Editor
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| CodeMirror 6 | 6.x (via `@codemirror/next` packages) | Markdown editor | Purpose-built for in-browser code/text editing. Far lighter than Monaco (which bundles a full VS Code language server). CodeMirror 6 has a first-class markdown language package (`@codemirror/lang-markdown`), excellent mobile support (irrelevant here but signals quality), and a clean extension API for custom keybindings, vim mode, and themes. Obsidian uses CodeMirror 6. |
-
-**Do NOT use:**
-- Monaco Editor — designed for code with language servers, ~4MB bundle, overkill for markdown. Its markdown support is basic; you'd fight the abstractions.
-- ProseMirror directly — too low-level; CodeMirror 6 builds on similar architecture with better DX.
-- TipTap / Lexical / Slate — rich-text WYSIWYG editors, not raw-markdown editors. Wrong abstraction for a files-on-disk workflow.
-
-### Markdown Rendering (Preview)
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `marked` | 12.x | Markdown → HTML | Fast, battle-tested, CommonMark compliant. Used by GitHub's docs tooling. |
-| `DOMPurify` | 3.x | Sanitize HTML output | Required when rendering arbitrary markdown to prevent XSS. Local-first doesn't eliminate this — user files could contain injected content. |
-| `highlight.js` | 11.x | Code block syntax highlighting | Pairs cleanly with `marked`. Lighter than Prism for this use case. |
-
-**Alternative considered:** `remark` + `rehype` pipeline — more powerful and composable, but adds 3-4 packages and significant config for what is a straightforward render task. Use only if you need custom AST transformations (e.g., custom directives, wikilinks). Keep `marked` unless that need emerges.
-
-### Backend (Node.js API Server)
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Fastify | 4.x | HTTP server | Fastest Node.js framework by throughput benchmark. Schema-based validation built in. Express is the alternative but has worse TypeScript support and no built-in validation — you'd add middleware that Fastify ships with. Hono is a lighter alternative if you want edge-compatibility later. |
-| `chokidar` | 3.x | File system watching | The de facto standard. Wraps `fs.watch`/`inotify`/FSEvents with cross-platform normalization. Native `fs.watch` has known issues on macOS with rename events and deep directories — do not use it directly. |
-| WebSocket (`ws`) | 8.x | Push file-change events to browser | Server sends file-change notifications; browser updates the open tab. Native Node.js WebSocket support landed in Node 22 but `ws` has broader compatibility and tested reliability. |
-
-**Architecture note:** The backend is thin — it exposes file read/write/list endpoints and a WebSocket channel for file-change events. It does NOT own state; the React frontend owns UI state (open tabs, split config, etc.).
-
-### Full-Text Search
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `flexsearch` | 0.7.x | In-memory full-text search index | Fastest full-text search library for JavaScript. Runs entirely in-process (no search server needed). Supports async indexing, field weighting, and tokenization. Alternatives: Fuse.js (slower, fuzzy-only), lunr.js (legacy, not maintained), MiniSearch (good but slightly slower than FlexSearch for large corpora). |
-
-**Implementation:** Index is built on server startup by scanning all markdown files. Rebuilt on file-change events. Index lives in memory on the Node.js backend; search queries hit a `/search?q=` endpoint. Do NOT send the raw index to the browser — too large for a real knowledge base.
-
-**Do NOT use:** Elasticsearch, Meilisearch, Typesense — all require a separate running service. Gross overkill for a single-user local tool with a few thousand files.
-
-### Semantic Search
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Anthropic SDK (`@anthropic-ai/sdk`) | 0.26.x | Claude API client | User already uses Claude ecosystem. Use claude-3-haiku for semantic search (fastest, cheapest). Strategy: embed search query + top N full-text results, ask Claude to re-rank or identify semantic matches. |
-| SQLite (via `better-sqlite3`) | 9.x | Persist embeddings cache | Claude API doesn't provide embeddings directly — use Claude to score relevance. Cache per-file summaries or semantic tags in SQLite so you don't re-call the API on every search. |
-
-**Semantic search strategy — important:**
-Claude API does not expose an embeddings endpoint (unlike OpenAI). The correct pattern for Marky is:
-1. Full-text search (FlexSearch) returns top 20 candidates
-2. Send those 20 file excerpts + the user query to Claude (claude-3-haiku)
-3. Claude returns ranked/filtered results with explanation
-4. Cache nothing per-request (Claude call is fast enough); cache file summaries to reduce token count
-
-This is called "LLM-as-reranker" and is the right pattern for Claude API integration. Do NOT try to generate vector embeddings via Claude — it doesn't support it. If vector embeddings are later needed, use a separate library (e.g., `transformers.js` with a small SBERT model) or a different API.
-
-### Layout / UI
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `allotment` | 1.x | Split-pane layout | Purpose-built React split-pane component. Supports horizontal/vertical splits, drag-to-resize, controlled/uncontrolled modes. Better maintained than `react-split-pane` (which is stale). |
-| Tailwind CSS | 4.x | Utility-first styling | Fastest path to polished UI without a component library. Tailwind v4 uses a CSS-first config (no tailwind.config.js) which is cleaner. |
-
-**Do NOT use:**
-- MUI / Ant Design / Chakra — heavy component libraries that fight your custom layout requirements (split panes, custom editor panels). The UI surface area here is custom enough that a component library adds more friction than it saves.
-- CSS Modules — fine but more boilerplate than Tailwind for this scope.
-
-### State Management
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Zustand | 5.x | Global UI state | Tabs, active file, split config, search state, tag filters. Zustand is minimal, TypeScript-friendly, and avoids Redux boilerplate. Context API alone would cause unnecessary re-renders across the tab bar + editor + preview. |
-
-**Do NOT use:** Redux Toolkit — correct tool for complex server state but Marky's state is UI-local; it doesn't need the full reducer/slice ceremony. TanStack Query is not needed because the backend is local (no async caching problem to solve).
-
-### Tag Management Storage
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| YAML frontmatter (parsed by `gray-matter`) | 4.x | Tags stored in files | Tags live IN the markdown files as YAML frontmatter (`tags: [kb, phase2]`). This is the standard convention (Obsidian, Hugo, Jekyll all use it). Tags are extracted at index time and stored in the in-memory FlexSearch index for filtering. No separate database for tags — the files ARE the source of truth. |
-
-**Do NOT use:** A separate tags database. If tags are in a DB, they go out of sync with file edits made by Claude CLI agents. Frontmatter in the file is the single source of truth.
-
-### Development Tooling
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `tsx` | 4.x | Run TypeScript Node.js files directly | Replaces `ts-node`. Faster, ESM-native. Used to run the Fastify backend in dev without a separate compile step. |
-| `concurrently` | 9.x | Run frontend + backend together | Single `npm run dev` starts both Vite and Fastify. Simple, no Turborepo/Nx needed for a two-process app. |
-| ESLint | 9.x | Linting | Flat config (ESLint 9+). |
-| Prettier | 3.x | Formatting | Standard. |
-| Vitest | 2.x | Unit + integration tests | Vite-native, fast, same config as build. Jest is the alternative but Vitest is the 2025 standard for Vite projects. |
+**State management:** Plain `useReducer` + custom hooks. No Zustand. `localStorage` is already used directly in `App.tsx` for sidebar/TOC collapse state — this pattern is established and working.
 
 ---
 
-## Project Structure
+## New Stack Additions Required for v1.1
 
+### Tab Persistence (PRST-01 / PRST-02 / PRST-03)
+
+**Decision: No new package needed.**
+
+The codebase already calls `localStorage` directly. Tab persistence follows the same pattern:
+- Persist tab paths + active tab ID to `localStorage` key `marky-tabs` on every `useTabs` dispatch
+- Restore on mount by reading `localStorage` and dispatching `OPEN` actions
+- Scroll position: use `sessionStorage` keyed by tab ID — survives React re-renders but not a full page close (acceptable for scroll position)
+
+**Do NOT add Zustand.** The app is useReducer-based throughout. Introducing Zustand just for localStorage persistence would fragment the state model with no benefit. The `useTabs` hook already owns all tab state; a 10-line `useEffect` that syncs reducer state to localStorage is sufficient.
+
+**Pattern already in codebase (lines 152-163 of App.tsx):**
+```ts
+const [sidebarCollapsed, setSidebarCollapsed] = useState(
+  () => localStorage.getItem('marky-sidebar-collapsed') === 'true'
+);
 ```
-marky/
-├── packages/
-│   ├── frontend/          # Vite + React app
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── FileTree/
-│   │   │   │   ├── TabBar/
-│   │   │   │   ├── Editor/       # CodeMirror 6 wrapper
-│   │   │   │   ├── Preview/      # marked renderer
-│   │   │   │   ├── SplitPane/    # allotment wrapper
-│   │   │   │   └── SearchPanel/
-│   │   │   ├── store/            # Zustand slices
-│   │   │   └── hooks/            # useFileWatch, useSearch, etc.
-│   └── backend/           # Fastify server
-│       ├── src/
-│       │   ├── routes/
-│       │   │   ├── files.ts       # read/write/list endpoints
-│       │   │   ├── search.ts      # FlexSearch + Claude reranker
-│       │   │   └── tags.ts        # tag index endpoint
-│       │   ├── watcher.ts         # chokidar + WebSocket broadcast
-│       │   └── index.ts
-├── package.json           # workspaces: ["packages/*"]
-└── tsconfig.json
+Replicate this pattern inside `useTabs`: initialize from localStorage, write to localStorage on state change.
+
+---
+
+### Backlink Indexing (BKLN-01 / BKLN-02 / BKLN-03)
+
+**Decision: Extend the existing `SearchService` on the server. No new package for link parsing.**
+
+The server already uses `gray-matter` + `fs/promises` to read every markdown file at startup. `gray-matter` returns the raw content — regular expressions are sufficient to extract `[text](path.md)` and `[[wiki-link]]` patterns from markdown content without a full AST parse.
+
+**Why not remark on the server?**
+
+`remark` + `unist-util-visit` would be the "correct" AST approach, but:
+- It adds 3 packages (`remark`, `remark-parse`, `unist-util-visit`) at ~2 MB
+- Regex on the already-parsed `parsed.content` string handles 99% of real-world link patterns in this codebase
+- The link extractor only needs to run at index time (startup + file change), not on the hot path
+
+Use regex in `SearchService._readDoc()` or a new `_extractLinks()` helper. Pattern:
+```
+/\[([^\]]*)\]\(([^)]+\.md)\)/g           // [text](file.md)
+/\[\[([^\]|#]+)/g                         // [[wiki-link]] or [[wiki-link|alias]]
 ```
 
-**Monorepo approach:** npm workspaces (no Turborepo). Two packages: `frontend` and `backend`. Shared types live in `packages/shared/` if needed. This is the simplest setup that avoids path confusion between the two environments.
+**Server route to add:** `GET /api/backlinks/:path` — returns `{ backlinks: { path, label }[] }` by querying a `linkIndex: Map<target, Set<source>>` built during indexing.
+
+**No new npm packages required.**
 
 ---
 
-## Alternatives Considered
+### Image Path Resolution (IMG-01 / IMG-02)
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Editor | CodeMirror 6 | Monaco | Monaco is VS Code's editor. 4MB+ bundle, designed for LSP/code, markdown is second-class. |
-| Editor | CodeMirror 6 | TipTap | WYSIWYG (rich-text), not raw-markdown. Wrong abstraction for file-based workflow. |
-| Backend | Fastify | Express | Express has no built-in validation, worse TS types, slower benchmarks. Still fine but Fastify is better. |
-| Backend | Fastify | Hono | Hono is excellent but optimized for edge/worker runtimes. Fastify better for long-lived Node process with filesystem access. |
-| Full-text | FlexSearch | Fuse.js | Fuse.js is fuzzy-search only, much slower for large indexes, designed for small datasets. |
-| Full-text | FlexSearch | MiniSearch | Excellent alternative — API is simpler, slightly slower. If FlexSearch API feels complex, MiniSearch is a valid swap. |
-| State | Zustand | Redux Toolkit | RTK is correct for complex server-state apps. Overkill here. |
-| State | Zustand | Jotai | Valid alternative (atomic model). Zustand slightly easier to reason about for this shape of state (global tab list + active file). |
-| Styling | Tailwind CSS | CSS Modules | More verbose for this scope without meaningful benefit. |
-| Split pane | allotment | react-split-pane | react-split-pane is effectively abandoned (last major update 2021). |
-| Markdown render | marked | remark/rehype | More powerful pipeline but 3x more config. Use only if wikilink / custom directive support is needed. |
-| File watch | chokidar | native `fs.watch` | `fs.watch` has macOS rename-event bugs and no debouncing. Do not use directly. |
+**Decision: Use `@fastify/static` (already installed, not yet registered) to serve a proxied image endpoint.**
+
+Current state: `@fastify/static` is in `server/package.json` but only used for serving the built client SPA. A dedicated `/api/image/*` route can proxy filesystem images to the browser, solving the `file://` restriction.
+
+**Pattern:**
+```
+GET /api/image/knowledge/some-folder/screenshot.png
+→ Server reads rootDir/knowledge/some-folder/screenshot.png
+→ Replies with correct Content-Type using fastify.sendFile or fs.createReadStream
+```
+
+The `MarkdownPreview` component already has an `img` override that returns a placeholder for non-remote images (lines 74-82). Update it to point `src` at `/api/image/${resolvedPath}` where `resolvedPath` is computed from the current file's directory + the relative `src` attribute.
+
+**`@fastify/static` version already installed: `^8.0.0`** — no version change needed.
+
+**No new npm packages required.**
 
 ---
 
-## Installation
+### File Templates (TMPL-01 / TMPL-02 / TMPL-03)
+
+**Decision: Templates are data, not a library concern. No new packages.**
+
+Built-in templates (daily note, meeting note, decision record) are hardcoded template strings in a `client/src/templates/` directory — TypeScript objects with `{ id, label, content: string }`. No template engine required; they are plain markdown strings with a `{{DATE}}` placeholder replaced at creation time using `new Date().toISOString().slice(0, 10)`.
+
+Custom templates (TMPL-02): when a user saves a file as a template, POST to a new server endpoint `POST /api/templates` which writes the file content to a `.marky/templates/` directory inside `rootDir`. Template list endpoint: `GET /api/templates`.
+
+**`gray-matter` (already installed):** parse frontmatter from saved template files to extract a `template-name` key for display in the picker.
+
+**No new npm packages required.**
+
+---
+
+### Graph View (GRPH-01 / GRPH-02 / GRPH-03 / GRPH-04)
+
+**Decision: `react-force-graph-2d` — the only new package needed for v1.1.**
+
+| Package | Version | Peer Deps | Bundle Impact |
+|---------|---------|-----------|---------------|
+| `react-force-graph-2d` | `1.29.1` | `react: '*'` (any version) | ~180 KB gzipped (canvas, no WebGL) |
+
+**Why `react-force-graph-2d` over alternatives:**
+
+- **D3 directly** — requires writing the full simulation loop, node positioning, zoom, pan, drag, click handling from scratch. 300+ lines for a feature that should take one phase.
+- **`cytoscape.js` + `react-cytoscapejs`** — excellent for large graphs with complex layouts (Obsidian uses it). Adds ~400 KB. For a tag-based view with <1000 nodes, this is overkill and the API surface is larger.
+- **`react-d3-graph`** — last published 3+ years ago, effectively abandoned.
+- **`react-force-graph-2d`** — actively maintained (version 1.29.1, last published weeks ago as of research date). Canvas-based (not SVG, so stays fast at 200+ nodes). Peer dep is `react: '*'` — confirmed compatible with React 19. Minimal API: pass `graphData: { nodes, links }` and callback props. Node click, highlight, zoom/pan all built in.
+
+**Data shape the graph needs:**
+
+The tag index already exists as `indexPayload.tagMap: Record<string, string[]>` (tag → file paths). Graph nodes = files + tag nodes. Graph edges = file-has-tag relationships. This data is already delivered to the client by the existing `/api/search/index` endpoint — no new server route needed.
+
+**Integration point:** Add a `GraphView` component that:
+1. Receives `indexPayload` as prop (already in `App.tsx` state)
+2. Transforms `tagMap` into `{ nodes: [...], links: [...] }`
+3. Renders `<ForceGraph2D>` inside a panel or tab
+4. On node click, calls `openTab(node.path)` for file nodes
+
+**Positioning:** GRPH-04 requires the graph to live in a dedicated panel or tab, not a modal. The right panel already hosts TOC + FileInfo. A tab-based approach (add "Graph" as a special tab type in the tab reducer) is cleanest — it reuses existing layout without adding a new panel slot.
+
+---
+
+## Complete v1.1 Install Delta
 
 ```bash
-# Initialize workspace
-mkdir marky && cd marky
-npm init -y
-# add "workspaces": ["packages/*"] to package.json
-
-# Frontend
-mkdir -p packages/frontend
-cd packages/frontend
-npm create vite@latest . -- --template react-ts
-
-# Backend
-mkdir -p packages/backend
-cd packages/backend
-npm init -y
-
-# Frontend deps
-cd packages/frontend
-npm install react react-dom
-npm install @codemirror/view @codemirror/state @codemirror/lang-markdown @codemirror/theme-one-dark
-npm install marked dompurify highlight.js
-npm install allotment
-npm install zustand
-npm install gray-matter
-npm install -D tailwindcss @tailwindcss/vite
-npm install -D typescript @types/react @types/react-dom vitest
-
-# Backend deps
-cd packages/backend
-npm install fastify @fastify/cors @fastify/static @fastify/websocket
-npm install chokidar flexsearch gray-matter better-sqlite3
-npm install @anthropic-ai/sdk
-npm install -D tsx typescript @types/node
+# Only ONE new package for the entire milestone
+cd /Users/romankarski/projects/portal-hub/Marky
+npm install react-force-graph-2d --workspace=client
 ```
+
+Everything else is implemented using packages already installed.
 
 ---
 
-## Confidence Notes
+## Supporting Libraries Table
 
-| Area | Confidence | Basis |
-|------|------------|-------|
-| React + Vite + TypeScript | HIGH | Dominant ecosystem choice, stable for 3+ years |
-| CodeMirror 6 for markdown | HIGH | Obsidian uses it; well-documented, active |
-| Fastify | HIGH | Stable, widely adopted, clear TS support |
-| chokidar for file watching | HIGH | De facto standard, no real competitor |
-| FlexSearch | MEDIUM | Accurate as of mid-2025; verify 0.7.x is latest stable |
-| allotment for split pane | MEDIUM | Accurate as of mid-2025; verify not abandoned |
-| Zustand 5.x | MEDIUM | v5 released late 2024; API stable, verify breaking changes from v4 |
-| Claude-as-reranker pattern | HIGH | Correct given Claude API has no embeddings endpoint |
-| better-sqlite3 9.x | MEDIUM | Verify version number before install |
-| @anthropic-ai/sdk 0.26.x | LOW | Version number based on training data; always check npm before installing |
-| Tailwind v4 | MEDIUM | v4 stable as of early 2025; CSS-first config is real |
+| Library | Version | Purpose | Status |
+|---------|---------|---------|--------|
+| `react-force-graph-2d` | `^1.29.1` | Graph view canvas rendering | NEW — install |
+| `@fastify/static` | `^8.0.0` | Image proxy endpoint | ALREADY INSTALLED — register in app.ts |
+| `gray-matter` | `^4.0.3` | Parse template frontmatter | ALREADY INSTALLED |
+| `remark-wiki-link` | `^2.0.1` | Wiki-link detection (client preview) | ALREADY INSTALLED |
+| `localStorage` (browser API) | — | Tab persistence | BUILT-IN — no package |
 
-**Validation step before build:** Run `npm show [package] version` for all pinned versions above before committing to package.json. Training data is accurate through Aug 2025 but npm releases continuously.
+---
+
+## What NOT to Add
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Zustand | State model is already useReducer; adding a second paradigm creates confusion. Tab persistence needs 10 lines, not a library. | `useEffect` + `localStorage` in `useTabs` |
+| `remark` + `unist-util-visit` (server) | Adds 3 packages for link extraction that regex handles in this codebase. | Regex on `parsed.content` from `gray-matter` |
+| `cytoscape.js` / `react-cytoscapejs` | 400 KB for a feature that needs basic force-directed layout. Obsidian-scale features not required here. | `react-force-graph-2d` |
+| `react-d3-graph` | Last published 3+ years ago, abandoned. | `react-force-graph-2d` |
+| Template engine (Handlebars, Mustache, etc.) | Templates are markdown strings with one `{{DATE}}` substitution. No engine needed. | `String.replace()` |
+| SQLite / database | Templates are files in `.marky/templates/`. No database needed for this scope. | Filesystem via existing file routes |
+
+---
+
+## Version Compatibility
+
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| `react-force-graph-2d@1.29.1` | `react@19.x` | Peer dep is `react: '*'` — any React version confirmed via `npm info` |
+| `@fastify/static@8.x` | `fastify@5.x` | Already in package.json at this version combination |
+
+---
+
+## Architectural Notes by Feature
+
+**Tab Persistence:** Serialize only `{ paths: string[], activeIndex: number }` to localStorage — not full Tab objects (which include content). Rehydrate by dispatching OPEN actions with paths. Content is re-fetched from server on mount, same as a normal open.
+
+**Backlink Index:** Add `linkIndex: Map<string, Set<string>>` to `SearchService`. Populate during `_readDoc`. Expose via `getBacklinks(targetPath: string): string[]`. Wire to a new Fastify route. The `SearchService.updateDoc` method already handles incremental updates on file change — extend it to also update `linkIndex`.
+
+**Image Proxy:** The path security utility (`lib/pathSecurity.ts`) already exists and validates paths against `rootDir`. Reuse it for the image proxy route to prevent directory traversal.
+
+**Graph View:** Tag nodes and file nodes should be visually distinct (different colors/sizes). The active file (already tracked in App.tsx as `activeFocusedTab`) should be passed as a prop to highlight its node. Use `nodeColor` and `nodeRelSize` props on `ForceGraph2D` for this.
 
 ---
 
 ## Sources
 
-- CodeMirror 6 architecture and extension system: training data, known to be stable API since 2021
-- Obsidian using CodeMirror 6: publicly documented in Obsidian developer docs
-- chokidar as macOS fs.watch fix: well-documented Node.js community knowledge
-- Claude API capabilities (no embeddings): Anthropic API reference as of Aug 2025
-- FlexSearch vs MiniSearch vs Fuse.js: npm download trends + benchmark repos in training data
-- allotment vs react-split-pane: GitHub activity comparison in training data
-- Zustand v5: release notes published late 2024
-- Tailwind v4: announced and shipped early 2025
+- `npm info react-force-graph-2d version peerDependencies` — version 1.29.1, `react: '*'` (verified 2026-03-10)
+- `npm info react-force-graph version peerDependencies` — version 1.48.2, `react: '*'` (verified 2026-03-10)
+- `npm info remark-parse version` — 11.0.0 (verified — not needed for this milestone)
+- `npm info unist-util-visit version` — 5.1.0 (verified — not needed for this milestone)
+- `npm info zustand version peerDependencies` — 5.0.11, `react: '>=18.0.0'` (verified — rejected in favor of existing pattern)
+- Existing codebase review: `App.tsx` lines 152-163 (localStorage pattern), `server/package.json` (`@fastify/static` already present), `server/src/lib/search.ts` (extension point for link index), `client/src/components/MarkdownPreview.tsx` (image override already placeholder-ready)
+- WebSearch: vasturiano/react-force-graph GitHub — actively maintained, canvas-based, knowledge graph use cases documented
+- WebSearch: cytoscape.js ecosystem — confirmed Obsidian uses it; ruled out for size vs. need ratio
 
-*Note: External verification tools (WebSearch, WebFetch, Bash) were unavailable in this research session. All findings are from training data (cutoff Aug 2025). Confidence levels reflect this limitation. Version-pin validation via `npm show` is strongly recommended before installation.*
+---
+
+*Stack research for: Marky v1.1 feature additions*
+*Researched: 2026-03-10*
+*Prior stack research (Phase 1, pre-build): see git history — superseded by this file*
