@@ -9,9 +9,12 @@ interface Props {
   // Called when user clicks an internal .md link or [[wiki-link]]
   // Receives the resolved file path (relative to root) — caller opens a tab
   onLinkClick: (path: string) => void;
+  // Path of the currently-open file (relative to rootDir), used to resolve
+  // relative image paths (e.g. ./screenshot.png → docs/screenshot.png)
+  filePath: string;
 }
 
-export function MarkdownPreview({ content, onLinkClick }: Props) {
+export function MarkdownPreview({ content, onLinkClick, filePath }: Props) {
   return (
     <article className="prose prose-orange max-w-none px-6 py-4">
       <ReactMarkdown
@@ -69,16 +72,42 @@ export function MarkdownPreview({ content, onLinkClick }: Props) {
             );
           },
 
-          // Local images: browser blocks file:// when served from localhost.
-          // Defer proxy to Phase 4. Show a placeholder alt text instead of a broken image icon.
+          // Local images: route through /api/image proxy with correct path resolution.
           img: ({ src, alt }) => {
-            const isRemote = src && (src.startsWith('http://') || src.startsWith('https://'));
+            if (!src) return null;
+
+            // Remote URLs (http/https): render directly, no proxy
+            const isRemote = src.startsWith('http://') || src.startsWith('https://');
             if (isRemote) return <img src={src} alt={alt} className="max-w-full rounded-lg" />;
-            return (
-              <span className="inline-flex items-center gap-1 text-sm text-gray-400 italic">
-                [{alt ?? 'image'}]
-              </span>
-            );
+
+            // Absolute OS paths (start with /Users/, /home/, etc.): pass as-is
+            const OS_PREFIXES = ['/Users/', '/home/', '/root/', '/var/', '/private/'];
+            const isAbsoluteOS = OS_PREFIXES.some((p) => src.startsWith(p));
+
+            let resolvedPath: string;
+            if (isAbsoluteOS) {
+              // Absolute OS path: pass directly to proxy
+              resolvedPath = src;
+            } else if (src.startsWith('/')) {
+              // Root-relative path (e.g. /assets/photo.png): pass as-is to proxy
+              // Server strips the leading '/' and resolves relative to rootDir
+              resolvedPath = src;
+            } else {
+              // Relative path (./img.png, ../assets/photo.jpg, img.png):
+              // Resolve against the directory of the currently-open file
+              const dir = filePath.includes('/')
+                ? filePath.substring(0, filePath.lastIndexOf('/'))
+                : '';
+              // Strip leading './' if present before URL normalization
+              const rawSrc = src.startsWith('./') ? src.slice(2) : src;
+              // Use URL constructor to normalize '../' segments
+              const normalized = new URL(rawSrc, `file:///dummy/${dir}/`);
+              // Extract pathname and strip the leading '/dummy/' prefix
+              resolvedPath = normalized.pathname.slice('/dummy/'.length);
+            }
+
+            const proxyUrl = `/api/image?path=${encodeURIComponent(resolvedPath)}`;
+            return <img src={proxyUrl} alt={alt} className="max-w-full rounded-lg" />;
           },
         }}
       >

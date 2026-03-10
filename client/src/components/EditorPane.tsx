@@ -81,7 +81,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
           <Group orientation="vertical" className="h-full">
             <Panel id={`preview-${tab.id}`} defaultSize="50%">
               <div className="h-full overflow-y-auto">
-                <MarkdownPreview content={editContent} onLinkClick={onLinkClick} />
+                <MarkdownPreview content={editContent} onLinkClick={onLinkClick} filePath={tab.path} />
               </div>
             </Panel>
             <Separator className="h-1 bg-gray-200 hover:bg-orange-400 transition-colors cursor-row-resize" />
@@ -94,7 +94,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
         ) : (
           // Preview-only mode
           <div ref={scrollRef} className="h-full overflow-y-auto">
-            <MarkdownPreview content={tab.content ?? ''} onLinkClick={onLinkClick} />
+            <MarkdownPreview content={tab.content ?? ''} onLinkClick={onLinkClick} filePath={tab.path} />
           </div>
         )}
       </div>
