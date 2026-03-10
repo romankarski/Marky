@@ -231,6 +231,32 @@ export default function App() {
     });
   };
 
+  // Derive which tab's content the TOC should show
+  const tocContent = splitMode
+    ? (activePaneId === 'right' ? rightTab?.content : leftTab?.content) ?? null
+    : activeTab?.content ?? null;
+
+  // TOC heading click: scroll within the correct pane in split mode
+  const handleTocHeadingClick = useCallback((id: string) => {
+    if (splitMode) {
+      const paneEl = document.querySelector(`[data-pane="${activePaneId}"]`);
+      paneEl?.querySelector(`#${CSS.escape(id)}`)?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [splitMode, activePaneId]);
+
+  // Tree auto-reveal: when query transitions from non-empty → empty, expand active file's ancestors
+  const prevQueryRef = useRef('');
+  useEffect(() => {
+    const wasSearching = prevQueryRef.current.trim().length > 0;
+    const nowEmpty = query.trim().length === 0;
+    prevQueryRef.current = query;
+    if (wasSearching && nowEmpty && activeTab) {
+      expandFolder(activeTab.path);
+    }
+  }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleInternalLink = (href: string) => {
     let resolved = href;
     if (href.startsWith('./') && activeTab) {
@@ -402,8 +428,8 @@ export default function App() {
         className="flex flex-col bg-gray-50 border-l border-gray-200 shrink-0 overflow-hidden"
         style={{ width: tocWidth }}
       >
-        {activeTab?.content ? (
-          <TableOfContents content={activeTab.content} />
+        {tocContent ? (
+          <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
         ) : (
           <div className="p-4 text-xs text-gray-300">No document open</div>
         )}

@@ -8,6 +8,7 @@ interface Heading {
 
 interface Props {
   content: string;   // raw markdown string (same value passed to MarkdownPreview)
+  onHeadingClick?: (id: string) => void;
 }
 
 // Extract headings from markdown string using regex.
@@ -29,7 +30,7 @@ function extractHeadings(markdown: string): Heading[] {
   return headings;
 }
 
-export function TableOfContents({ content }: Props) {
+export function TableOfContents({ content, onHeadingClick }: Props) {
   const headings = extractHeadings(content);
   const [activeId, setActiveId] = useState<string | null>(null);
   // Ref to track cleanup across content changes
@@ -78,7 +79,11 @@ export function TableOfContents({ content }: Props) {
               }`}
               onClick={(e) => {
                 e.preventDefault();
-                document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth' });
+                if (onHeadingClick) {
+                  onHeadingClick(h.id);
+                } else {
+                  document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth' });
+                }
               }}
             >
               {h.text}
