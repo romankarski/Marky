@@ -56,7 +56,7 @@ created: 2026-03-10
 - [ ] `server/tests/routes/search.test.ts` — stubs for TAG-03 (PATCH tags round-trip via Fastify inject)
 - [ ] `client/src/__tests__/useSearch.test.ts` — stubs for SRCH-01 (MiniSearch.loadJSON + search result shape)
 - [ ] `client/src/__tests__/useTags.test.ts` — stubs for TAG-02 (filterPaths derivation from tagMap)
-- [ ] `client/src/__tests__/SearchPanel.test.ts` — stubs for SRCH-03 (click result fires openTab)
+- [ ] `client/src/__tests__/SearchPanel.test.tsx` — stubs for SRCH-03 (click result fires openTab)
 
 ---
 
