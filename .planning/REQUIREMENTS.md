@@ -36,15 +36,15 @@
 
 ### Search
 
-- [ ] **SRCH-01**: User can search for any word or phrase across all files with instant results
-- [ ] **SRCH-02**: Search results show file name, path, and a snippet of matching context
+- [x] **SRCH-01**: User can search for any word or phrase across all files with instant results
+- [x] **SRCH-02**: Search results show file name, path, and a snippet of matching context
 - [ ] **SRCH-03**: User can click a search result to open the file at the matching location
 
 ### Tags
 
-- [ ] **TAG-01**: App reads YAML frontmatter tags from markdown files automatically
+- [x] **TAG-01**: App reads YAML frontmatter tags from markdown files automatically
 - [ ] **TAG-02**: User can filter the file tree / list by tag to see all files with that tag
-- [ ] **TAG-03**: User can add or edit tags on a file from the UI (written back to frontmatter)
+- [x] **TAG-03**: User can add or edit tags on a file from the UI (written back to frontmatter)
 
 ### Design
 
@@ -110,12 +110,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-05 | Phase 3: Editor | Complete |
 | LIVE-01 | Phase 4: Live Reload | Complete |
 | LIVE-02 | Phase 4: Live Reload | Complete |
-| SRCH-01 | Phase 5: Search and Tags | Pending |
-| SRCH-02 | Phase 5: Search and Tags | Pending |
+| SRCH-01 | Phase 5: Search and Tags | Complete |
+| SRCH-02 | Phase 5: Search and Tags | Complete |
 | SRCH-03 | Phase 5: Search and Tags | Pending |
-| TAG-01 | Phase 5: Search and Tags | Pending |
+| TAG-01 | Phase 5: Search and Tags | Complete |
 | TAG-02 | Phase 5: Search and Tags | Pending |
-| TAG-03 | Phase 5: Search and Tags | Pending |
+| TAG-03 | Phase 5: Search and Tags | Complete |
 
 **Coverage:**
 - v1 requirements: 27 total
