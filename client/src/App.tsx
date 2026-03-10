@@ -31,13 +31,6 @@ export default function App() {
   const { query, results, search, indexPayload, refetchIndex } = useSearch();
   const { activeTag, setActiveTag, filterPaths, allTags } = useTags(indexPayload);
 
-  const currentFileTags = useMemo(() => {
-    if (!activeTab || !indexPayload) return [];
-    return Object.entries(indexPayload.tagMap)
-      .filter(([, paths]) => paths.includes(activeTab.path))
-      .map(([tag]) => tag);
-  }, [activeTab?.path, indexPayload]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const [activeFolder, setActiveFolder] = useState<string>('');
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const { tree, loading: treeLoading, refetch } = useFileTree();
@@ -57,6 +50,18 @@ export default function App() {
 
   const leftTab = tabs.find(t => t.id === leftActiveTabId) ?? null;
   const rightTab = tabs.find(t => t.id === rightActiveTabId) ?? null;
+
+  // The active tab for the currently focused pane (or single-pane active tab)
+  const activeFocusedTab = splitMode
+    ? (activePaneId === 'right' ? rightTab : leftTab)
+    : activeTab;
+
+  const currentFileTags = useMemo(() => {
+    if (!activeFocusedTab || !indexPayload) return [];
+    return Object.entries(indexPayload.tagMap)
+      .filter(([, paths]) => paths.includes(activeFocusedTab.path))
+      .map(([tag]) => tag);
+  }, [activeFocusedTab?.path, indexPayload]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enter split mode: all current tabs go to left pane, right pane starts empty
   const enterSplit = useCallback(() => {
@@ -258,6 +263,13 @@ export default function App() {
     }
   }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Tree reveal: always expand ancestors of the active file whenever it changes
+  // Covers: tab switch, file open, split-view pane focus change
+  useEffect(() => {
+    const path = activeFocusedTab?.path;
+    if (path) expandFolder(path);
+  }, [activeFocusedTab?.path]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleInternalLink = (href: string) => {
     let resolved = href;
     if (href.startsWith('./') && activeTab) {
@@ -324,6 +336,12 @@ export default function App() {
           <p className="text-xs text-gray-400 px-3 py-2">Loading...</p>
         ) : (
           <>
+            {/* TagFilter — directly below search input, always visible when tags exist */}
+            <TagFilter
+              allTags={allTags}
+              activeTag={activeTag}
+              onTagClick={setActiveTag}
+            />
             <div className="flex-1 overflow-auto">
               <FileTree
                 nodes={filteredTree}
@@ -338,11 +356,6 @@ export default function App() {
                 filterPaths={filterPaths}
               />
             </div>
-            <TagFilter
-              allTags={allTags}
-              activeTag={activeTag}
-              onTagClick={setActiveTag}
-            />
           </>
         )}
       </div>
@@ -427,7 +440,7 @@ export default function App() {
         style={{ width: tocWidth }}
       >
         <FileInfo
-          activeFilePath={activeTab?.path ?? null}
+          activeFilePath={activeFocusedTab?.path ?? null}
           currentFileTags={currentFileTags}
           onTagsUpdated={refetchIndex}
         />
