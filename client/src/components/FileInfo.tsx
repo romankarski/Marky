@@ -52,6 +52,25 @@ export function FileInfo({ activeFilePath, currentFileTags, allTags, onTagsUpdat
 
   const fileName = activeFilePath.split('/').pop() ?? activeFilePath;
 
+  const handleSaveAsTemplate = async () => {
+    if (!activeFilePath) return;
+    const name = window.prompt('Template name:');
+    if (!name || !name.trim()) return;
+    // Fetch current file content
+    const contentRes = await fetch(`/api/files/${activeFilePath}`);
+    if (!contentRes.ok) { window.alert('Could not read file content'); return; }
+    const { content } = await contentRes.json() as { content: string };
+    // POST to templates route
+    const res = await fetch('/api/templates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name.trim(), content }),
+    });
+    if (res.status === 400) { window.alert('Invalid template name'); return; }
+    if (!res.ok) { window.alert('Failed to save template'); return; }
+    // Success — no toast needed, button itself is the feedback
+  };
+
   const patchTags = async (updatedTags: string[]) => {
     if (!activeFilePath) return;
     pendingWriteRef.current = true;
@@ -109,6 +128,7 @@ export function FileInfo({ activeFilePath, currentFileTags, allTags, onTagsUpdat
   };
 
   return (
+    <>
     <div className="px-4 py-3 border-b border-gray-200">
       <p className="text-xs font-medium text-gray-500 truncate mb-1" title={activeFilePath}>
         {fileName}
@@ -176,5 +196,14 @@ export function FileInfo({ activeFilePath, currentFileTags, allTags, onTagsUpdat
         </div>
       )}
     </div>
+    <div className="px-4 py-2 border-t border-gray-100">
+      <button
+        onClick={() => void handleSaveAsTemplate()}
+        className="text-xs text-gray-400 hover:text-gray-600"
+      >
+        Save as template
+      </button>
+    </div>
+    </>
   );
 }

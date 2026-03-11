@@ -72,6 +72,7 @@ function FolderItem({
 export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: Props) {
   const [step, setStep] = useState<'template' | 'location'>('template');
   const [selectedContent, setSelectedContent] = useState('');
+  const [customTemplates, setCustomTemplates] = useState<Array<{ name: string; content: string }>>([]);
   const [tree, setTree] = useState<FileNode[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string>(defaultFolder);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(ancestorPaths(defaultFolder));
@@ -83,6 +84,12 @@ export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: P
     fetch('/api/files')
       .then((r) => r.json())
       .then((d) => { setTree(d.items); setLoading(false); });
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/templates')
+      .then((r) => r.json())
+      .then((d) => setCustomTemplates(d.templates ?? []));
   }, []);
 
   const handleTemplateSelect = (content: string) => {
@@ -137,6 +144,20 @@ export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: P
                   <span className="font-medium">{entry.label}</span>
                 </button>
               ))}
+              {customTemplates.length > 0 && (
+                <>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide px-3 py-1">Your Templates</p>
+                  {customTemplates.map((entry) => (
+                    <button
+                      key={entry.name}
+                      className="w-full text-left py-2 px-3 text-sm hover:bg-orange-50 border-b border-gray-100 rounded-sm"
+                      onClick={() => handleTemplateSelect(entry.content)}
+                    >
+                      <span className="font-medium">{entry.name}</span>
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>
