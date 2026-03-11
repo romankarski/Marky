@@ -140,10 +140,13 @@ Plans:
   1. When creating a new file, a template picker appears offering built-in templates (daily note, meeting note, decision record) alongside a blank option
   2. Selecting a built-in template creates the file pre-filled with the template's structure, with `{{date}}` and `{{title}}` tokens substituted at creation time
   3. User can save any open file as a custom template, which then appears in the template picker for future use
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — TBD
+- [ ] 07-01-PLAN.md — Wave 0 test stubs: templateTokens, builtInTemplates, TemplatePickerModal, server templates (RED state)
+- [ ] 07-02-PLAN.md — Client lib (builtInTemplates + templateTokens) + FolderPickerModal two-step flow + FileTree wiring
+- [ ] 07-03-PLAN.md — Server templates CRUD route (GET/POST /api/templates) + app.ts registration
+- [ ] 07-04-PLAN.md — FileInfo "Save as template" button + custom template picker + visual verification checkpoint
 
 ### Phase 8: Backlinks Panel
 **Goal**: The right panel shows every file that links to the current document — users can see their knowledge connections and navigate to linking files with a single click
