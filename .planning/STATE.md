@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: planning
-stopped_at: "Checkpoint 06-04: awaiting human verification of Phase 6 features"
-last_updated: "2026-03-10T16:43:22.193Z"
+stopped_at: Completed 06-tab-persistence-and-image-rendering 06-04-PLAN.md
+last_updated: "2026-03-11T10:00:14.784Z"
 last_activity: 2026-03-10 — Roadmap created for v1.1 (Phases 6-9)
 progress:
   total_phases: 9
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 | Phase 06-tab-persistence-and-image-rendering P02 | 3 | 2 tasks | 5 files |
 | Phase 06-tab-persistence-and-image-rendering P03 | 12 | 2 tasks | 4 files |
 | Phase 06-tab-persistence-and-image-rendering P04 | 5 | 1 tasks | 1 files |
+| Phase 06-tab-persistence-and-image-rendering P04 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,7 @@ Recent decisions affecting current work:
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-03: OS_ROOT_PREFIXES expanded to include /tmp/ and other system dirs to correctly return 403 for paths outside rootDir
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-03: MarkdownPreview filePath prop is required (not optional) — EditorPane always has tab.path, URL() constructor used for client-side relative path normalization
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-04: Write-lock TTL increased from 200ms to 500ms to eliminate LIVE-01 test race condition (chokidar settle window overlap)
+- [Phase 06-tab-persistence-and-image-rendering]: Phase 06-04: Write-lock TTL confirmed at 500ms (up from 200ms) — deterministic fix for LIVE-01 race condition; all Phase 6 requirements verified by user
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T16:43:22.191Z
-Stopped at: Checkpoint 06-04: awaiting human verification of Phase 6 features
+Last session: 2026-03-11T10:00:14.781Z
+Stopped at: Completed 06-tab-persistence-and-image-rendering 06-04-PLAN.md
 Resume file: None

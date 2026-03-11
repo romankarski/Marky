@@ -185,7 +185,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Editor | v1.0 | 5/5 | Complete | 2026-03-09 |
 | 4. Live Reload | v1.0 | 3/3 | Complete | 2026-03-10 |
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
-| 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-10 | - |
+| 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-11 | - |
 | 7. File Templates | v1.1 | 0/TBD | Not started | - |
 | 8. Backlinks Panel | v1.1 | 0/TBD | Not started | - |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |

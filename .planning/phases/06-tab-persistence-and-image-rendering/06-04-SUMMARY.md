@@ -13,7 +13,7 @@ requires:
 
 provides:
   - "Full test suite GREEN (72 client + 33 server) with write-lock race fix"
-  - "Human-verified Phase 6 functionality (pending checkpoint approval)"
+  - "Human-verified Phase 6 functionality — all 5 browser tests approved by user"
 
 affects:
   - "future phases — baseline test suite is stable"
@@ -57,7 +57,7 @@ completed: 2026-03-10
 - Fixed chokidar write-lock race condition (TTL 200ms → 500ms) causing LIVE-01 test to fail deterministically
 - All 72 client tests GREEN across 12 test files
 - All 33 server tests GREEN across 6 test files
-- Human verification of Phase 6 features: tab persistence, scroll restore, recent files, image proxy
+- Human verification approved: all 5 browser tests passed (PRST-01, PRST-02, PRST-03, IMG-01, IMG-02)
 
 ## Task Commits
 
@@ -65,7 +65,7 @@ Each task was committed atomically:
 
 1. **Task 1: Run full test suite and confirm GREEN** - `991052b` (fix)
 
-**Plan metadata:** (committed after human verify)
+**Plan metadata:** (see final docs commit below)
 
 ## Files Created/Modified
 - `server/src/lib/watcher.ts` - Increased write-lock TTL from 200ms to 500ms to prevent LIVE-01 test race condition
