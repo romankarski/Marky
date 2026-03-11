@@ -63,9 +63,9 @@
 - [x] **IMG-02**: Images with absolute paths (/Users/... or /notes/img.png) render correctly in markdown preview
 
 ### Templates
-- [ ] **TMPL-01**: User can create a new file from a built-in template (daily note, meeting note, decision record)
-- [ ] **TMPL-02**: User can save any file as a custom template
-- [ ] **TMPL-03**: Template picker shown when creating a new file (alongside blank option)
+- [x] **TMPL-01**: User can create a new file from a built-in template (daily note, meeting note, decision record)
+- [x] **TMPL-02**: User can save any file as a custom template
+- [x] **TMPL-03**: Template picker shown when creating a new file (alongside blank option)
 
 ### Graph View
 - [ ] **GRPH-01**: Graph view shows files as nodes clustered and connected by shared tags
@@ -136,9 +136,9 @@
 | PRST-03 | Phase 6: Tab Persistence and Image Rendering | Complete |
 | IMG-01 | Phase 6: Tab Persistence and Image Rendering | Complete |
 | IMG-02 | Phase 6: Tab Persistence and Image Rendering | Complete |
-| TMPL-01 | Phase 7: File Templates | Pending |
-| TMPL-02 | Phase 7: File Templates | Pending |
-| TMPL-03 | Phase 7: File Templates | Pending |
+| TMPL-01 | Phase 7: File Templates | Complete |
+| TMPL-02 | Phase 7: File Templates | Complete |
+| TMPL-03 | Phase 7: File Templates | Complete |
 | BKLN-01 | Phase 8: Backlinks Panel | Pending |
 | BKLN-02 | Phase 8: Backlinks Panel | Pending |
 | BKLN-03 | Phase 8: Backlinks Panel | Pending |

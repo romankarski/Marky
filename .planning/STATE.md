@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: planning
-stopped_at: Completed 06-tab-persistence-and-image-rendering 06-04-PLAN.md
-last_updated: "2026-03-11T10:00:14.784Z"
+stopped_at: Completed 07-file-templates 07-01-PLAN.md
+last_updated: "2026-03-11T13:30:49.054Z"
 last_activity: 2026-03-10 — Roadmap created for v1.1 (Phases 6-9)
 progress:
   total_phases: 9
   completed_phases: 6
-  total_plans: 29
-  completed_plans: 29
+  total_plans: 33
+  completed_plans: 30
   percent: 0
 ---
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 | Phase 06-tab-persistence-and-image-rendering P03 | 12 | 2 tasks | 4 files |
 | Phase 06-tab-persistence-and-image-rendering P04 | 5 | 1 tasks | 1 files |
 | Phase 06-tab-persistence-and-image-rendering P04 | 5 | 2 tasks | 1 files |
+| Phase 07-file-templates P01 | 2 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,7 @@ Recent decisions affecting current work:
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-03: MarkdownPreview filePath prop is required (not optional) — EditorPane always has tab.path, URL() constructor used for client-side relative path normalization
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-04: Write-lock TTL increased from 200ms to 500ms to eliminate LIVE-01 test race condition (chokidar settle window overlap)
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-04: Write-lock TTL confirmed at 500ms (up from 200ms) — deterministic fix for LIVE-01 race condition; all Phase 6 requirements verified by user
+- [Phase 07-file-templates]: Wave 0 RED-first: all 4 test stubs created before any implementation to lock down behavioral contracts for TMPL-01, TMPL-02, TMPL-03
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T10:00:14.781Z
-Stopped at: Completed 06-tab-persistence-and-image-rendering 06-04-PLAN.md
+Last session: 2026-03-11T13:30:49.051Z
+Stopped at: Completed 07-file-templates 07-01-PLAN.md
 Resume file: None
