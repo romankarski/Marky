@@ -1,10 +1,8 @@
-// Wave 0 RED tests — useScrollPersist does not exist yet.
-// These tests will fail with module-not-found errors until Wave 1 creates the source file.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import React from 'react';
 
-// Source file does not exist yet — RED state
-import { saveScrollPosition, getScrollPosition } from '../useScrollPersist';
+import { saveScrollPosition, getScrollPosition, useScrollPersist } from '../useScrollPersist';
 
 // Map-backed localStorage mock
 function makeLocalStorageMock() {
@@ -35,15 +33,10 @@ afterEach(() => {
 });
 
 describe('saveScrollPosition', () => {
-  it('saves scroll position to localStorage after 200ms debounce', async () => {
+  it('saves scroll position to localStorage synchronously', () => {
     saveScrollPosition('docs/long.md', 450);
 
-    // Before debounce fires — nothing written yet
-    expect(lsMock.setItem).not.toHaveBeenCalled();
-
-    // Advance past 200ms
-    await vi.advanceTimersByTimeAsync(200);
-
+    // Synchronous — written immediately, no timer needed
     expect(lsMock.setItem).toHaveBeenCalledWith(
       'marky:scroll',
       expect.stringContaining('docs/long.md')
@@ -54,32 +47,26 @@ describe('saveScrollPosition', () => {
     expect(parsed['docs/long.md']).toBe(450);
   });
 
-  it('does NOT save scroll position before 200ms debounce fires', async () => {
-    saveScrollPosition('docs/long.md', 300);
-
-    // Only advance 100ms — debounce not yet fired
-    await vi.advanceTimersByTimeAsync(100);
-
-    expect(lsMock.setItem).not.toHaveBeenCalled();
-  });
-
-  it('debounces multiple rapid calls — only saves once with the latest value', async () => {
+  it('overwrites previous value on successive calls', () => {
     saveScrollPosition('docs/long.md', 100);
-    await vi.advanceTimersByTimeAsync(50);
-    saveScrollPosition('docs/long.md', 200);
-    await vi.advanceTimersByTimeAsync(50);
     saveScrollPosition('docs/long.md', 350);
 
-    // Should not have saved yet
-    expect(lsMock.setItem).not.toHaveBeenCalled();
-
-    await vi.advanceTimersByTimeAsync(200);
-
-    // Should save exactly once with the latest value
-    expect(lsMock.setItem).toHaveBeenCalledTimes(1);
-    const written = lsMock.setItem.mock.calls[0][1] as string;
+    expect(lsMock.setItem).toHaveBeenCalledTimes(2);
+    const written = lsMock.setItem.mock.calls[1][1] as string;
     const parsed = JSON.parse(written);
     expect(parsed['docs/long.md']).toBe(350);
+  });
+
+  it('preserves other paths when saving a new value', () => {
+    // Pre-populate with another path
+    lsMock._store.set('marky:scroll', JSON.stringify({ 'other/file.md': 999 }));
+
+    saveScrollPosition('docs/long.md', 200);
+
+    const written = lsMock.setItem.mock.calls[0][1] as string;
+    const parsed = JSON.parse(written);
+    expect(parsed['docs/long.md']).toBe(200);
+    expect(parsed['other/file.md']).toBe(999);
   });
 });
 
@@ -107,5 +94,39 @@ describe('getScrollPosition', () => {
 
     const result = getScrollPosition('docs/long.md');
     expect(result).toBeUndefined();
+  });
+});
+
+describe('useScrollPersist — scroll listener debounce', () => {
+  it('debounces scroll events: calls saveScrollPosition after 200ms idle', async () => {
+    // Render a real component that uses the hook so the ref attaches to a real DOM node
+    function TestComponent() {
+      const scrollRef = useScrollPersist('docs/long.md', 'content');
+      return React.createElement('div', {
+        ref: scrollRef,
+        style: { overflow: 'auto', height: '100px' },
+        'data-testid': 'scroll-container',
+      });
+    }
+
+    const { getByTestId } = render(React.createElement(TestComponent));
+    const el = getByTestId('scroll-container');
+
+    // Fire scroll events rapidly
+    act(() => {
+      el.dispatchEvent(new Event('scroll'));
+      el.dispatchEvent(new Event('scroll'));
+    });
+
+    // Should not have saved yet (debounced)
+    expect(lsMock.setItem).not.toHaveBeenCalled();
+
+    // Advance past the 200ms debounce
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    // Now it should have saved
+    expect(lsMock.setItem).toHaveBeenCalled();
   });
 });

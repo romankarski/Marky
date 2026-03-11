@@ -1,2 +1,29 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+@media print {
+  /* Hide everything except the article being exported */
+  body > * { display: none !important; }
+  #print-root { display: block !important; }
+
+  #print-root {
+    position: fixed;
+    inset: 0;
+    background: white;
+    padding: 2cm 2.5cm;
+    font-size: 11pt;
+    color: black;
+  }
+
+  /* Keep code blocks readable */
+  pre, code { font-size: 9pt; }
+
+  /* Avoid breaking headings from their content */
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+
+  /* Avoid orphaned table rows */
+  tr { break-inside: avoid; }
+
+  /* Links: show URL after text */
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #555; }
+}

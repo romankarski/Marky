@@ -3,27 +3,19 @@ import { useRef, useLayoutEffect, type RefObject } from 'react';
 const SCROLL_KEY = 'marky:scroll';
 const DEBOUNCE_MS = 200;
 
-// Module-level timer for debouncing saveScrollPosition calls.
-// This allows saveScrollPosition to be a plain function (not a hook)
-// while still supporting debounce — same shape as useAutoSave's timerRef.
-let scrollTimerRef: ReturnType<typeof setTimeout> | null = null;
-
 /**
- * Saves scrollTop for a given filePath to 'marky:scroll' after a 200ms debounce.
- * Multiple rapid calls cancel the previous timer (debounce pattern from useAutoSave).
+ * Saves scrollTop for a given filePath to 'marky:scroll' synchronously.
+ * Callers are responsible for debouncing (e.g. via their own per-instance timerRef).
  */
 export function saveScrollPosition(filePath: string, scrollTop: number): void {
-  if (scrollTimerRef) clearTimeout(scrollTimerRef);
-  scrollTimerRef = setTimeout(() => {
-    try {
-      const raw = localStorage.getItem(SCROLL_KEY);
-      const map: Record<string, number> = raw ? JSON.parse(raw) : {};
-      map[filePath] = scrollTop;
-      localStorage.setItem(SCROLL_KEY, JSON.stringify(map));
-    } catch {
-      // localStorage unavailable or corrupt — silently ignore
-    }
-  }, DEBOUNCE_MS);
+  try {
+    const raw = localStorage.getItem(SCROLL_KEY);
+    const map: Record<string, number> = raw ? JSON.parse(raw) : {};
+    map[filePath] = scrollTop;
+    localStorage.setItem(SCROLL_KEY, JSON.stringify(map));
+  } catch {
+    // localStorage unavailable or corrupt — silently ignore
+  }
 }
 
 /**

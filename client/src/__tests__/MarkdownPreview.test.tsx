@@ -7,9 +7,41 @@ import { MarkdownPreview } from '../components/MarkdownPreview';
 
 const noop = () => {};
 
+describe('MarkdownPreview — data-source-line (rehypeSourceLines)', () => {
+  it('stamps data-source-line on rendered headings', () => {
+    const { container } = render(
+      <MarkdownPreview
+        content={'# Title\n\n## Section\n\nSome paragraph\n'}
+        onLinkClick={noop}
+        filePath="docs/notes.md"
+      />
+    );
+    const h1 = container.querySelector('h1');
+    const h2 = container.querySelector('h2');
+    expect(h1).not.toBeNull();
+    expect(h1!.getAttribute('data-source-line')).toBe('1');
+    expect(h2).not.toBeNull();
+    expect(h2!.getAttribute('data-source-line')).toBe('3');
+  });
+
+  it('stamps data-source-line on rendered paragraphs', () => {
+    const { container } = render(
+      <MarkdownPreview
+        content={'First\n\nSecond\n'}
+        onLinkClick={noop}
+        filePath="docs/notes.md"
+      />
+    );
+    const paras = container.querySelectorAll('p');
+    expect(paras.length).toBeGreaterThanOrEqual(2);
+    expect(paras[0].getAttribute('data-source-line')).toBe('1');
+    expect(paras[1].getAttribute('data-source-line')).toBe('3');
+  });
+});
+
 describe('MarkdownPreview — smoke test', () => {
   it('renders without error when filePath prop is provided', () => {
-    render(
+    const { container } = render(
       <MarkdownPreview
         content="# Hello"
         onLinkClick={noop}
@@ -17,7 +49,7 @@ describe('MarkdownPreview — smoke test', () => {
       />
     );
     // Should render the heading
-    expect(screen.getByRole('heading', { level: 1 })).toBeDefined();
+    expect(container.querySelector('h1')).not.toBeNull();
   });
 });
 

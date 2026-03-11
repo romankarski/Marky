@@ -3,6 +3,7 @@ import remarkGfm from 'remark-gfm';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkWikiLink from 'remark-wiki-link';
 import rehypeSlug from 'rehype-slug';
+import { rehypeSourceLines } from './rehype-source-lines';
 
 interface Props {
   content: string;
@@ -26,7 +27,7 @@ export function MarkdownPreview({ content, onLinkClick, filePath }: Props) {
             hrefTemplate: (permalink: string) => `${permalink}.md`,
           }],
         ]}
-        rehypePlugins={[rehypeSlug]}
+        rehypePlugins={[rehypeSlug, rehypeSourceLines]}
         components={{
           // Suppress frontmatter YAML node — remark-frontmatter parses it but
           // react-markdown still renders unknown node types unless explicitly silenced
