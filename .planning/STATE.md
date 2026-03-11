@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: planning
-stopped_at: Completed 07-file-templates 07-02-PLAN.md
-last_updated: "2026-03-11T13:38:08.869Z"
+stopped_at: Completed 07-file-templates 07-03-PLAN.md
+last_updated: "2026-03-11T13:40:52.332Z"
 last_activity: 2026-03-10 — Roadmap created for v1.1 (Phases 6-9)
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 33
-  completed_plans: 31
+  completed_plans: 32
   percent: 0
 ---
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 | Phase 06-tab-persistence-and-image-rendering P04 | 5 | 2 tasks | 1 files |
 | Phase 07-file-templates P01 | 2 | 3 tasks | 4 files |
 | Phase 07-file-templates P02 | 5 | 2 tasks | 7 files |
+| Phase 07-file-templates P03 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,7 @@ Recent decisions affecting current work:
 - [Phase 06-tab-persistence-and-image-rendering]: Phase 06-04: Write-lock TTL confirmed at 500ms (up from 200ms) — deterministic fix for LIVE-01 race condition; all Phase 6 requirements verified by user
 - [Phase 07-file-templates]: Wave 0 RED-first: all 4 test stubs created before any implementation to lock down behavioral contracts for TMPL-01, TMPL-02, TMPL-03
 - [Phase 07-file-templates]: FolderPickerModal step 1 renders template buttons inline; applyTokens called once in handleConfirm; vitest setup uses direct expect.extend to fix monorepo v2/v4 version conflict
+- [Phase 07-file-templates]: Phase 07-03: Default export for templatesRoutes (consistent with files.ts/watch.ts/search.ts); rootDir: string added to FastifyInstance augmentation in app.ts
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T13:38:08.866Z
-Stopped at: Completed 07-file-templates 07-02-PLAN.md
+Last session: 2026-03-11T13:40:52.329Z
+Stopped at: Completed 07-file-templates 07-03-PLAN.md
 Resume file: None
