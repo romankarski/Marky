@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { FileNode } from '@marky/shared';
+import { BUILT_IN_TEMPLATES } from '../lib/builtInTemplates';
+import { applyTokens } from '../lib/templateTokens';
 
 interface Props {
   defaultFolder?: string;
-  onConfirm: (filePath: string, fileName: string) => void;
+  onConfirm: (filePath: string, fileName: string, content: string) => void;
   onCancel: () => void;
 }
 
@@ -68,6 +70,8 @@ function FolderItem({
 }
 
 export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: Props) {
+  const [step, setStep] = useState<'template' | 'location'>('template');
+  const [selectedContent, setSelectedContent] = useState('');
   const [tree, setTree] = useState<FileNode[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string>(defaultFolder);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(ancestorPaths(defaultFolder));
@@ -80,6 +84,11 @@ export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: P
       .then((r) => r.json())
       .then((d) => { setTree(d.items); setLoading(false); });
   }, []);
+
+  const handleTemplateSelect = (content: string) => {
+    setSelectedContent(content);
+    setStep('location');
+  };
 
   const handleToggle = (path: string) => {
     setExpandedPaths((prev) => {
@@ -94,8 +103,46 @@ export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: P
     if (!name) return;
     const safeName = name.endsWith('.md') ? name : `${name}.md`;
     const fullPath = selectedFolder ? `${selectedFolder}/${safeName}` : safeName;
-    onConfirm(fullPath, safeName);
+    const title = safeName.replace(/\.md$/, '');
+    const date = new Date().toISOString().slice(0, 10);
+    const content = applyTokens(selectedContent, { title, date });
+    onConfirm(fullPath, safeName, content);
   };
+
+  if (step === 'template') {
+    return (
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-xl w-96 flex flex-col max-h-[80vh]">
+          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <span className="font-semibold text-gray-800 text-sm">New File</span>
+            <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
+          </div>
+
+          <div className="px-4 py-3">
+            <p className="text-xs text-gray-500 mb-2">Choose a template</p>
+            <div className="flex flex-col">
+              <button
+                className="w-full text-left py-2 px-3 text-sm hover:bg-orange-50 border-b border-gray-100 rounded-sm"
+                onClick={() => handleTemplateSelect('')}
+              >
+                <span className="font-medium">Blank</span>
+                <span className="ml-2 text-xs text-gray-400">Start with an empty file</span>
+              </button>
+              {BUILT_IN_TEMPLATES.map((entry) => (
+                <button
+                  key={entry.id}
+                  className="w-full text-left py-2 px-3 text-sm hover:bg-orange-50 border-b border-gray-100 rounded-sm"
+                  onClick={() => handleTemplateSelect(entry.content)}
+                >
+                  <span className="font-medium">{entry.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -165,17 +212,25 @@ export function FolderPickerModal({ defaultFolder = '', onConfirm, onCancel }: P
           </div>
         )}
 
-        <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
-          <button onClick={onCancel} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded">
-            Cancel
-          </button>
+        <div className="px-4 py-3 border-t border-gray-200 flex justify-between gap-2">
           <button
-            onClick={handleConfirm}
-            disabled={!fileName.trim()}
-            className="px-3 py-1.5 text-sm bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            onClick={() => setStep('template')}
+            className="px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 rounded"
           >
-            Create
+            ← Back
           </button>
+          <div className="flex gap-2">
+            <button onClick={onCancel} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded">
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!fileName.trim()}
+              className="px-3 py-1.5 text-sm bg-orange-500 text-white rounded hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Create
+            </button>
+          </div>
         </div>
       </div>
     </div>

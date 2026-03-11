@@ -112,11 +112,11 @@ export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolde
     selectedElRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [selectedPath]);
 
-  const handleCreate = async (filePath: string) => {
+  const handleCreate = async (filePath: string, content: string = '') => {
     const res = await fetch(`/api/files/${filePath}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: '' }),
+      body: JSON.stringify({ content }),
     });
     setShowCreate(false);
     if (!res.ok) {
@@ -136,7 +136,7 @@ export function FileTree({ nodes, selectedPath, expandedPaths, onSelect, onFolde
       {showCreate && (
         <FolderPickerModal
           defaultFolder={currentFolder}
-          onConfirm={(filePath) => handleCreate(filePath)}
+          onConfirm={(filePath, _fileName, content) => handleCreate(filePath, content)}
           onCancel={() => setShowCreate(false)}
         />
       )}
