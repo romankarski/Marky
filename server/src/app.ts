@@ -10,6 +10,7 @@ import { SearchService } from './lib/search.js';
 declare module 'fastify' {
   interface FastifyInstance {
     fileWatcher: FileWatcherService;
+    rootDir: string;
   }
 }
 
