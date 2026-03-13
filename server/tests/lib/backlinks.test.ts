@@ -1,7 +1,7 @@
 // Wave 0 RED tests — server/src/lib/backlinks.ts does not exist yet.
 // All tests will fail with import errors until Wave 1 creates BacklinkService.
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
