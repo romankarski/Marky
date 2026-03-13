@@ -54,9 +54,9 @@
 - [x] **PRST-03**: Reloaded tabs restore their last scroll position in preview
 
 ### Backlinks
-- [ ] **BKLN-01**: Right panel shows all files that link to the current document
-- [ ] **BKLN-02**: Clicking a backlink opens that file in a tab
-- [ ] **BKLN-03**: Backlinks panel header shows count of incoming links
+- [x] **BKLN-01**: Right panel shows all files that link to the current document
+- [x] **BKLN-02**: Clicking a backlink opens that file in a tab
+- [x] **BKLN-03**: Backlinks panel header shows count of incoming links
 
 ### Images
 - [x] **IMG-01**: Images with relative paths (./img.png, ../img.png) render in markdown preview using the file's directory as base
@@ -139,9 +139,9 @@
 | TMPL-01 | Phase 7: File Templates | Complete |
 | TMPL-02 | Phase 7: File Templates | Complete |
 | TMPL-03 | Phase 7: File Templates | Complete |
-| BKLN-01 | Phase 8: Backlinks Panel | Pending |
-| BKLN-02 | Phase 8: Backlinks Panel | Pending |
-| BKLN-03 | Phase 8: Backlinks Panel | Pending |
+| BKLN-01 | Phase 8: Backlinks Panel | Complete |
+| BKLN-02 | Phase 8: Backlinks Panel | Complete |
+| BKLN-03 | Phase 8: Backlinks Panel | Complete |
 | GRPH-01 | Phase 9: Tag Graph View | Pending |
 | GRPH-02 | Phase 9: Tag Graph View | Pending |
 | GRPH-03 | Phase 9: Tag Graph View | Pending |
