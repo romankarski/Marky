@@ -192,5 +192,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
 | 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-11 | - |
 | 7. File Templates | 2/4 | In Progress|  | - |
-| 8. Backlinks Panel | 1/3 | In Progress|  | - |
+| 8. Backlinks Panel | 2/3 | In Progress|  | - |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
