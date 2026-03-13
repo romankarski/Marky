@@ -157,10 +157,12 @@ Plans:
   2. The backlinks section header displays the count of incoming links (e.g., "Backlinks (3)")
   3. Clicking a backlink entry opens that file in a new tab
   4. When the active file has no incoming links, the backlinks section shows an empty state (zero count, not hidden)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — TBD
+- [ ] 08-01-PLAN.md — Wave 0 RED test stubs: BacklinkService unit tests, route integration tests, BacklinksPanel client tests
+- [ ] 08-02-PLAN.md — BacklinkService implementation + route + app.ts wiring (turns server tests GREEN)
+- [ ] 08-03-PLAN.md — BacklinksPanel component + App.tsx mount + visual verification checkpoint
 
 ### Phase 9: Tag Graph View
 **Goal**: A persistent tag-based graph view lets users explore their knowledge structure visually — files cluster by shared tags, the active file is highlighted, and clicking any node opens that file
@@ -190,5 +192,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
 | 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-11 | - |
 | 7. File Templates | 2/4 | In Progress|  | - |
-| 8. Backlinks Panel | v1.1 | 0/TBD | Not started | - |
+| 8. Backlinks Panel | v1.1 | 0/3 | Not started | - |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
