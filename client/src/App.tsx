@@ -9,6 +9,7 @@ import { SplitView } from './components/SplitView';
 import SearchPanel from './components/SearchPanel';
 import { TagFilter } from './components/TagFilter';
 import { FileInfo } from './components/FileInfo';
+import { BacklinksPanel } from './components/BacklinksPanel';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
 import { useFileWatcher } from './hooks/useFileWatcher';
@@ -536,6 +537,10 @@ export default function App() {
           currentFileTags={currentFileTags}
           allTags={allTags}
           onTagsUpdated={refetchIndex}
+        />
+        <BacklinksPanel
+          activeFilePath={activeFocusedTab?.path ?? null}
+          onOpen={p => { openTab(p); updateRecentFiles(p); expandFolder(p); }}
         />
         {tocContent ? (
           <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
