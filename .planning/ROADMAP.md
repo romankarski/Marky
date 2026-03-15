@@ -109,7 +109,7 @@ Plans:
 
 - [x] **Phase 6: Tab Persistence and Image Rendering** - Tabs survive page reload; recent files on welcome screen; local images render in preview (completed 2026-03-10)
 - [ ] **Phase 7: File Templates** - New files can be created from built-in and custom templates via a picker modal
-- [ ] **Phase 8: Backlinks Panel** - Right panel shows all files that link to the current document, with click-to-open
+- [x] **Phase 8: Backlinks Panel** - Right panel shows all files that link to the current document, with click-to-open (completed 2026-03-15)
 - [ ] **Phase 9: Tag Graph View** - Tag-based graph visualizes knowledge structure; nodes are clickable; active file is highlighted
 
 ## Phase Details
@@ -192,5 +192,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
 | 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-11 | - |
 | 7. File Templates | 2/4 | In Progress|  | - |
-| 8. Backlinks Panel | 2/3 | In Progress|  | - |
+| 8. Backlinks Panel | 3/3 | Complete   | 2026-03-15 | - |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |

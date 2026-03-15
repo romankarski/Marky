@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: planning
-stopped_at: Completed 08-backlinks-panel 08-02-PLAN.md
-last_updated: "2026-03-13T15:54:42.143Z"
+stopped_at: Completed 08-backlinks-panel 08-03-PLAN.md
+last_updated: "2026-03-15T12:50:58.589Z"
 last_activity: 2026-03-10 — Roadmap created for v1.1 (Phases 6-9)
 progress:
   total_phases: 9
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 36
-  completed_plans: 35
+  completed_plans: 36
   percent: 0
 ---
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
 | Phase 07-file-templates P04 | 5 | 2 tasks | 2 files |
 | Phase 08-backlinks-panel P01 | 4 | 3 tasks | 3 files |
 | Phase 08-backlinks-panel P02 | 5 | 2 tasks | 4 files |
+| Phase 08-backlinks-panel P03 | continuation | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,7 @@ Recent decisions affecting current work:
 - [Phase 07-file-templates]: Phase 07-04: No success toast after Save as template — button itself serves as sufficient feedback; next picker open shows the saved template
 - [Phase 08-backlinks-panel]: Phase 08-01: Wave 0 RED-first — three test stubs committed before any implementation to lock BKLN-01/02/03 behavioral contracts
 - [Phase 08-backlinks-panel]: Phase 08-02: BacklinkService has own collectMdFiles for service isolation; updateDoc calls _removeFileLinks first to prevent stale reverse-index entries; wildcard GET /api/backlinks/* handles slash-containing paths
+- [Phase 08-backlinks-panel]: Phase 08-03: BacklinksPanel returns null when activeFilePath is null; header always visible at zero count; onOpen uses openTab+updateRecentFiles+expandFolder pattern
 
 ### Pending Todos
 
@@ -101,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-13T15:54:42.140Z
-Stopped at: Completed 08-backlinks-panel 08-02-PLAN.md
+Last session: 2026-03-15T12:50:58.586Z
+Stopped at: Completed 08-backlinks-panel 08-03-PLAN.md
 Resume file: None
