@@ -27,6 +27,6 @@ export default async function uploadImageRoutes(fastify: FastifyInstance) {
     const buffer = await data.toBuffer();
     await fs.writeFile(dest, buffer);
 
-    return { path: `/images/${filename}` };
+    return { path: `/api/image?path=images/${filename}` };
   });
 }
