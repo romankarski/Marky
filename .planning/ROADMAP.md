@@ -4,6 +4,7 @@
 
 - ✅ **v1.0 MVP** - Phases 1-5 (shipped 2026-03-10)
 - 🚧 **v1.1 Polish and Navigation** - Phases 6-9 (in progress)
+- 📋 **v1.2 WYSIWYG Editing** - Phase 10 (planned)
 
 ## Phases
 
@@ -178,10 +179,25 @@ Plans:
 Plans:
 - [ ] 09-01-PLAN.md — TBD
 
+### Phase 10: WYSIWYG Editor
+**Goal**: Replace the split-pane CodeMirror + preview model with a Notion-style WYSIWYG editor — users click anywhere on the rendered document to edit, use slash commands to insert blocks, drag-and-drop images, and can toggle to raw markdown when needed. Markdown remains the on-disk file format.
+**Depends on**: Phase 9
+**Requirements**: WYSIWYG-01, WYSIWYG-02, WYSIWYG-03, WYSIWYG-04, WYSIWYG-05
+**Success Criteria** (what must be TRUE):
+  1. Clicking anywhere on a document places a cursor and begins editing inline — no mode switch required
+  2. Typing `/` opens an inline slash command menu; `/h1`–`/h3`, `/table`, `/image`, `/code` are available at launch
+  3. Dragging an image file onto the document inserts it; image is saved to `/images/` at vault root; inline resize handles are available
+  4. Selecting text shows a floating bubble toolbar with Bold, Italic, Link, and Inline Code
+  5. A `</>` toggle switches between WYSIWYG and raw CodeMirror view (full replacement, not split); auto-save works in both modes
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01-PLAN.md — TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -190,7 +206,8 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Editor | v1.0 | 5/5 | Complete | 2026-03-09 |
 | 4. Live Reload | v1.0 | 3/3 | Complete | 2026-03-10 |
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
-| 6. Tab Persistence and Image Rendering | 4/4 | Complete   | 2026-03-11 | - |
-| 7. File Templates | 2/4 | In Progress|  | - |
-| 8. Backlinks Panel | 3/3 | Complete   | 2026-03-15 | - |
+| 6. Tab Persistence and Image Rendering | v1.1 | 4/4 | Complete | 2026-03-11 |
+| 7. File Templates | v1.1 | 2/4 | In Progress | - |
+| 8. Backlinks Panel | v1.1 | 3/3 | Complete | 2026-03-15 |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
+| 10. WYSIWYG Editor | v1.2 | 0/TBD | Not started | - |
