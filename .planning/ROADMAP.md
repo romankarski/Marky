@@ -185,14 +185,18 @@ Plans:
 **Requirements**: WYSIWYG-01, WYSIWYG-02, WYSIWYG-03, WYSIWYG-04, WYSIWYG-05
 **Success Criteria** (what must be TRUE):
   1. Clicking anywhere on a document places a cursor and begins editing inline — no mode switch required
-  2. Typing `/` opens an inline slash command menu; `/h1`–`/h3`, `/table`, `/image`, `/code` are available at launch
+  2. Typing `/` opens an inline slash command menu; `/h1`-`/h3`, `/table`, `/image`, `/code` are available at launch
   3. Dragging an image file onto the document inserts it; image is saved to `/images/` at vault root; inline resize handles are available
   4. Selecting text shows a floating bubble toolbar with Bold, Italic, Link, and Inline Code
   5. A `</>` toggle switches between WYSIWYG and raw CodeMirror view (full replacement, not split); auto-save works in both modes
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — TBD
+- [ ] 10-01-PLAN.md — Install TipTap dependencies + Wave 0 test stubs (RED state)
+- [ ] 10-02-PLAN.md — WysiwygEditor component + BubbleToolbar (core editing surface)
+- [ ] 10-03-PLAN.md — Slash command extension + menu + server image upload route
+- [ ] 10-04-PLAN.md — EditorPane rewrite (WYSIWYG default, raw toggle, image drop handler)
+- [ ] 10-05-PLAN.md — Markdown round-trip verification + visual checkpoint
 
 ## Progress
 
@@ -210,4 +214,4 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10
 | 7. File Templates | v1.1 | 2/4 | In Progress | - |
 | 8. Backlinks Panel | v1.1 | 3/3 | Complete | 2026-03-15 |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
-| 10. WYSIWYG Editor | v1.2 | 0/TBD | Not started | - |
+| 10. WYSIWYG Editor | v1.2 | 0/5 | Not started | - |
