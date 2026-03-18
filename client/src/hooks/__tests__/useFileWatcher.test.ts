@@ -32,7 +32,6 @@ function makeTab(overrides: Partial<Tab> = {}): Tab {
     content: '# note',
     loading: false,
     dirty: false,
-    editMode: false,
     deleted: false,
     ...overrides,
   };

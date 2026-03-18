@@ -19,7 +19,7 @@ export function useFileWatcher(
       const { path } = JSON.parse(event.data) as { path: string };
       const match = tabsRef.current.find(t => t.path === path);
       if (!match) return;
-      if (match.dirty || match.editMode) return; // guard: don't overwrite unsaved or in-progress edits
+      if (match.dirty) return; // guard: don't overwrite unsaved edits
       fetch(`/api/files/${path}`)
         .then(res => res.json())
         .then(data => dispatch({ type: 'SET_CONTENT', path, content: data.content }))
