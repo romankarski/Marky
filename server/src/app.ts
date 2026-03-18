@@ -6,6 +6,7 @@ import searchRoutes from './routes/search.js';
 import { imagesRoutes } from './routes/images.js';
 import templatesRoutes from './routes/templates.js';
 import backlinksRoutes from './routes/backlinks.js';
+import uploadImageRoutes from './routes/upload-image.js';
 import { FileWatcherService } from './lib/watcher.js';
 import { SearchService } from './lib/search.js';
 import { BacklinkService } from './lib/backlinks.js';
@@ -52,5 +53,6 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await fastify.register(imagesRoutes);
   await fastify.register(templatesRoutes);
   await fastify.register(backlinksRoutes);
+  await fastify.register(uploadImageRoutes);
   return fastify;
 }
