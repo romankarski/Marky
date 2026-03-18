@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: executing
-stopped_at: Completed 10-03-PLAN.md
-last_updated: "2026-03-18T16:08:03.326Z"
-last_activity: "2026-03-18 — Completed 10-01: Dependencies and Wave 0 test stubs"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-03-18T16:10:48.568Z"
+last_activity: "2026-03-18 — Completed 10-02: Core Editor and Bubble Toolbar"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 14
   percent: 75
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 10 of 10 (Phase 10: WYSIWYG Editor)
-Plan: 1 of 5 (complete)
+Plan: 2 of 5 (complete)
 Status: Executing
-Last activity: 2026-03-18 — Completed 10-01: Dependencies and Wave 0 test stubs
+Last activity: 2026-03-18 — Completed 10-02: Core Editor and Bubble Toolbar
 
 Progress: [████████░░] 75% (v1.1 milestone)
 
@@ -64,6 +64,7 @@ Progress: [████████░░] 75% (v1.1 milestone)
 | Phase 08-backlinks-panel P03 | continuation | 3 tasks | 2 files |
 | Phase 10-wysiwyg-editor P01 | 3 | 2 tasks | 10 files |
 | Phase 10 P03 | 6 | 2 tasks | 7 files |
+| Phase 10-wysiwyg-editor P02 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 10-wysiwyg-editor]: TipTap v3.20.4 installed with 12 packages including @tiptap/markdown for round-trip fidelity
 - [Phase 10]: SlashItem icon uses text strings (H1, H2, etc.) not SVG; Image command deferred to Plan 04 wiring
 - [Phase 10]: Upload route scopes @fastify/multipart to itself; filename sanitization replaces non-alphanumeric with underscore
+- [Phase 10-02]: Named imports for all @tiptap/* v3.20 packages (not default exports); BubbleMenu from @tiptap/react/menus subpath
+- [Phase 10-02]: StarterKit.configure({ link: false }) to avoid duplicate extension when using standalone Link extension
+- [Phase 10-02]: Mock BubbleMenu in tests to avoid ProseMirror view dependency in jsdom
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T16:08:03.323Z
-Stopped at: Completed 10-03-PLAN.md
-Resume file: None
+Last session: 2026-03-18T16:09:05Z
+Stopped at: Completed 10-02-PLAN.md
+Resume file: .planning/phases/10-wysiwyg-editor/10-03-PLAN.md
