@@ -52,7 +52,7 @@ Exceptions: Bubble toolbar offset from selection — 8px above selection boundin
 | Heading (editor H1) | 28px | 600 (semibold) | 1.2 |
 | Heading (editor H2) | 22px | 600 (semibold) | 1.2 |
 
-Note: Editor content inherits the existing `prose prose-orange` typographic scale from Tailwind Typography plugin. The sizes above govern the WYSIWYG surface and its chrome (toolbar labels, slash menu items). H3 renders at 18px/600/1.3 within the prose context.
+Note: Editor content inherits the existing `prose prose-orange` typographic scale from Tailwind Typography plugin. The sizes above govern the WYSIWYG surface and its chrome (toolbar labels, slash menu items). Sub-heading levels (H3+) are fully governed by the inherited prose scale and are not declared here.
 
 ---
 
@@ -71,6 +71,12 @@ Accent reserved for:
 - Editor cursor caret color
 - Link text within the WYSIWYG surface
 - `</>` toggle button active state (when in raw mode)
+
+---
+
+## Focal Point
+
+Primary visual anchor: the full-height document surface in the center pane. All chrome (bubble toolbar, slash menu, resize handles) is transient and appears only on interaction.
 
 ---
 
@@ -176,6 +182,10 @@ Accent reserved for:
 | Deleted file state | "This file was deleted" (inherited, unchanged) |
 | Link dialog prompt | "Paste or type a URL" |
 | Code block language placeholder | "Language" |
+| Bold button tooltip | "Bold (Cmd+B)" |
+| Italic button tooltip | "Italic (Cmd+I)" |
+| Link button tooltip | "Insert link (Cmd+K)" |
+| Inline code button tooltip | "Inline code (Cmd+E)" |
 
 ---
 
