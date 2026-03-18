@@ -1,13 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Group, Panel, Separator } from 'react-resizable-panels';
-import type { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import { EditorView } from '@codemirror/view';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Tab, TabAction } from '../types/tabs';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useScrollPersist } from '../hooks/useScrollPersist';
-import { useScrollSync } from '../hooks/useScrollSync';
+import { WysiwygEditor, type WysiwygEditorHandle } from './WysiwygEditor';
 import { MarkdownEditor } from './MarkdownEditor';
-import { MarkdownPreview } from './MarkdownPreview';
 import { exportPdf, exportHtml, exportMarkdown } from '../lib/export';
 
 interface EditorPaneProps {
@@ -17,76 +13,76 @@ interface EditorPaneProps {
 }
 
 export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
+  // Local state: raw mode toggle (WYSIWYG is default)
+  const [rawMode, setRawMode] = useState(false);
+
   // Local edit content — single source of truth while editing.
-  // Initialized from tab.content when editMode becomes true.
-  // NOT written to reducer on every keystroke (prevents cursor-jumping).
   const [editContent, setEditContent] = useState<string>('');
 
-  // Debounced content for scroll sync — avoids cache rebuild on every keystroke
-  const [syncContent, setSyncContent] = useState('');
+  // Auto-save gate: temporarily disabled during mode switch (Pitfall 3)
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
-  // Scroll persistence: saves/restores preview scroll position per file.
-  // Pass null in edit mode — the scrollRef isn't mounted in edit mode anyway.
-  const scrollRef = useScrollPersist(tab.path, tab.editMode ? null : tab.content);
+  const wysiwygRef = useRef<WysiwygEditorHandle>(null);
+  const editorPaneRef = useRef<HTMLDivElement>(null);
 
-  // Refs for bidirectional scroll sync in edit mode
-  const editorRef = useRef<ReactCodeMirrorRef>(null);
-  const editPreviewRef = useRef<HTMLDivElement>(null);
+  // Scroll persistence for the WYSIWYG editor container
+  const scrollRef = useScrollPersist(tab.path, tab.content);
 
-  // Saves preview scrollTop before each keystroke so we can restore it after DOM mutation
-  const editPreviewScrollRef = useRef(0);
-
-  // Track when the CodeMirror view is ready (populated after first render)
-  const [cmView, setCmView] = useState<EditorView | null>(null);
-
-  useScrollSync({
-    editorView: cmView,
-    previewRef: editPreviewRef,
-    content: syncContent,
-  });
-
-  // Reset editContent when switching tabs or when edit mode activates
+  // Initialize editContent from tab.content when tab changes
   useEffect(() => {
-    if (tab.editMode && tab.content !== null) {
+    if (tab.content !== null) {
       setEditContent(tab.content);
-      setSyncContent(tab.content); // initialize immediately, no debounce on first load
     }
-  }, [tab.id, tab.editMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tab.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounce syncContent updates during typing (400ms after last keystroke)
+  // Update editContent when external file changes arrive (live reload)
   useEffect(() => {
-    const timer = setTimeout(() => setSyncContent(editContent), 400);
-    return () => clearTimeout(timer);
-  }, [editContent]);
+    if (tab.content !== null && !tab.dirty) {
+      setEditContent(tab.content);
+      // If in WYSIWYG mode, update the TipTap editor content
+      if (!rawMode && wysiwygRef.current) {
+        wysiwygRef.current.setContent(tab.content);
+      }
+    }
+  }, [tab.content]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Restore preview scroll after each DOM mutation caused by editContent change
-  useLayoutEffect(() => {
-    const el = editPreviewRef.current;
-    if (el) el.scrollTop = editPreviewScrollRef.current;
-  }, [editContent]);
-
-  // Clear cmView when leaving edit mode so effects re-attach on next entry
-  useEffect(() => {
-    if (!tab.editMode) setCmView(null);
-  }, [tab.editMode, tab.id]);
-
-  // Stable callback: syncs saved content back to reducer and clears dirty flag
-  const onSaved = useCallback((savedContent: string) => {
-    dispatch({ type: 'SET_CONTENT', path: tab.path, content: savedContent });
+  // Stable callback: clears dirty flag after auto-save
+  const onSaved = useCallback((_savedContent: string) => {
     dispatch({ type: 'CLEAR_DIRTY', id: tab.id });
-  }, [dispatch, tab.id, tab.path]);
+  }, [dispatch, tab.id]);
 
-  // Auto-save hook — only fires when in edit mode AND the user has made changes
-  useAutoSave(tab.path, editContent, onSaved, tab.editMode && tab.dirty);
+  // Auto-save — always enabled (editing is always active), controlled by autoSaveEnabled flag
+  useAutoSave(tab.path, editContent, onSaved, tab.dirty && autoSaveEnabled);
 
-  function handleChange(value: string) {
-    // Capture scroll position BEFORE setEditContent triggers re-render
-    editPreviewScrollRef.current = editPreviewRef.current?.scrollTop ?? 0;
+  function handleWysiwygChange(md: string) {
+    setEditContent(md);
+    if (!tab.dirty) dispatch({ type: 'SET_DIRTY', id: tab.id });
+  }
+
+  function handleRawChange(value: string) {
     setEditContent(value);
-    // Mark dirty on first keystroke only
-    if (!tab.dirty) {
-      dispatch({ type: 'SET_DIRTY', id: tab.id });
+    if (!tab.dirty) dispatch({ type: 'SET_DIRTY', id: tab.id });
+  }
+
+  function handleToggleRawMode() {
+    // Temporarily disable auto-save during transition (Pitfall 3)
+    setAutoSaveEnabled(false);
+
+    if (rawMode) {
+      // raw -> WYSIWYG: editContent already has latest markdown from CodeMirror
+      if (wysiwygRef.current) {
+        wysiwygRef.current.setContent(editContent);
+      }
+    } else {
+      // WYSIWYG -> raw: serialize TipTap to markdown
+      const md = wysiwygRef.current?.getMarkdown() ?? editContent;
+      setEditContent(md);
     }
+
+    setRawMode(!rawMode);
+
+    // Re-enable auto-save after React renders the new mode
+    requestAnimationFrame(() => setAutoSaveEnabled(true));
   }
 
   return (
@@ -97,7 +93,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
-              const el = tab.editMode ? editPreviewRef.current : scrollRef.current;
+              const el = editorPaneRef.current;
               if (el) exportPdf(el, tab.path);
             }}
             className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
@@ -107,7 +103,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
           </button>
           <button
             onClick={() => {
-              const el = tab.editMode ? editPreviewRef.current : scrollRef.current;
+              const el = editorPaneRef.current;
               if (el) exportHtml(el, tab.path);
             }}
             className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
@@ -116,7 +112,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
             HTML
           </button>
           <button
-            onClick={() => exportMarkdown(tab.editMode ? editContent : (tab.content ?? ''), tab.path)}
+            onClick={() => exportMarkdown(editContent, tab.path)}
             className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
             title="Download raw Markdown"
           >
@@ -124,20 +120,21 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
           </button>
         </div>
 
+        {/* Raw mode toggle (replaces old Edit/Preview toggle) */}
         <button
-          onClick={() => dispatch({ type: 'TOGGLE_EDIT', id: tab.id })}
-          className="text-xs font-medium text-orange-600 hover:text-orange-800 transition-colors"
+          onClick={handleToggleRawMode}
+          className={`text-xs font-medium transition-colors ${rawMode ? 'text-orange-600' : 'text-gray-500 hover:text-gray-800'}`}
+          title={rawMode ? 'Switch to rich editor' : 'Switch to raw Markdown'}
         >
-          {tab.editMode ? 'Preview' : 'Edit'}
+          {'</>'}
         </button>
       </div>
 
       {/* Content area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden transition-opacity duration-150">
         {tab.deleted ? (
-          // File was deleted externally
           <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-400">
-            <span className="text-2xl">🗑</span>
+            <span className="text-2xl">&#x1F5D1;</span>
             <p className="text-sm">This file was deleted</p>
             <button
               onClick={() => dispatch({ type: 'CLOSE', id: tab.id })}
@@ -147,41 +144,26 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
             </button>
           </div>
         ) : tab.loading ? (
-          // Loading spinner
           <div className="flex items-center justify-center h-full">
             <span className="w-4 h-4 rounded-full bg-orange-400 animate-pulse" />
           </div>
-        ) : tab.editMode ? (
-          // Split pane: preview on top, editor on bottom
-          <Group orientation="vertical" className="h-full">
-            <Panel id={`preview-${tab.id}`} defaultSize="50%">
-              <div ref={editPreviewRef} className="h-full overflow-y-auto">
-                <MarkdownPreview content={editContent} onLinkClick={onLinkClick} filePath={tab.path} />
-              </div>
-            </Panel>
-            <Separator className="h-1 bg-gray-200 hover:bg-orange-400 transition-colors cursor-row-resize" />
-            <Panel id={`editor-${tab.id}`} defaultSize="50%">
-              <div className="h-full overflow-hidden border-t border-gray-200">
-                <MarkdownEditor
-                  ref={editorRef}
-                  value={editContent}
-                  onChange={handleChange}
-                  tabId={tab.id}
-                  onUpdate={(update) => {
-                    if (!cmView && update.view) setCmView(update.view);
-                  }}
-                />
-              </div>
-            </Panel>
-          </Group>
+        ) : rawMode ? (
+          <MarkdownEditor
+            value={editContent}
+            onChange={handleRawChange}
+            tabId={tab.id}
+          />
         ) : (
-          // Preview-only mode
-          <div ref={scrollRef} className="h-full overflow-y-auto">
-            <MarkdownPreview content={tab.content ?? ''} onLinkClick={onLinkClick} filePath={tab.path} />
+          <div ref={editorPaneRef} className="h-full">
+            <WysiwygEditor
+              ref={wysiwygRef}
+              content={editContent}
+              onChange={handleWysiwygChange}
+              onLinkClick={onLinkClick}
+            />
           </div>
         )}
       </div>
-
     </div>
   );
 }
