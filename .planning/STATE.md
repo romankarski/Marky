@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: executing
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-03-18T16:10:48.568Z"
-last_activity: "2026-03-18 — Completed 10-02: Core Editor and Bubble Toolbar"
+stopped_at: Completed 10-04-PLAN.md
+last_updated: "2026-03-18T16:16:08Z"
+last_activity: "2026-03-18 — Completed 10-04: EditorPane Integration"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 16
-  completed_plans: 14
-  percent: 75
+  completed_plans: 15
+  percent: 81
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 10 of 10 (Phase 10: WYSIWYG Editor)
-Plan: 2 of 5 (complete)
+Plan: 4 of 5 (complete)
 Status: Executing
-Last activity: 2026-03-18 — Completed 10-02: Core Editor and Bubble Toolbar
+Last activity: 2026-03-18 — Completed 10-04: EditorPane Integration
 
-Progress: [████████░░] 75% (v1.1 milestone)
+Progress: [████████░░] 81% (v1.1 milestone)
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [████████░░] 75% (v1.1 milestone)
 | Phase 10-wysiwyg-editor P01 | 3 | 2 tasks | 10 files |
 | Phase 10 P03 | 6 | 2 tasks | 7 files |
 | Phase 10-wysiwyg-editor P02 | 8 | 2 tasks | 4 files |
+| Phase 10-wysiwyg-editor P04 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase 10-02]: Named imports for all @tiptap/* v3.20 packages (not default exports); BubbleMenu from @tiptap/react/menus subpath
 - [Phase 10-02]: StarterKit.configure({ link: false }) to avoid duplicate extension when using standalone Link extension
 - [Phase 10-02]: Mock BubbleMenu in tests to avoid ProseMirror view dependency in jsdom
+- [Phase 10-04]: Raw/WYSIWYG toggle state is local to EditorPane (useState), not in Tab reducer -- keeps reducer simple
+- [Phase 10-04]: editMode removed from Tab type entirely -- WYSIWYG is always active, no separate edit/preview modes
+- [Phase 10-04]: Auto-save disabled during mode switch via setAutoSaveEnabled(false), re-enabled via requestAnimationFrame (Pitfall 3)
 
 ### Pending Todos
 
@@ -113,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T16:09:05Z
-Stopped at: Completed 10-02-PLAN.md
-Resume file: .planning/phases/10-wysiwyg-editor/10-03-PLAN.md
+Last session: 2026-03-18T16:16:08Z
+Stopped at: Completed 10-04-PLAN.md
+Resume file: .planning/phases/10-wysiwyg-editor/10-05-PLAN.md
