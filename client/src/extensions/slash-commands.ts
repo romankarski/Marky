@@ -3,6 +3,7 @@ import Suggestion, { type SuggestionOptions } from '@tiptap/suggestion';
 import { createRoot, type Root } from 'react-dom/client';
 import { createElement } from 'react';
 import { SlashCommandMenu } from '../components/SlashCommandMenu';
+import { uploadImageFromPicker } from './image-upload';
 
 export interface SlashItem {
   title: string;
@@ -46,10 +47,7 @@ export const SLASH_ITEMS: SlashItem[] = [
     icon: 'img',
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.click();
+      uploadImageFromPicker(editor);
     },
   },
   {
@@ -80,7 +78,6 @@ export const SlashCommands = Extension.create({
           let container: HTMLElement | null = null;
           let root: Root | null = null;
           let selectedIndex = 0;
-          // Keep a reference to props so onKeyDown can call command
           let currentProps: any = null;
 
           const destroy = () => {
@@ -109,9 +106,7 @@ export const SlashCommands = Extension.create({
               container.style.left = `${rect.left + window.scrollX}px`;
             }
 
-            // Clamp selectedIndex to current filtered list
-            const clampedIndex = Math.min(selectedIndex, items.length - 1);
-            selectedIndex = clampedIndex;
+            selectedIndex = Math.min(selectedIndex, Math.max(0, items.length - 1));
 
             root!.render(
               createElement(SlashCommandMenu, {
@@ -119,8 +114,10 @@ export const SlashCommands = Extension.create({
                 query: props.query ?? '',
                 selectedIndex,
                 command: (item: SlashItem) => {
+                  // Capture command ref before destroy nulls currentProps
+                  const cmd = command;
                   destroy();
-                  command(item);
+                  cmd(item);
                 },
               }),
             );
@@ -136,7 +133,7 @@ export const SlashCommands = Extension.create({
             },
             onKeyDown: ({ event }: { event: KeyboardEvent }) => {
               if (!currentProps) return false;
-              const items = currentProps.items as SlashItem[];
+              const { items, command } = currentProps;
 
               if (event.key === 'ArrowDown') {
                 selectedIndex = (selectedIndex + 1) % items.length;
@@ -151,8 +148,10 @@ export const SlashCommands = Extension.create({
               if (event.key === 'Enter') {
                 const item = items[selectedIndex];
                 if (item) {
+                  // Capture before destroy
+                  const cmd = command;
                   destroy();
-                  currentProps.command(item);
+                  cmd(item);
                 }
                 return true;
               }

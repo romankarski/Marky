@@ -16,6 +16,7 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { BubbleToolbar } from './BubbleToolbar';
 import { SlashCommands } from '../extensions/slash-commands';
+import { ImageUpload } from '../extensions/image-upload';
 
 export interface WysiwygEditorHandle {
   getMarkdown: () => string;
@@ -61,6 +62,7 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
           placeholder: 'Click anywhere to begin, or type / for commands',
         }),
         SlashCommands,
+        ImageUpload,
       ],
       content: body,
       contentType: 'markdown',
@@ -88,6 +90,18 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
         }
       },
     }), [editor]);
+
+    // Prevent browser from opening dropped files as a new tab/page.
+    // ProseMirror's handleDrop still receives the event via capture phase.
+    useEffect(() => {
+      const stop = (e: DragEvent) => e.preventDefault();
+      window.addEventListener('dragover', stop);
+      window.addEventListener('drop', stop);
+      return () => {
+        window.removeEventListener('dragover', stop);
+        window.removeEventListener('drop', stop);
+      };
+    }, []);
 
     // Sync content prop when a new file is loaded
     useEffect(() => {
