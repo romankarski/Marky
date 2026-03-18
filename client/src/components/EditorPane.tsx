@@ -126,7 +126,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
           className={`text-xs font-medium transition-colors ${rawMode ? 'text-orange-600' : 'text-gray-500 hover:text-gray-800'}`}
           title={rawMode ? 'Switch to rich editor' : 'Switch to raw Markdown'}
         >
-          {'</>'}
+          {rawMode ? 'WYSIWYG' : 'Raw MD'}
         </button>
       </div>
 

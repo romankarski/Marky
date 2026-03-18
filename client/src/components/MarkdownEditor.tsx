@@ -2,6 +2,7 @@ import React from 'react';
 import CodeMirror, { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import type { ViewUpdate } from '@codemirror/view';
 import { markdown } from '@codemirror/lang-markdown';
+import { EditorView } from '@codemirror/view';
 
 interface MarkdownEditorProps {
   value: string;
@@ -18,7 +19,7 @@ export const MarkdownEditor = React.forwardRef<ReactCodeMirrorRef, MarkdownEdito
         key={tabId}
         value={value}
         height="100%"
-        extensions={[markdown()]}
+        extensions={[markdown(), EditorView.lineWrapping]}
         onChange={onChange}
         onUpdate={onUpdate}
         className="h-full text-sm font-mono overflow-auto"
