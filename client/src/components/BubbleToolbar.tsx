@@ -7,7 +7,7 @@ interface BubbleToolbarProps {
 
 export function BubbleToolbar({ editor }: BubbleToolbarProps) {
   return (
-    <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
+    <BubbleMenu editor={editor}>
       <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-white/80 backdrop-blur-md shadow-lg border border-white/20">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}

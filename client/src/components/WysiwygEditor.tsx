@@ -15,6 +15,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { BubbleToolbar } from './BubbleToolbar';
+import { SlashCommands } from '../extensions/slash-commands';
 
 export interface WysiwygEditorHandle {
   getMarkdown: () => string;
@@ -44,6 +45,7 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
         Placeholder.configure({
           placeholder: 'Click anywhere to begin, or type / for commands',
         }),
+        SlashCommands,
       ],
       content,
       contentType: 'markdown',
@@ -59,7 +61,7 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
       setContent: (md: string) => {
         if (editor) {
           lastContentRef.current = md;
-          editor.commands.setContent(md, false, { contentType: 'markdown' });
+          editor.commands.setContent(md, { contentType: 'markdown' });
         }
       },
     }), [editor]);
@@ -69,7 +71,7 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
       if (!editor) return;
       if (content !== lastContentRef.current) {
         lastContentRef.current = content;
-        editor.commands.setContent(content, false, { contentType: 'markdown' });
+        editor.commands.setContent(content, { contentType: 'markdown' });
       }
     }, [content, editor]);
 
