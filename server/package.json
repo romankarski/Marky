@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
+    "@fastify/multipart": "^9.4.0",
     "@fastify/static": "^8.0.0",
     "@marky/shared": "*",
     "chokidar": "^5.0.0",
