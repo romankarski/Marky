@@ -17,21 +17,21 @@ export const SLASH_ITEMS: SlashItem[] = [
     description: 'Large heading',
     icon: 'H1',
     command: ({ editor, range }) =>
-      editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run(),
+      editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run(),
   },
   {
     title: 'Heading 2',
     description: 'Medium heading',
     icon: 'H2',
     command: ({ editor, range }) =>
-      editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run(),
+      editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run(),
   },
   {
     title: 'Heading 3',
     description: 'Small heading',
     icon: 'H3',
     command: ({ editor, range }) =>
-      editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run(),
+      editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run(),
   },
   {
     title: 'Table',
@@ -80,8 +80,20 @@ export const SlashCommands = Extension.create({
           let container: HTMLElement | null = null;
           let root: Root | null = null;
           let selectedIndex = 0;
+          // Keep a reference to props so onKeyDown can call command
+          let currentProps: any = null;
+
+          const destroy = () => {
+            root?.unmount();
+            container?.remove();
+            container = null;
+            root = null;
+            currentProps = null;
+          };
 
           const mountMenu = (props: any) => {
+            currentProps = props;
+
             if (!container) {
               container = document.createElement('div');
               container.style.position = 'absolute';
@@ -97,12 +109,19 @@ export const SlashCommands = Extension.create({
               container.style.left = `${rect.left + window.scrollX}px`;
             }
 
+            // Clamp selectedIndex to current filtered list
+            const clampedIndex = Math.min(selectedIndex, items.length - 1);
+            selectedIndex = clampedIndex;
+
             root!.render(
               createElement(SlashCommandMenu, {
                 items,
                 query: props.query ?? '',
                 selectedIndex,
-                command: (item: SlashItem) => command(item),
+                command: (item: SlashItem) => {
+                  destroy();
+                  command(item);
+                },
               }),
             );
           };
@@ -116,29 +135,34 @@ export const SlashCommands = Extension.create({
               mountMenu(props);
             },
             onKeyDown: ({ event }: { event: KeyboardEvent }) => {
+              if (!currentProps) return false;
+              const items = currentProps.items as SlashItem[];
+
               if (event.key === 'ArrowDown') {
-                selectedIndex = Math.min(selectedIndex + 1, SLASH_ITEMS.length - 1);
+                selectedIndex = (selectedIndex + 1) % items.length;
+                mountMenu(currentProps);
                 return true;
               }
               if (event.key === 'ArrowUp') {
-                selectedIndex = Math.max(selectedIndex - 1, 0);
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                mountMenu(currentProps);
+                return true;
+              }
+              if (event.key === 'Enter') {
+                const item = items[selectedIndex];
+                if (item) {
+                  destroy();
+                  currentProps.command(item);
+                }
                 return true;
               }
               if (event.key === 'Escape') {
-                root?.unmount();
-                container?.remove();
-                container = null;
-                root = null;
+                destroy();
                 return true;
               }
               return false;
             },
-            onExit: () => {
-              root?.unmount();
-              container?.remove();
-              container = null;
-              root = null;
-            },
+            onExit: destroy,
           };
         },
       } as Partial<SuggestionOptions>,
