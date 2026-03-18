@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { SlashCommandMenu } from '../components/SlashCommandMenu';
 import { SLASH_ITEMS } from '../extensions/slash-commands';
+
+afterEach(() => cleanup());
 
 describe('SlashCommandMenu', () => {
   it('renders all 6 command items when query is empty', () => {
