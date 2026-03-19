@@ -37,6 +37,27 @@ function triggerDownload(blob: Blob, filename: string) {
 }
 
 /**
+ * Poll until every .mermaid-diagram div contains an <svg> (or 3s timeout).
+ * MermaidDiagram renders async via useEffect so we can't just use rAF.
+ */
+function waitForMermaid(container: HTMLElement): Promise<void> {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    function check() {
+      const pending = Array.from(container.querySelectorAll('.mermaid-diagram')).filter(
+        (el) => !el.querySelector('svg'),
+      );
+      if (pending.length === 0 || Date.now() - start > 3000) {
+        resolve();
+      } else {
+        setTimeout(check, 50);
+      }
+    }
+    check();
+  });
+}
+
+/**
  * Render MarkdownPreview into a detached div and return its article innerHTML.
  * Uses requestAnimationFrame to let React flush before reading the DOM.
  */
@@ -57,14 +78,16 @@ function renderPreviewHtml(content: string, filePath: string): Promise<string> {
       }),
     );
 
-    // Two rAF ticks: first lets React commit, second lets the browser paint images/tables
+    // Wait for React to commit, then poll until all mermaid diagrams have rendered their SVG.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const article = container.querySelector('article');
-        const html = article?.innerHTML ?? container.innerHTML;
-        root.unmount();
-        container.remove();
-        resolve(html);
+        waitForMermaid(container).then(() => {
+          const article = container.querySelector('article');
+          const html = article?.innerHTML ?? container.innerHTML;
+          root.unmount();
+          container.remove();
+          resolve(html);
+        });
       });
     });
   });

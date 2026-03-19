@@ -1,4 +1,10 @@
 import ReactMarkdown from 'react-markdown';
+import { MermaidDiagram } from './MermaidDiagram';
+
+/** Wraps MermaidDiagram and suppresses the surrounding <pre> that ReactMarkdown adds. */
+function MermaidBlock({ code }: { code: string }) {
+  return <MermaidDiagram code={code} />;
+}
 import remarkGfm from 'remark-gfm';
 import remarkFrontmatter from 'remark-frontmatter';
 import remarkWikiLink from 'remark-wiki-link';
@@ -54,18 +60,19 @@ export function MarkdownPreview({ content, onLinkClick, filePath }: Props) {
             );
           },
 
-          // Fenced code blocks — plain, no syntax highlighting
+          // Fenced code blocks — render mermaid as diagram, others as plain code
           pre: ({ children }) => (
             <pre className="bg-gray-100 rounded-lg p-4 overflow-x-auto text-sm font-mono text-gray-800 leading-relaxed">
               {children}
             </pre>
           ),
           code: ({ className, children, ...props }) => {
-            // Block code inside <pre> — let pre handle styling
+            if (className === 'language-mermaid') {
+              return <MermaidBlock code={String(children).trim()} />;
+            }
             if (className?.startsWith('language-')) {
               return <code className="font-mono" {...props}>{children}</code>;
             }
-            // Inline code
             return (
               <code className="bg-gray-100 text-gray-800 rounded px-1 py-0.5 text-sm font-mono" {...props}>
                 {children}
