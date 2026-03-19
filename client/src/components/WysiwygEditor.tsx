@@ -17,6 +17,7 @@ import { Placeholder } from '@tiptap/extension-placeholder';
 import { BubbleToolbar } from './BubbleToolbar';
 import { SlashCommands } from '../extensions/slash-commands';
 import { ImageUpload } from '../extensions/image-upload';
+import { MermaidCodeBlock } from '../extensions/mermaid';
 
 export interface WysiwygEditorHandle {
   getMarkdown: () => string;
@@ -50,7 +51,8 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
 
     const editor = useEditor({
       extensions: [
-        StarterKit.configure({ link: false }),
+        StarterKit.configure({ link: false, codeBlock: false }),
+        MermaidCodeBlock,
         Markdown.configure({ markedOptions: { gfm: true } }),
         Link.configure({ openOnClick: false }),
         Image.configure({ inline: false }),
