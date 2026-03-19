@@ -23,7 +23,6 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
   const wysiwygRef = useRef<WysiwygEditorHandle>(null);
-  const editorPaneRef = useRef<HTMLDivElement>(null);
 
   // Scroll persistence for the WYSIWYG editor container
   const scrollRef = useScrollPersist(tab.path, tab.content);
@@ -92,20 +91,14 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
         {/* Export buttons */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              const el = editorPaneRef.current;
-              if (el) exportPdf(el, tab.path);
-            }}
+            onClick={() => exportPdf(editContent, tab.path)}
             className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
             title="Export as PDF"
           >
             PDF
           </button>
           <button
-            onClick={() => {
-              const el = editorPaneRef.current;
-              if (el) exportHtml(el, tab.path);
-            }}
+            onClick={() => exportHtml(editContent, tab.path)}
             className="text-xs text-gray-500 hover:text-gray-800 transition-colors"
             title="Export as HTML (opens in Word / LibreOffice)"
           >
@@ -154,7 +147,7 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
             tabId={tab.id}
           />
         ) : (
-          <div ref={editorPaneRef} className="h-full">
+          <div className="h-full">
             <WysiwygEditor
               ref={wysiwygRef}
               content={editContent}

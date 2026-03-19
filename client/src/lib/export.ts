@@ -1,11 +1,14 @@
 /**
  * Export utilities for Marky documents.
  *
- * PDF  — renders current MarkdownPreview into a hidden #print-root div,
- *         triggers window.print(), then tears down.
- * HTML — serialises the rendered article to a self-contained HTML file.
+ * PDF  — renders MarkdownPreview into a hidden #print-root div, triggers window.print().
+ * HTML — renders MarkdownPreview into a detached node, downloads self-contained HTML.
  * MD   — downloads the raw markdown source as-is.
  */
+
+import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { MarkdownPreview } from '../components/MarkdownPreview';
 
 /** Grab the Tailwind/prose CSS from the page so exported HTML is self-contained. */
 function collectStyles(): string {
@@ -14,7 +17,6 @@ function collectStyles(): string {
       try {
         return Array.from(sheet.cssRules).map((r) => r.cssText);
       } catch {
-        // Cross-origin sheets (CDN etc.) — skip
         return [];
       }
     })
@@ -35,15 +37,46 @@ function triggerDownload(blob: Blob, filename: string) {
 }
 
 /**
- * Export as PDF via the browser's native print dialog.
- * Clones the rendered preview article into a hidden div that @media print
- * makes the only visible element, then calls window.print().
+ * Render MarkdownPreview into a detached div and return its article innerHTML.
+ * Uses requestAnimationFrame to let React flush before reading the DOM.
  */
-export function exportPdf(previewEl: HTMLElement, filePath: string) {
-  const article = previewEl.querySelector('article') ?? previewEl.querySelector('.ProseMirror');
-  if (!article) return;
+function renderPreviewHtml(content: string, filePath: string): Promise<string> {
+  return new Promise((resolve) => {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    document.body.appendChild(container);
 
-  // Create (or reuse) the dedicated print root
+    const root = createRoot(container);
+    root.render(
+      createElement(MarkdownPreview, {
+        content,
+        filePath,
+        onLinkClick: () => {},
+      }),
+    );
+
+    // Two rAF ticks: first lets React commit, second lets the browser paint images/tables
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const article = container.querySelector('article');
+        const html = article?.innerHTML ?? container.innerHTML;
+        root.unmount();
+        container.remove();
+        resolve(html);
+      });
+    });
+  });
+}
+
+/**
+ * Export as PDF via the browser's native print dialog.
+ * Renders MarkdownPreview into a hidden #print-root so the full styled output prints.
+ */
+export async function exportPdf(content: string, filePath: string) {
+  const innerHtml = await renderPreviewHtml(content, filePath);
+
   let root = document.getElementById('print-root');
   if (!root) {
     root = document.createElement('div');
@@ -52,7 +85,7 @@ export function exportPdf(previewEl: HTMLElement, filePath: string) {
     document.body.appendChild(root);
   }
 
-  root.innerHTML = article.outerHTML;
+  root.innerHTML = `<article class="prose prose-orange max-w-none px-6 py-4">${innerHtml}</article>`;
 
   const afterPrint = () => {
     if (root) root.innerHTML = '';
@@ -60,19 +93,14 @@ export function exportPdf(previewEl: HTMLElement, filePath: string) {
   };
   window.addEventListener('afterprint', afterPrint);
 
-  // Safari requires a small delay — it won't open the print dialog while
-  // network connections (HMR websocket, SSE) are active. setTimeout preserves
-  // the user-gesture chain on Safari for delays up to ~1s.
   setTimeout(() => window.print(), 100);
 }
 
 /**
- * Export as a self-contained HTML file (works in any browser, opens in Word/LibreOffice).
+ * Export as a self-contained HTML file with full prose styling.
  */
-export function exportHtml(previewEl: HTMLElement, filePath: string) {
-  const article = previewEl.querySelector('article') ?? previewEl.querySelector('.ProseMirror');
-  if (!article) return;
-
+export async function exportHtml(content: string, filePath: string) {
+  const innerHtml = await renderPreviewHtml(content, filePath);
   const name = basename(filePath);
   const styles = collectStyles();
 
@@ -88,7 +116,9 @@ export function exportHtml(previewEl: HTMLElement, filePath: string) {
   </style>
 </head>
 <body>
-  ${article.outerHTML}
+  <article class="prose prose-orange max-w-none px-6 py-4">
+    ${innerHtml}
+  </article>
 </body>
 </html>`;
 
