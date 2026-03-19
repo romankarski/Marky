@@ -40,7 +40,7 @@ function triggerDownload(blob: Blob, filename: string) {
  * makes the only visible element, then calls window.print().
  */
 export function exportPdf(previewEl: HTMLElement, filePath: string) {
-  const article = previewEl.querySelector('article');
+  const article = previewEl.querySelector('article') ?? previewEl.querySelector('.ProseMirror');
   if (!article) return;
 
   // Create (or reuse) the dedicated print root
@@ -70,7 +70,7 @@ export function exportPdf(previewEl: HTMLElement, filePath: string) {
  * Export as a self-contained HTML file (works in any browser, opens in Word/LibreOffice).
  */
 export function exportHtml(previewEl: HTMLElement, filePath: string) {
-  const article = previewEl.querySelector('article');
+  const article = previewEl.querySelector('article') ?? previewEl.querySelector('.ProseMirror');
   if (!article) return;
 
   const name = basename(filePath);
