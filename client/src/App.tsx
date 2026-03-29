@@ -241,7 +241,15 @@ export default function App() {
   }, []);
 
   const allTopDirs = tree.filter(n => n.type === 'dir').map(n => n.name);
-  const filteredTree = tree.filter(node => includeDirs.includes(node.name));
+  const filteredTree = tree.filter((node) => node.type === 'file' || includeDirs.includes(node.name));
+
+  useEffect(() => {
+    if (allTopDirs.length === 0) return;
+    setIncludeDirs((prev) => {
+      const visibleDirs = prev.filter((dir) => allTopDirs.includes(dir));
+      return visibleDirs.length > 0 ? prev : allTopDirs;
+    });
+  }, [allTopDirs.join('|')]);
 
   // Fetch content for the active tab in single-pane mode
   const singleActiveTab = splitMode ? null : tabs.find(t => t.id === activeTabId) ?? null;

@@ -1,9 +1,9 @@
 class Marky < Formula
   desc "Local-first markdown workspace for browsing and editing notes"
   homepage "https://github.com/romankarski/Marky"
-  version "0.1.1"
-  url "https://github.com/romankarski/Marky/releases/download/v0.1.1/marky-0.1.1.tgz"
-  sha256 "4b1f27c07817d578d9a06d5a66968a4512f2a75e79622bec3d603f472cbf0c61"
+  version "0.1.2"
+  url "https://github.com/romankarski/Marky/releases/download/v0.1.2/marky-0.1.2.tgz"
+  sha256 "REPLACE_WITH_RELEASE_SHA256"
   license "MIT"
 
   depends_on "node"
@@ -11,15 +11,13 @@ class Marky < Formula
   def install
     cache_dir = buildpath/".npm-cache"
 
-    cd "package" do
-      system Formula["node"].opt_bin/"npm", "install", "--omit=dev", "--cache", cache_dir
-    end
+    system Formula["node"].opt_bin/"npm", "install", "--omit=dev", "--cache", cache_dir
 
-    libexec.install "package"
+    libexec.install Dir["*"]
 
     (bin/"marky").write <<~SH
       #!/bin/bash
-      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/package/server/dist/cli.js" "$@"
+      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/server/dist/cli.js" "$@"
     SH
   end
 

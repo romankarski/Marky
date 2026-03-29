@@ -17,7 +17,7 @@ node server/dist/cli.js --no-open /path/to/notes
 After a tagged release publishes `marky-<version>.tgz`:
 
 ```bash
-npm install -g ./marky-0.1.0.tgz
+npm install -g ./marky-<version>.tgz
 cd /path/to/notes
 marky
 ```
