@@ -3,7 +3,7 @@ class Marky < Formula
   homepage "https://github.com/romankarski/Marky"
   version "0.1.1"
   url "https://github.com/romankarski/Marky/releases/download/v0.1.1/marky-0.1.1.tgz"
-  sha256 "REPLACE_WITH_RELEASE_SHA256"
+  sha256 "4b1f27c07817d578d9a06d5a66968a4512f2a75e79622bec3d603f472cbf0c61"
   license "MIT"
 
   depends_on "node"
