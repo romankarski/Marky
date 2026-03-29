@@ -32,7 +32,13 @@ jobs:
         id: pack
         run: |
           mkdir -p .release-artifacts
-          PACKAGE_FILE="$(npm pack --pack-destination .release-artifacts)"
+          npm pack --pack-destination .release-artifacts >/dev/null
+          PACKAGE_PATH="$(find .release-artifacts -maxdepth 1 -type f -name 'marky-*.tgz' | head -n 1)"
+          if [ -z "$PACKAGE_PATH" ]; then
+            echo "Expected a marky-*.tgz artifact in .release-artifacts" >&2
+            exit 1
+          fi
+          PACKAGE_FILE="$(basename "$PACKAGE_PATH")"
           echo "package_file=${PACKAGE_FILE}" >> "$GITHUB_OUTPUT"
           shasum -a 256 ".release-artifacts/${PACKAGE_FILE}" > ".release-artifacts/${PACKAGE_FILE}.sha256"
 
@@ -42,4 +48,3 @@ jobs:
           files: |
             .release-artifacts/*.tgz
             .release-artifacts/*.sha256
-
