@@ -7,9 +7,9 @@
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "@marky/shared": ["../shared/src/types.ts"]
+      "@marky/shared": ["../shared/dist/types.d.ts"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

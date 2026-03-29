@@ -4,12 +4,12 @@ milestone: v1.1
 milestone_name: Polish and Navigation
 status: executing
 stopped_at: Completed 10-04-PLAN.md
-last_updated: "2026-03-18T16:16:08Z"
-last_activity: "2026-03-18 — Completed 10-04: EditorPane Integration"
+last_updated: "2026-03-29T13:49:12.962Z"
+last_activity: 2026-03-29 -- Phase 11 execution started
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 3
-  total_plans: 16
+  total_plans: 20
   completed_plans: 15
   percent: 81
 ---
@@ -21,20 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Instant, beautiful markdown reading and editing with full-text search across all files — so nothing gets lost and switching between documents is effortless.
-**Current focus:** Phase 10: WYSIWYG Editor
+**Current focus:** Phase 11 — cli-distribution-and-homebrew-packaging
 
 ## Current Position
 
-Phase: 10 of 10 (Phase 10: WYSIWYG Editor)
-Plan: 4 of 5 (complete)
-Status: Executing
-Last activity: 2026-03-18 — Completed 10-04: EditorPane Integration
+Phase: 11 (cli-distribution-and-homebrew-packaging) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 11
+Last activity: 2026-03-29 -- Phase 11 execution started
 
 Progress: [████████░░] 81% (v1.1 milestone)
 
 ## Performance Metrics
 
 **Velocity (v1.0 reference):**
+
 - Total plans completed: 25 (v1.0)
 - Average duration: ~5 min/plan
 - Total execution time: ~2 hours (v1.0)
@@ -46,6 +47,7 @@ Progress: [████████░░] 81% (v1.1 milestone)
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans (v1.0): 2, 2, 2, 2, 2 min
 - Trend: Stable
 
@@ -68,6 +70,10 @@ Progress: [████████░░] 81% (v1.1 milestone)
 | Phase 10-wysiwyg-editor P04 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 11 added: CLI Distribution and Homebrew Packaging (derived from `CLI-DISTRIBUTION.md`)
 
 ### Decisions
 

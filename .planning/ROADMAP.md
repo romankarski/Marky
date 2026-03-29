@@ -5,6 +5,7 @@
 - ✅ **v1.0 MVP** - Phases 1-5 (shipped 2026-03-10)
 - 🚧 **v1.1 Polish and Navigation** - Phases 6-9 (in progress)
 - 📋 **v1.2 WYSIWYG Editing** - Phase 10 (planned)
+- 📋 **v1.3 CLI Distribution** - Phase 11 (planned)
 
 ## Phases
 
@@ -198,10 +199,29 @@ Plans:
 - [ ] 10-04-PLAN.md — EditorPane rewrite (WYSIWYG default, raw toggle, image drop handler)
 - [ ] 10-05-PLAN.md — Markdown round-trip verification + visual checkpoint
 
+### Phase 11: CLI Distribution and Homebrew Packaging
+**Goal**: Users can install and launch Marky from the terminal in any notes directory via `marky`, with the app serving built assets in standalone mode, selecting a usable port, and opening the browser automatically unless told not to.
+**Depends on**: Phase 10
+**Requirements**: CLI-01, CLI-02, CLI-03, CLI-04, CLI-05, DIST-01
+**Success Criteria** (what must be TRUE):
+  1. Running `marky` inside a notes directory starts Marky against that directory without requiring repo-local commands
+  2. Running `marky .` or `marky /path/to/folder` uses that folder as the content root; explicit `ROOT_DIR` still overrides defaults
+  3. The CLI serves production-built client assets from the standalone install, not from the source repo layout
+  4. `marky --port 4310` binds the requested port when available, and duplicate launch or port-conflict behavior is predictable and clearly surfaced
+  5. Browser auto-open is enabled by default and can be disabled with `--no-open`
+  6. An installable artifact and Homebrew tap formula exist and can install a working `marky` command
+**Plans**: 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — CLI entrypoint, path resolution, flags, browser-open, and port-selection behavior
+- [ ] 11-02-PLAN.md — Production build pipeline and standalone asset serving from Fastify
+- [ ] 11-03-PLAN.md — Installable distribution artifact and standalone verification from arbitrary folders
+- [ ] 11-04-PLAN.md — Homebrew tap formula, release wiring, and install verification
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9 → 10
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -214,4 +234,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10
 | 7. File Templates | v1.1 | 2/4 | In Progress | - |
 | 8. Backlinks Panel | v1.1 | 3/3 | Complete | 2026-03-15 |
 | 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
-| 10. WYSIWYG Editor | 4/5 | In Progress|  | - |
+| 10. WYSIWYG Editor | v1.2 | 4/5 | In Progress | - |
+| 11. CLI Distribution and Homebrew Packaging | v1.3 | 0/4 | Not started | - |

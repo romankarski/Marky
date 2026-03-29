@@ -6,7 +6,7 @@ import path from 'path';
 export const MINISEARCH_OPTIONS = {
   fields: ['name', 'text'],
   storeFields: ['name', 'path', 'text', 'tags'],
-} as const;
+};
 
 export interface SearchDoc {
   id: string;

@@ -1,0 +1,45 @@
+name: release-cli
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build release artifacts
+        run: npm run build
+
+      - name: Pack CLI tarball
+        id: pack
+        run: |
+          mkdir -p .release-artifacts
+          PACKAGE_FILE="$(npm pack --pack-destination .release-artifacts)"
+          echo "package_file=${PACKAGE_FILE}" >> "$GITHUB_OUTPUT"
+          shasum -a 256 ".release-artifacts/${PACKAGE_FILE}" > ".release-artifacts/${PACKAGE_FILE}.sha256"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .release-artifacts/*.tgz
+            .release-artifacts/*.sha256
+

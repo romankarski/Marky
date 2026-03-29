@@ -9,7 +9,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "paths": {
-      "@marky/shared": ["../shared/src/types.ts"]
+      "@marky/shared": ["../shared/dist/types.d.ts"]
     }
   },
   "include": ["src/**/*"],

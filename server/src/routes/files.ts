@@ -3,7 +3,7 @@ import { resolveSafePath } from '../lib/pathSecurity.js';
 import { buildTree } from '../lib/fsTree.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { ListResponse, FileContentResponse } from '@marky/shared';
+import type { ListResponse, FileContentResponse } from '@marky/shared';
 
 declare module 'fastify' {
   interface FastifyInstance {

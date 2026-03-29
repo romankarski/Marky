@@ -1,6 +1,6 @@
 import { readdir } from 'fs/promises';
 import path from 'path';
-import { FileNode } from '@marky/shared';
+import type { FileNode } from '@marky/shared';
 
 export async function buildTree(dir: string, rootDir: string): Promise<FileNode[]> {
   // IMPORTANT: Do NOT use { recursive: true, withFileTypes: true } together — known Node.js bug #48858
