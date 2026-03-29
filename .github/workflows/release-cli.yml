@@ -17,6 +17,11 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      package_file: ${{ steps.pack.outputs.package_file }}
+      package_sha: ${{ steps.pack.outputs.package_sha }}
+      package_version: ${{ steps.version.outputs.package_version }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
     env:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
 
@@ -34,6 +39,7 @@ jobs:
           cache: npm
 
       - name: Validate release tag matches package version
+        id: version
         run: |
           PACKAGE_VERSION="$(node -p "require('./package.json').version")"
           EXPECTED_TAG="v${PACKAGE_VERSION}"
@@ -41,6 +47,8 @@ jobs:
             echo "Release tag ${RELEASE_TAG} does not match package.json version ${PACKAGE_VERSION}" >&2
             exit 1
           fi
+          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
         run: npm ci
@@ -59,8 +67,16 @@ jobs:
             exit 1
           fi
           PACKAGE_FILE="$(basename "$PACKAGE_PATH")"
+          PACKAGE_SHA="$(shasum -a 256 ".release-artifacts/${PACKAGE_FILE}" | awk '{print $1}')"
           echo "package_file=${PACKAGE_FILE}" >> "$GITHUB_OUTPUT"
-          shasum -a 256 ".release-artifacts/${PACKAGE_FILE}" > ".release-artifacts/${PACKAGE_FILE}.sha256"
+          echo "package_sha=${PACKAGE_SHA}" >> "$GITHUB_OUTPUT"
+          printf '%s  %s\n' "${PACKAGE_SHA}" "${PACKAGE_FILE}" > ".release-artifacts/${PACKAGE_FILE}.sha256"
+
+      - name: Upload workflow release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-cli-assets-${{ steps.version.outputs.package_version }}
+          path: .release-artifacts/*
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
@@ -70,3 +86,68 @@ jobs:
           files: |
             .release-artifacts/*.tgz
             .release-artifacts/*.sha256
+
+  homebrew-tap-not-configured:
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ secrets.HOMEBREW_TAP_TOKEN == '' }}
+    steps:
+      - name: Warn when tap automation is disabled
+        run: echo "::warning::HOMEBREW_TAP_TOKEN is not configured; skipping Homebrew tap update."
+
+  update-homebrew-tap:
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+    env:
+      PACKAGE_SHA: ${{ needs.release.outputs.package_sha }}
+      PACKAGE_VERSION: ${{ needs.release.outputs.package_version }}
+      RELEASE_TAG: ${{ needs.release.outputs.release_tag }}
+      SOURCE_REPO: ${{ github.repository }}
+      TAP_REPO: romankarski/homebrew-marky
+
+    steps:
+      - name: Checkout Marky at release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          path: marky
+
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TAP_REPO }}
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Seed formula file when tap is empty
+        run: |
+          mkdir -p homebrew-tap/Formula
+          if [ ! -f homebrew-tap/Formula/marky.rb ]; then
+            cp marky/packaging/homebrew/marky.rb homebrew-tap/Formula/marky.rb
+          fi
+
+      - name: Update Homebrew formula
+        run: |
+          node marky/scripts/update-homebrew-formula.mjs \
+            --formula homebrew-tap/Formula/marky.rb \
+            --repo "${SOURCE_REPO}" \
+            --version "${PACKAGE_VERSION}" \
+            --sha "${PACKAGE_SHA}"
+
+      - name: Commit and push tap update
+        run: |
+          git -C homebrew-tap config user.name "github-actions[bot]"
+          git -C homebrew-tap config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git -C homebrew-tap diff --quiet -- Formula/marky.rb; then
+            echo "Formula already up to date"
+            exit 0
+          fi
+          git -C homebrew-tap add Formula/marky.rb
+          git -C homebrew-tap commit -m "Update marky ${PACKAGE_VERSION}"
+          git -C homebrew-tap push origin HEAD:main
