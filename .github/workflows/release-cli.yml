@@ -112,11 +112,11 @@ jobs:
         if: ${{ steps.token_check.outputs.configured != 'true' }}
         run: echo "::warning::HOMEBREW_TAP_TOKEN is not configured; skipping Homebrew tap update."
 
-      - name: Checkout Marky at release tag
+      - name: Checkout Marky automation scripts
         if: ${{ steps.token_check.outputs.configured == 'true' }}
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: refs/heads/main
           path: marky
 
       - name: Checkout tap repository
