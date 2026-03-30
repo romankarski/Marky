@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import filesRoutes from './routes/files.js';
 import watchRoutes from './routes/watch.js';
 import searchRoutes from './routes/search.js';
+import graphRoutes from './routes/graph.js';
 import { imagesRoutes } from './routes/images.js';
 import templatesRoutes from './routes/templates.js';
 import backlinksRoutes from './routes/backlinks.js';
@@ -15,6 +16,7 @@ declare module 'fastify' {
   interface FastifyInstance {
     fileWatcher: FileWatcherService;
     rootDir: string;
+    searchService: SearchService;
     backlinkService: BacklinkService;
   }
 }
@@ -30,7 +32,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   fastify.addHook('onClose', async () => { await watcher.close(); });
   const searchService = new SearchService();
   fastify.decorate('searchService', searchService);
-  searchService.buildFromDir(opts.rootDir).catch((err) => {
+  await searchService.buildFromDir(opts.rootDir).catch((err) => {
     fastify.log.error({ err }, 'SearchService.buildFromDir failed');
   });
   const backlinkService = new BacklinkService();
@@ -50,6 +52,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await fastify.register(filesRoutes);
   await fastify.register(watchRoutes);
   await fastify.register(searchRoutes);
+  await fastify.register(graphRoutes);
   await fastify.register(imagesRoutes);
   await fastify.register(templatesRoutes);
   await fastify.register(backlinksRoutes);
