@@ -1,8 +1,8 @@
 // Wave 0 RED tests — client/src/components/TagGraphPanel.tsx does not exist yet.
 // These tests should fail with import errors until Wave 1 creates the component.
 
-import { afterEach, describe, expect, it, vi, waitFor } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TagGraphPanel } from '../components/TagGraphPanel';
 
 type MockGraphNode = {

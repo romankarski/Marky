@@ -10,6 +10,7 @@ import SearchPanel from './components/SearchPanel';
 import { TagFilter } from './components/TagFilter';
 import { FileInfo } from './components/FileInfo';
 import { BacklinksPanel } from './components/BacklinksPanel';
+import { TagGraphPanel } from './components/TagGraphPanel';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
 import { useFileWatcher } from './hooks/useFileWatcher';
@@ -22,6 +23,11 @@ import {
   updateRecentFiles,
   getRecentFiles,
 } from './hooks/useTabPersistence';
+import {
+  loadRightRailTab,
+  saveRightRailTab,
+  type RightRailTab,
+} from './hooks/useTagGraphPersistence';
 import type { TabAction } from './types/tabs';
 
 const DEFAULT_DIRS = ['knowledge', 'notes'];
@@ -85,6 +91,8 @@ export default function App() {
   useFileWatcher(tabs, dispatch, refetch);
   const [includeDirs, setIncludeDirs] = useState<string[]>(DEFAULT_DIRS);
   const [managingFolders, setManagingFolders] = useState(false);
+  const [rightRailTab, setRightRailTab] = useState<RightRailTab>(() => loadRightRailTab());
+  const [graphRefreshVersion, setGraphRefreshVersion] = useState(0);
 
   // Split view state
   const [splitMode, setSplitMode] = useState(false);
@@ -354,6 +362,22 @@ export default function App() {
     expandFolder(resolved);
   };
 
+  const handleRightRailTabChange = useCallback((tab: RightRailTab) => {
+    setRightRailTab(tab);
+    saveRightRailTab(tab);
+  }, []);
+
+  const handleRightRailOpen = useCallback((path: string) => {
+    openTab(path);
+    updateRecentFiles(path);
+    expandFolder(path);
+  }, [openTab]);
+
+  const handleTagsUpdated = useCallback(() => {
+    refetchIndex();
+    setGraphRefreshVersion((version) => version + 1);
+  }, [refetchIndex]);
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#FAFAF8' }}>
 
@@ -544,17 +568,63 @@ export default function App() {
           activeFilePath={activeFocusedTab?.path ?? null}
           currentFileTags={currentFileTags}
           allTags={allTags}
-          onTagsUpdated={refetchIndex}
+          onTagsUpdated={handleTagsUpdated}
         />
         <BacklinksPanel
           activeFilePath={activeFocusedTab?.path ?? null}
-          onOpen={p => { openTab(p); updateRecentFiles(p); expandFolder(p); }}
+          onOpen={handleRightRailOpen}
         />
-        {tocContent ? (
-          <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
-        ) : (
-          <div className="p-4 text-xs text-gray-300">No document open</div>
-        )}
+        <div className="flex min-h-0 flex-1 flex-col border-t border-gray-100">
+          <div className="flex shrink-0 border-b border-gray-200 px-3">
+            <button
+              type="button"
+              onClick={() => handleRightRailTabChange('outline')}
+              className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+                rightRailTab === 'outline'
+                  ? 'border-orange-500 text-orange-600'
+                  : 'border-transparent text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              Outline
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRightRailTabChange('graph')}
+              className={`border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+                rightRailTab === 'graph'
+                  ? 'border-orange-500 text-orange-600'
+                  : 'border-transparent text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              Graph
+            </button>
+          </div>
+
+          <div className="relative min-h-0 flex-1">
+            <div
+              className={`absolute inset-0 min-h-0 ${rightRailTab === 'outline' ? 'block' : 'hidden'}`}
+              aria-hidden={rightRailTab !== 'outline'}
+            >
+              {tocContent ? (
+                <TableOfContents content={tocContent} onHeadingClick={handleTocHeadingClick} />
+              ) : (
+                <div className="p-4 text-xs text-gray-300">No document open</div>
+              )}
+            </div>
+
+            <div
+              className={`absolute inset-0 min-h-0 ${rightRailTab === 'graph' ? 'block' : 'hidden'}`}
+              aria-hidden={rightRailTab !== 'graph'}
+            >
+              <TagGraphPanel
+                activeFilePath={activeFocusedTab?.path ?? null}
+                isVisible={rightRailTab === 'graph'}
+                refreshToken={graphRefreshVersion}
+                onOpen={handleRightRailOpen}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
