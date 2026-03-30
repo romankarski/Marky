@@ -22,6 +22,26 @@ export interface SearchIndexPayload {
   tagMap: Record<string, string[]>;
 }
 
+export interface TagGraphNodePayload {
+  id: string;
+  path: string;
+  label: string;
+  tags: string[];
+  tagCount: number;
+}
+
+export interface TagGraphLinkPayload {
+  source: string;
+  target: string;
+  sharedTags: string[];
+  weight: number;
+}
+
+export interface TagGraphPayload {
+  nodes: TagGraphNodePayload[];
+  links: TagGraphLinkPayload[];
+}
+
 function normaliseTags(raw: unknown): string[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw.map(String);
@@ -102,6 +122,77 @@ export class SearchService {
       }
     }
     return tagMap;
+  }
+
+  getTagGraphPayload(): TagGraphPayload {
+    const nodes = Array.from(this.docs.values())
+      .sort((a, b) => a.path.localeCompare(b.path))
+      .map((doc) => ({
+        id: doc.path,
+        path: doc.path,
+        label: path.basename(doc.path, '.md'),
+        tags: [...doc.tags],
+        tagCount: doc.tags.length,
+      }));
+
+    const tagOrder = new Map<string, number>();
+    const tagBuckets = new Map<string, string[]>();
+
+    for (const node of nodes) {
+      for (const tag of node.tags) {
+        if (!tagOrder.has(tag)) {
+          tagOrder.set(tag, tagOrder.size);
+        }
+        const bucket = tagBuckets.get(tag);
+        if (bucket) {
+          bucket.push(node.path);
+        } else {
+          tagBuckets.set(tag, [node.path]);
+        }
+      }
+    }
+
+    const linkMap = new Map<string, { source: string; target: string; sharedTags: string[] }>();
+
+    for (const [tag, bucket] of tagBuckets.entries()) {
+      const sortedBucket = [...bucket].sort((a, b) => a.localeCompare(b));
+      for (let sourceIndex = 0; sourceIndex < sortedBucket.length; sourceIndex += 1) {
+        for (let targetIndex = sourceIndex + 1; targetIndex < sortedBucket.length; targetIndex += 1) {
+          const source = sortedBucket[sourceIndex];
+          const target = sortedBucket[targetIndex];
+          const key = `${source}::${target}`;
+          const existing = linkMap.get(key);
+
+          if (existing) {
+            existing.sharedTags.push(tag);
+          } else {
+            linkMap.set(key, { source, target, sharedTags: [tag] });
+          }
+        }
+      }
+    }
+
+    const links = Array.from(linkMap.values())
+      .map((link) => {
+        const sharedTags = [...link.sharedTags].sort(
+          (left, right) => (tagOrder.get(left) ?? Number.MAX_SAFE_INTEGER)
+            - (tagOrder.get(right) ?? Number.MAX_SAFE_INTEGER),
+        );
+
+        return {
+          source: link.source,
+          target: link.target,
+          sharedTags,
+          weight: sharedTags.length,
+        };
+      })
+      .sort((a, b) => {
+        const sourceCompare = a.source.localeCompare(b.source);
+        if (sourceCompare !== 0) return sourceCompare;
+        return a.target.localeCompare(b.target);
+      });
+
+    return { nodes, links };
   }
 
   async updateDoc(rootDir: string, relPath: string): Promise<void> {
