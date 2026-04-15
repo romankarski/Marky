@@ -1,9 +1,9 @@
 class Marky < Formula
   desc "Local-first markdown workspace for browsing and editing notes"
   homepage "https://github.com/romankarski/Marky"
-  version "0.1.2"
-  url "https://github.com/romankarski/Marky/releases/download/v0.1.2/marky-0.1.2.tgz"
-  sha256 "800dd919b237c2cd038875dc55f11838a1dcc394c478d379d14f05bfc761df33"
+  version "0.1.3"
+  url "https://github.com/romankarski/Marky/releases/download/v0.1.3/marky-0.1.3.tgz"
+  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   license "MIT"
 
   depends_on "node"
