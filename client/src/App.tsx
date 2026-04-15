@@ -322,13 +322,25 @@ export default function App() {
     : activeTab?.content ?? null;
 
   // TOC heading click: scroll within the correct pane in split mode
-  const handleTocHeadingClick = useCallback((id: string) => {
-    if (splitMode) {
-      const paneEl = document.querySelector(`[data-pane="${activePaneId}"]`);
-      paneEl?.querySelector(`#${CSS.escape(id)}`)?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const handleTocHeadingClick = useCallback((id: string, text: string) => {
+    const container = splitMode
+      ? document.querySelector(`[data-pane="${activePaneId}"]`)
+      : document.querySelector('.flex-1.overflow-hidden.p-4');
+
+    // Try by id first (works for rehype-slug rendered headings)
+    let target = container?.querySelector(`#${CSS.escape(id)}`) as HTMLElement | null;
+
+    // Fallback: match by text content (works for TipTap WYSIWYG headings without ids)
+    if (!target) {
+      const headings = container?.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      headings?.forEach(el => {
+        if (!target && el.textContent?.trim() === text.trim()) {
+          target = el as HTMLElement;
+        }
+      });
     }
+
+    target?.scrollIntoView({ behavior: 'smooth' });
   }, [splitMode, activePaneId]);
 
   // Tree auto-reveal: when query transitions from non-empty → empty, expand active file's ancestors

@@ -45,7 +45,7 @@ function SortableTab({ tab, isActive, dispatch }: SortableTabProps) {
       {...listeners}
       className={`
         group relative flex items-center gap-1.5 px-4 py-2.5
-        text-sm cursor-grab shrink-0 select-none
+        text-sm cursor-grab w-[160px] select-none
         border-b-2 transition-colors
         ${isActive
           ? 'border-orange-500 text-orange-700 bg-white/80'
@@ -58,7 +58,7 @@ function SortableTab({ tab, isActive, dispatch }: SortableTabProps) {
       {tab.loading && (
         <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
       )}
-      <span className="max-w-[120px] truncate">{tab.label}</span>
+      <span className="flex-1 min-w-0 truncate">{tab.label}</span>
       {tab.dirty && (
         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" title="Unsaved changes" />
       )}

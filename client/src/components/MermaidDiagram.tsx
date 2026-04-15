@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
 
-mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'default',
+  securityLevel: 'loose',
+  flowchart: {
+    useMaxWidth: false,
+    htmlLabels: false,
+    padding: 20,
+  },
+});
 
 let idCounter = 0;
 
@@ -45,7 +54,7 @@ export function MermaidDiagram({ code }: Props) {
 
   return (
     <div
-      className="mermaid-diagram my-2 flex justify-start"
+      className="mermaid-diagram my-2 overflow-x-auto"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
