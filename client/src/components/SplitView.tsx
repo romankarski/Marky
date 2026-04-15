@@ -25,7 +25,7 @@ export function SplitView({ leftTab, rightTab, dispatch, rightDispatch, onLinkCl
           onMouseDown={() => onPaneFocus('left')}
         >
           {leftTab ? (
-            <EditorPane tab={leftTab} dispatch={dispatch} onLinkClick={onLinkClick} />
+            <EditorPane key={leftTab.id} tab={leftTab} dispatch={dispatch} onLinkClick={onLinkClick} />
           ) : (
             <WelcomeScreen />
           )}
@@ -41,7 +41,7 @@ export function SplitView({ leftTab, rightTab, dispatch, rightDispatch, onLinkCl
           onMouseDown={() => onPaneFocus('right')}
         >
           {rightTab ? (
-            <EditorPane tab={rightTab} dispatch={rightDispatch} onLinkClick={onLinkClick} />
+            <EditorPane key={rightTab.id} tab={rightTab} dispatch={rightDispatch} onLinkClick={onLinkClick} />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400 text-sm select-none">
               Click to focus · open a file from sidebar

@@ -18,6 +18,7 @@ export function useScrollSync({ editorView, previewRef, content }: UseScrollSync
   const cacheRef = useRef<SourceLineEntry[]>([]);
   const cacheReadyRef = useRef(false);
   const lastEditorScrollTopRef = useRef<number | null>(null);
+  const lastPreviewScrollTopRef = useRef<number | null>(null);
 
   function acquireLock(side: 'editor' | 'preview') {
     if (lockTimerRef.current !== null) clearTimeout(lockTimerRef.current);
@@ -126,6 +127,11 @@ export function useScrollSync({ editorView, previewRef, content }: UseScrollSync
       if (!cacheReadyRef.current) return;
 
       const scrollTop = previewEl.scrollTop;
+
+      // Ignore zero-delta scrolls (programmatic restores that didn't actually move)
+      if (lastPreviewScrollTopRef.current !== null &&
+          Math.abs(scrollTop - lastPreviewScrollTopRef.current) < 1) return;
+      lastPreviewScrollTopRef.current = scrollTop;
       const cache = cacheRef.current;
 
       let targetLine: number;

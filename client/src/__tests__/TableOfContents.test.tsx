@@ -25,11 +25,11 @@ describe('TableOfContents', () => {
     expect(screen.getByText('Section Two')).toBeTruthy();
   });
 
-  it('calls onHeadingClick with heading id when link is clicked', () => {
+  it('calls onHeadingClick with heading id and text when link is clicked', () => {
     const onHeadingClick = vi.fn();
     render(<TableOfContents content={CONTENT} onHeadingClick={onHeadingClick} />);
     fireEvent.click(screen.getByText('Hello World'));
-    expect(onHeadingClick).toHaveBeenCalledWith('hello-world');
+    expect(onHeadingClick).toHaveBeenCalledWith('hello-world', 'Hello World');
   });
 
   it('renders nothing when content has no headings', () => {
