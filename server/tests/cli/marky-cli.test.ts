@@ -6,6 +6,7 @@ import { isDirectCliInvocation, parseCliArgs, resolveRootDir } from '../../src/c
 describe('parseCliArgs', () => {
   it('returns defaults for empty argv', () => {
     expect(parseCliArgs([])).toEqual({
+      action: 'run',
       rootArg: null,
       port: null,
       openBrowser: true,
@@ -14,6 +15,7 @@ describe('parseCliArgs', () => {
 
   it('treats a single positional path as the root arg', () => {
     expect(parseCliArgs(['.'])).toEqual({
+      action: 'run',
       rootArg: '.',
       port: null,
       openBrowser: true,
@@ -22,10 +24,21 @@ describe('parseCliArgs', () => {
 
   it('parses path, --port, and --no-open together', () => {
     expect(parseCliArgs(['/notes', '--port', '4310', '--no-open'])).toEqual({
+      action: 'run',
       rootArg: '/notes',
       port: 4310,
       openBrowser: false,
     });
+  });
+
+  it('sets action=version for --version and -v', () => {
+    expect(parseCliArgs(['--version']).action).toBe('version');
+    expect(parseCliArgs(['-v']).action).toBe('version');
+  });
+
+  it('sets action=help for --help and -h', () => {
+    expect(parseCliArgs(['--help']).action).toBe('help');
+    expect(parseCliArgs(['-h']).action).toBe('help');
   });
 });
 
