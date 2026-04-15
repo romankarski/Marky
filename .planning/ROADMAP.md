@@ -4,8 +4,8 @@
 
 - ✅ **v1.0 MVP** - Phases 1-5 (shipped 2026-03-10)
 - 🚧 **v1.1 Polish and Navigation** - Phases 6-9 (in progress)
-- 📋 **v1.2 WYSIWYG Editing** - Phase 10 (planned)
-- 📋 **v1.3 CLI Distribution** - Phase 11 (planned)
+- ✅ **v1.2 WYSIWYG Editing** - Phase 10 (shipped 2026-03-29)
+- ✅ **v1.3 CLI Distribution** - Phase 11 (shipped 2026-03-29)
 
 ## Phases
 
@@ -110,7 +110,7 @@ Plans:
 **Milestone Goal:** Make the workspace feel permanent and connected — tabs survive reloads, files link to each other visibly, images render, templates speed up note creation, and a tag-based graph reveals knowledge structure.
 
 - [x] **Phase 6: Tab Persistence and Image Rendering** - Tabs survive page reload; recent files on welcome screen; local images render in preview (completed 2026-03-10)
-- [ ] **Phase 7: File Templates** - New files can be created from built-in and custom templates via a picker modal
+- [x] **Phase 7: File Templates** - New files can be created from built-in and custom templates via a picker modal (completed 2026-03-13)
 - [x] **Phase 8: Backlinks Panel** - Right panel shows all files that link to the current document, with click-to-open (completed 2026-03-15)
 - [ ] **Phase 9: Tag Graph View** - Tag-based graph visualizes knowledge structure; nodes are clickable; active file is highlighted
 
@@ -145,10 +145,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Wave 0 test stubs: templateTokens, builtInTemplates, TemplatePickerModal, server templates (RED state)
-- [ ] 07-02-PLAN.md — Client lib (builtInTemplates + templateTokens) + FolderPickerModal two-step flow + FileTree wiring
-- [ ] 07-03-PLAN.md — Server templates CRUD route (GET/POST /api/templates) + app.ts registration
-- [ ] 07-04-PLAN.md — FileInfo "Save as template" button + custom template picker + visual verification checkpoint
+- [x] 07-01-PLAN.md — Wave 0 test stubs: templateTokens, builtInTemplates, TemplatePickerModal, server templates (RED state)
+- [x] 07-02-PLAN.md — Client lib (builtInTemplates + templateTokens) + FolderPickerModal two-step flow + FileTree wiring
+- [x] 07-03-PLAN.md — Server templates CRUD route (GET/POST /api/templates) + app.ts registration
+- [x] 07-04-PLAN.md — FileInfo "Save as template" button + custom template picker + visual verification checkpoint
 
 ### Phase 8: Backlinks Panel
 **Goal**: The right panel shows every file that links to the current document — users can see their knowledge connections and navigate to linking files with a single click
@@ -175,10 +175,13 @@ Plans:
   2. The currently active file is visually highlighted in the graph
   3. Clicking any node in the graph opens that file in a tab
   4. Navigating away from the graph and back restores the graph layout without restarting the simulation from scratch
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — TBD
+- [x] 09-01-PLAN.md — Install graph dependency and create Wave 0 RED tests
+- [x] 09-02-PLAN.md — Extend SearchService and expose GET /api/graph/tags
+- [x] 09-03-PLAN.md — Build TagGraphPanel, persistence utilities, and Outline | Graph right-rail tabset
+- [ ] 09-04-PLAN.md — Run phase regressions and complete graph verification checkpoint
 
 ### Phase 10: WYSIWYG Editor
 **Goal**: Replace the split-pane CodeMirror + preview model with a Notion-style WYSIWYG editor — users click anywhere on the rendered document to edit, use slash commands to insert blocks, drag-and-drop images, and can toggle to raw markdown when needed. Markdown remains the on-disk file format.
@@ -193,11 +196,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Install TipTap dependencies + Wave 0 test stubs (RED state)
-- [ ] 10-02-PLAN.md — WysiwygEditor component + BubbleToolbar (core editing surface)
-- [ ] 10-03-PLAN.md — Slash command extension + menu + server image upload route
-- [ ] 10-04-PLAN.md — EditorPane rewrite (WYSIWYG default, raw toggle, image drop handler)
-- [ ] 10-05-PLAN.md — Markdown round-trip verification + visual checkpoint
+- [x] 10-01-PLAN.md — Install TipTap dependencies + Wave 0 test stubs (RED state)
+- [x] 10-02-PLAN.md — WysiwygEditor component + BubbleToolbar (core editing surface)
+- [x] 10-03-PLAN.md — Slash command extension + menu + server image upload route
+- [x] 10-04-PLAN.md — EditorPane rewrite (WYSIWYG default, raw toggle, image drop handler)
+- [x] 10-05-PLAN.md — Markdown round-trip verification + visual checkpoint
 
 ### Phase 11: CLI Distribution and Homebrew Packaging
 **Goal**: Users can install and launch Marky from the terminal in any notes directory via `marky`, with the app serving built assets in standalone mode, selecting a usable port, and opening the browser automatically unless told not to.
@@ -213,10 +216,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — CLI entrypoint, path resolution, flags, browser-open, and port-selection behavior
-- [ ] 11-02-PLAN.md — Production build pipeline and standalone asset serving from Fastify
-- [ ] 11-03-PLAN.md — Installable distribution artifact and standalone verification from arbitrary folders
-- [ ] 11-04-PLAN.md — Homebrew tap formula, release wiring, and install verification
+- [x] 11-01-PLAN.md — CLI entrypoint, path resolution, flags, browser-open, and port-selection behavior
+- [x] 11-02-PLAN.md — Production build pipeline and standalone asset serving from Fastify
+- [x] 11-03-PLAN.md — Installable distribution artifact and standalone verification from arbitrary folders
+- [x] 11-04-PLAN.md — Homebrew tap formula, release wiring, and install verification
 
 ## Progress
 
@@ -231,8 +234,8 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 | 4. Live Reload | v1.0 | 3/3 | Complete | 2026-03-10 |
 | 5. Search and Tags | v1.0 | 9/9 | Complete | 2026-03-10 |
 | 6. Tab Persistence and Image Rendering | v1.1 | 4/4 | Complete | 2026-03-11 |
-| 7. File Templates | v1.1 | 2/4 | In Progress | - |
+| 7. File Templates | v1.1 | 4/4 | Complete | 2026-03-13 |
 | 8. Backlinks Panel | v1.1 | 3/3 | Complete | 2026-03-15 |
-| 9. Tag Graph View | v1.1 | 0/TBD | Not started | - |
-| 10. WYSIWYG Editor | v1.2 | 4/5 | In Progress | - |
-| 11. CLI Distribution and Homebrew Packaging | v1.3 | 0/4 | Not started | - |
+| 9. Tag Graph View | v1.1 | 0/4 | Not started | - |
+| 10. WYSIWYG Editor | v1.2 | 5/5 | Complete | 2026-03-29 |
+| 11. CLI Distribution and Homebrew Packaging | v1.3 | 4/4 | Complete | 2026-03-29 |

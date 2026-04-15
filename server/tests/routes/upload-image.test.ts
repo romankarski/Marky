@@ -10,7 +10,7 @@ let app: FastifyInstance;
 
 beforeEach(async () => {
   tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'marky-upload-test-'));
-  app = await buildApp({ rootDir: tmpDir });
+  app = await buildApp({ rootDir: tmpDir, enableWatcher: false });
 });
 
 afterEach(async () => {
@@ -61,7 +61,7 @@ describe('POST /api/upload-image', () => {
     expect(savedContent.toString()).toBe('fake-png-data');
   });
 
-  it('returns JSON with root-relative path: { path: "/images/{timestamp}-{filename}" }', async () => {
+  it('returns JSON with image proxy path for the uploaded file', async () => {
     const { body, contentType } = buildMultipartPayload(
       'photo.png',
       Buffer.from('data'),
@@ -74,7 +74,7 @@ describe('POST /api/upload-image', () => {
     });
     expect(res.statusCode).toBe(200);
     const json = JSON.parse(res.body);
-    expect(json.path).toMatch(/^\/images\/\d+-photo\.png$/);
+    expect(json.path).toMatch(/^\/api\/image\?path=images\/\d+-photo\.png$/);
   });
 
   it('creates images/ directory if it does not exist', async () => {
@@ -123,8 +123,8 @@ describe('POST /api/upload-image', () => {
     });
     const after = Date.now();
     const json = JSON.parse(res.body);
-    // Extract timestamp from /images/{timestamp}-pic.jpg
-    const match = json.path.match(/\/images\/(\d+)-pic\.jpg$/);
+    // Extract timestamp from /api/image?path=images/{timestamp}-pic.jpg
+    const match = json.path.match(/images\/(\d+)-pic\.jpg$/);
     expect(match).not.toBeNull();
     const ts = Number(match![1]);
     expect(ts).toBeGreaterThanOrEqual(before);

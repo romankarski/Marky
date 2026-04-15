@@ -8,28 +8,41 @@ import { imagesRoutes } from './routes/images.js';
 import templatesRoutes from './routes/templates.js';
 import backlinksRoutes from './routes/backlinks.js';
 import uploadImageRoutes from './routes/upload-image.js';
-import { FileWatcherService } from './lib/watcher.js';
+import {
+  FileWatcherService,
+  type FileWatcherLike,
+  NoopFileWatcherService,
+  type FileWatcherOptions,
+} from './lib/watcher.js';
 import { SearchService } from './lib/search.js';
 import { BacklinkService } from './lib/backlinks.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    fileWatcher: FileWatcherService;
+    fileWatcher: FileWatcherLike;
     rootDir: string;
     searchService: SearchService;
     backlinkService: BacklinkService;
   }
 }
 
-export interface AppOptions { rootDir: string; logger?: boolean; }
+export interface AppOptions {
+  rootDir: string;
+  logger?: boolean;
+  enableWatcher?: boolean;
+  watcherOptions?: FileWatcherOptions;
+}
 
 export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   const fastify = Fastify({ logger: opts.logger ?? false });
   await fastify.register(cors, { origin: true });
   fastify.decorate('rootDir', opts.rootDir);
-  const watcher = new FileWatcherService(opts.rootDir);
+  const watcher = opts.enableWatcher === false
+    ? new NoopFileWatcherService()
+    : new FileWatcherService(opts.rootDir, opts.watcherOptions);
   fastify.decorate('fileWatcher', watcher);
   fastify.addHook('onClose', async () => { await watcher.close(); });
+  await watcher.ready();
   const searchService = new SearchService();
   fastify.decorate('searchService', searchService);
   await searchService.buildFromDir(opts.rootDir).catch((err) => {

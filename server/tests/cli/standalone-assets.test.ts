@@ -30,7 +30,7 @@ describe('startMarkyServer static serving', () => {
   it('serves index.html from the provided staticDir', async () => {
     await fs.writeFile(path.join(staticDir, 'index.html'), '<html><head><title>Marky</title></head><body>ok</body></html>');
 
-    app = await buildApp({ rootDir, logger: false });
+    app = await buildApp({ rootDir, logger: false, enableWatcher: false });
     await attachStaticUi(app, staticDir);
 
     const response = await app.inject({
@@ -46,7 +46,7 @@ describe('startMarkyServer static serving', () => {
     await fs.writeFile(path.join(rootDir, 'note.md'), '# Hello');
     await fs.writeFile(path.join(staticDir, 'index.html'), '<html><body>Marky</body></html>');
 
-    app = await buildApp({ rootDir, logger: false });
+    app = await buildApp({ rootDir, logger: false, enableWatcher: false });
     await attachStaticUi(app, staticDir);
 
     const response = await app.inject({
@@ -63,7 +63,7 @@ describe('startMarkyServer static serving', () => {
   });
 
   it('fails with a clear client/dist error when staticDir does not exist', async () => {
-    app = await buildApp({ rootDir, logger: false });
+    app = await buildApp({ rootDir, logger: false, enableWatcher: false });
 
     await expect(
       attachStaticUi(app, path.join(staticDir, 'missing-client-dist'))

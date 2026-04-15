@@ -27,7 +27,7 @@ beforeEach(async () => {
     '---\ntags: search\n---\ncompletely different content',
   );
 
-  app = await buildApp({ rootDir: tmpDir });
+  app = await buildApp({ rootDir: tmpDir, enableWatcher: false });
 });
 
 afterEach(async () => {

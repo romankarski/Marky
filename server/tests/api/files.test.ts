@@ -10,7 +10,7 @@ let app: FastifyInstance;
 
 beforeEach(async () => {
   tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'marky-api-test-'));
-  app = await buildApp({ rootDir: tmpDir });
+  app = await buildApp({ rootDir: tmpDir, enableWatcher: false });
 });
 
 afterEach(async () => {

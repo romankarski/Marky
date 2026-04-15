@@ -37,7 +37,7 @@ const MINIMAL_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1
 
 beforeEach(async () => {
   tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'marky-images-test-'));
-  app = await buildApp({ rootDir: tmpDir });
+  app = await buildApp({ rootDir: tmpDir, enableWatcher: false });
 });
 
 afterEach(async () => {

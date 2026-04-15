@@ -10,7 +10,13 @@ let app: FastifyInstance;
 
 beforeEach(async () => {
   tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'marky-watch-test-'));
-  app = await buildApp({ rootDir: tmpDir });
+  app = await buildApp({
+    rootDir: tmpDir,
+    watcherOptions: {
+      usePolling: true,
+      interval: 50,
+    },
+  });
 });
 
 afterEach(async () => {
@@ -82,6 +88,7 @@ describe('GET /api/watch (SSE)', () => {
   it('LIVE-01 — app PUT write does NOT trigger SSE event (write-lock)', async () => {
     // Create a file to update
     await fs.writeFile(path.join(tmpDir, 'note.md'), '# original');
+    await new Promise(r => setTimeout(r, 200));
 
     // Connect to SSE endpoint
     const sseResponse = await app.inject({

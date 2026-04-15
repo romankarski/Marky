@@ -68,10 +68,10 @@
 - [x] **TMPL-03**: Template picker shown when creating a new file (alongside blank option)
 
 ### Graph View
-- [ ] **GRPH-01**: Graph view shows files as nodes clustered and connected by shared tags
-- [ ] **GRPH-02**: Clicking a node in the graph opens that file in a tab
-- [ ] **GRPH-03**: Active file is highlighted in the graph
-- [ ] **GRPH-04**: Graph lives in a dedicated panel or tab (not a modal)
+- [x] **GRPH-01**: Graph view shows files as nodes clustered and connected by shared tags
+- [x] **GRPH-02**: Clicking a node in the graph opens that file in a tab
+- [x] **GRPH-03**: Active file is highlighted in the graph
+- [x] **GRPH-04**: Graph lives in a dedicated panel or tab (not a modal)
 
 ## v2 Requirements
 
@@ -142,10 +142,10 @@
 | BKLN-01 | Phase 8: Backlinks Panel | Complete |
 | BKLN-02 | Phase 8: Backlinks Panel | Complete |
 | BKLN-03 | Phase 8: Backlinks Panel | Complete |
-| GRPH-01 | Phase 9: Tag Graph View | Pending |
-| GRPH-02 | Phase 9: Tag Graph View | Pending |
-| GRPH-03 | Phase 9: Tag Graph View | Pending |
-| GRPH-04 | Phase 9: Tag Graph View | Pending |
+| GRPH-01 | Phase 9: Tag Graph View | Complete |
+| GRPH-02 | Phase 9: Tag Graph View | Complete |
+| GRPH-03 | Phase 9: Tag Graph View | Complete |
+| GRPH-04 | Phase 9: Tag Graph View | Complete |
 
 **Coverage:**
 - v1 requirements: 27 total — all Complete

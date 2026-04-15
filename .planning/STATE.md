@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish and Navigation
 status: executing
-stopped_at: Completed 10-04-PLAN.md
-last_updated: "2026-03-29T13:49:12.962Z"
-last_activity: 2026-03-29 -- Phase 11 execution started
+stopped_at: Completed 09-03-PLAN.md
+last_updated: "2026-03-30T05:58:34.144Z"
+last_activity: 2026-03-30
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 20
-  completed_plans: 15
-  percent: 81
+  completed_phases: 5
+  total_plans: 24
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Instant, beautiful markdown reading and editing with full-text search across all files — so nothing gets lost and switching between documents is effortless.
-**Current focus:** Phase 11 — cli-distribution-and-homebrew-packaging
+**Current focus:** Phase 09 — tag-graph-view
 
 ## Current Position
 
-Phase: 11 (cli-distribution-and-homebrew-packaging) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 11
-Last activity: 2026-03-29 -- Phase 11 execution started
+Phase: 09 (tag-graph-view) — EXECUTING
+Plan: 3 of 4
+Status: Ready to execute
+Last activity: 2026-03-30
 
-Progress: [████████░░] 81% (v1.1 milestone)
+Progress: [██████████] 100% (tracked execution plan set)
 
 ## Performance Metrics
 
@@ -68,12 +68,17 @@ Progress: [████████░░] 81% (v1.1 milestone)
 | Phase 10 P03 | 6 | 2 tasks | 7 files |
 | Phase 10-wysiwyg-editor P02 | 8 | 2 tasks | 4 files |
 | Phase 10-wysiwyg-editor P04 | 4 | 2 tasks | 9 files |
+| Phase 09-tag-graph-view P01 | 5 | 3 tasks | 6 files |
+| Phase 09-tag-graph-view P03 | 8min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
 - Phase 11 added: CLI Distribution and Homebrew Packaging (derived from `CLI-DISTRIBUTION.md`)
+- Phase 11 completed: standalone CLI distribution, release automation, Homebrew tap publishing, and verified install flow
+- Phase 10 completed: WYSIWYG editor verified end-to-end with markdown round-trip coverage and user approval
+- Phase 7 corrected to complete in roadmap/state based on existing execution summaries
 
 ### Decisions
 
@@ -109,6 +114,12 @@ Recent decisions affecting current work:
 - [Phase 10-04]: Raw/WYSIWYG toggle state is local to EditorPane (useState), not in Tab reducer -- keeps reducer simple
 - [Phase 10-04]: editMode removed from Tab type entirely -- WYSIWYG is always active, no separate edit/preview modes
 - [Phase 10-04]: Auto-save disabled during mode switch via setAutoSaveEnabled(false), re-enabled via requestAnimationFrame (Pitfall 3)
+- [Phase 09-tag-graph-view]: Wave 0 persistence tests lock Phase 9 localStorage keys to marky:tag-graph-layout and marky:right-rail-tab so implementation cannot drift from the contract
+- [Phase 09-tag-graph-view]: Server graph route tests wait for SearchService indexing before inject calls because buildFromDir runs asynchronously in app.ts
+- [Phase 09-tag-graph-view]: Used markdown relative paths as graph node ids so the client can persist layout state without an id translation layer
+- [Phase 09-tag-graph-view]: Persist graph layout snapshots by file path plus graph center/zoom so the same scene restores across reloads and tab switches
+- [Phase 09-tag-graph-view]: Keep the graph mounted behind the Outline | Graph right-rail tabset and pause/resume animation instead of remounting on tab switches
+- [Phase 09-tag-graph-view]: Trigger graph refetches explicitly from FileInfo tag edits via a graphRefreshVersion counter rather than relying on incidental rerenders
 
 ### Pending Todos
 
@@ -116,13 +127,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 6 (PRST-03): Scroll restore timing — useLayoutEffect plus async content load interaction; timing edge case must be verified against real long documents, not just reasoned about
-- Phase 8 (BKLN): Wikilink parsing edge cases — `[[Wiki Link With Spaces]]` normalization needs unit tests before panel ships; normalize to lowercase for macOS case-insensitive FS
 - Phase 9 (GRPH): Right panel height budget — three-section right panel (FileInfo + BacklinksPanel + TOC) needs visual design review after Phase 8 before Phase 9 adds graph toggle
 - Phase 9 (GRPH): Graph performance — verify react-force-graph-2d with synthetic large dataset (500+ nodes) before declaring Phase 9 done
 
 ## Session Continuity
 
-Last session: 2026-03-18T16:16:08Z
-Stopped at: Completed 10-04-PLAN.md
-Resume file: .planning/phases/10-wysiwyg-editor/10-05-PLAN.md
+Last session: 2026-03-30T05:58:34.130Z
+Stopped at: Completed 09-03-PLAN.md
+Resume file: None
