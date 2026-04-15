@@ -11,6 +11,7 @@ import { TagFilter } from './components/TagFilter';
 import { FileInfo } from './components/FileInfo';
 import { BacklinksPanel } from './components/BacklinksPanel';
 import { TagGraphPanel } from './components/TagGraphPanel';
+import { FullGraphView } from './pages/FullGraphView';
 import { useFileTree } from './hooks/useFileTree';
 import { useTabs } from './hooks/useTabs';
 import { useFileWatcher } from './hooks/useFileWatcher';
@@ -26,6 +27,8 @@ import {
 import {
   loadRightRailTab,
   saveRightRailTab,
+  loadFullGraphOpen,
+  saveFullGraphOpen,
   type RightRailTab,
 } from './hooks/useTagGraphPersistence';
 import type { TabAction } from './types/tabs';
@@ -93,6 +96,14 @@ export default function App() {
   const [managingFolders, setManagingFolders] = useState(false);
   const [rightRailTab, setRightRailTab] = useState<RightRailTab>(() => loadRightRailTab());
   const [graphRefreshVersion, setGraphRefreshVersion] = useState(0);
+  const [fullGraphOpen, setFullGraphOpen] = useState<boolean>(() => loadFullGraphOpen());
+  const toggleFullGraph = useCallback((next?: boolean) => {
+    setFullGraphOpen((current) => {
+      const value = typeof next === 'boolean' ? next : !current;
+      saveFullGraphOpen(value);
+      return value;
+    });
+  }, []);
 
   // Split view state
   const [splitMode, setSplitMode] = useState(false);
@@ -400,11 +411,21 @@ export default function App() {
       >
         <div className="px-3 py-2 border-b border-gray-200 flex items-center justify-between shrink-0">
           <span className="text-sm font-semibold text-gray-700">Marky</span>
-          <button
-            onClick={() => setManagingFolders(v => !v)}
-            className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
-            title="Manage visible folders"
-          >⚙</button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => toggleFullGraph()}
+              className={`text-xs transition-colors ${
+                fullGraphOpen ? 'text-orange-500' : 'text-gray-400 hover:text-orange-500'
+              }`}
+              title={fullGraphOpen ? 'Close graph view' : 'Open full graph view'}
+              aria-pressed={fullGraphOpen}
+            >◈</button>
+            <button
+              onClick={() => setManagingFolders(v => !v)}
+              className="text-xs text-gray-400 hover:text-orange-500 transition-colors"
+              title="Manage visible folders"
+            >⚙</button>
+          </div>
         </div>
 
         {managingFolders && (
@@ -489,6 +510,18 @@ export default function App() {
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
 
+        {fullGraphOpen ? (
+          <FullGraphView
+            onClose={() => toggleFullGraph(false)}
+            onOpenFile={(path) => {
+              openTab(path);
+              updateRecentFiles(path);
+              expandFolder(path);
+              toggleFullGraph(false);
+            }}
+          />
+        ) : (<>
+
         {/* Tab bar row with split toggle */}
         {splitMode ? (
           <SplitTabBar
@@ -547,11 +580,12 @@ export default function App() {
               style={{ willChange: 'transform' }}
             >
               {singleActiveTab ? (
-                <EditorPane tab={singleActiveTab} dispatch={dispatch} onLinkClick={handleInternalLink} />
+                <EditorPane key={singleActiveTab.id} tab={singleActiveTab} dispatch={dispatch} onLinkClick={handleInternalLink} />
               ) : null}
             </div>
           )}
         </div>
+        </>)}
       </div>
 
       {/* TOC edge — centered collapse toggle tab + drag handle */}

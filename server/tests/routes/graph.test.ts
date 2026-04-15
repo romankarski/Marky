@@ -8,6 +8,7 @@ import path from 'path';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/app.js';
 import type { SearchService } from '../../src/lib/search.js';
+import type { BacklinkService } from '../../src/lib/backlinks.js';
 
 let tmpDir: string;
 let app: FastifyInstance;
@@ -21,6 +22,17 @@ async function waitForSearchIndex(
   }
 
   throw new Error('SearchService did not finish indexing graph fixtures');
+}
+
+async function waitForBacklinks(
+  instance: FastifyInstance & { backlinkService: BacklinkService },
+): Promise<void> {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (instance.backlinkService.getAllForwardLinks().length > 0) return;
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+
+  throw new Error('BacklinkService did not finish indexing graph fixtures');
 }
 
 beforeEach(async () => {
@@ -43,9 +55,15 @@ beforeEach(async () => {
     path.join(tmpDir, 'notes', 'delta.md'),
     '# Delta\n\nNo frontmatter tags here.',
   );
+  // Extra file with a wikilink to alpha — used by the fileLinks test.
+  await fs.writeFile(
+    path.join(tmpDir, 'notes', 'linker.md'),
+    'See [[alpha]] for context.',
+  );
 
   app = await buildApp({ rootDir: tmpDir, enableWatcher: false });
   await waitForSearchIndex(app as FastifyInstance & { searchService: SearchService });
+  await waitForBacklinks(app as FastifyInstance & { backlinkService: BacklinkService });
 });
 
 afterEach(async () => {
@@ -67,7 +85,7 @@ describe('GET /api/graph/tags', () => {
       nodes: expect.any(Array),
       links: expect.any(Array),
     });
-    expect(body.nodes).toHaveLength(4);
+    expect(body.nodes).toHaveLength(5);
 
     expect(body.nodes).toEqual(
       expect.arrayContaining([
@@ -96,6 +114,13 @@ describe('GET /api/graph/tags', () => {
           id: 'notes/delta.md',
           path: 'notes/delta.md',
           label: 'delta',
+          tags: [],
+          tagCount: 0,
+        }),
+        expect.objectContaining({
+          id: 'notes/linker.md',
+          path: 'notes/linker.md',
+          label: 'linker',
           tags: [],
           tagCount: 0,
         }),
@@ -149,5 +174,37 @@ describe('GET /api/graph/tags', () => {
           link.source === 'notes/delta.md' || link.target === 'notes/delta.md',
       ),
     ).toBe(false);
+    // linker has no tags so it should not participate in tag-based links
+    expect(
+      body.links.some(
+        (link: { source: string; target: string }) =>
+          link.source === 'notes/linker.md' || link.target === 'notes/linker.md',
+      ),
+    ).toBe(false);
+  });
+
+  it('omits fileLinks when includeLinks is not set', async () => {
+    const response = await app.inject({ method: 'GET', url: '/api/graph/tags' });
+    const body = JSON.parse(response.payload);
+    expect(body.fileLinks).toBeUndefined();
+  });
+
+  it('includes file-to-file edges from wiki/markdown links when includeLinks=true', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/graph/tags?includeLinks=true',
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.payload);
+
+    expect(Array.isArray(body.fileLinks)).toBe(true);
+    expect(body.fileLinks).toEqual(
+      expect.arrayContaining([
+        { source: 'notes/linker.md', target: 'notes/alpha.md' },
+      ]),
+    );
+    // tag-based links remain present alongside file links
+    expect(body.links.length).toBeGreaterThan(0);
   });
 });

@@ -1,5 +1,5 @@
 import net from 'node:net';
-import { readFileSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import open from 'open';
@@ -42,6 +42,9 @@ export function parseCliArgs(argv: string[]): ParsedCliArgs {
       port = Number.parseInt(value, 10);
       if (Number.isNaN(port)) {
         throw new Error(`Invalid port: ${value}`);
+      }
+      if (port < 1 || port > 65535) {
+        throw new Error(`Port out of range (1-65535): ${value}`);
       }
       index += 1;
       continue;
@@ -93,6 +96,20 @@ export function resolveRootDir(input: {
     return path.resolve(input.rootArg);
   }
   return path.resolve(input.cwd);
+}
+
+export function assertRootDirExists(rootDir: string, options?: {
+  exists?: (p: string) => boolean;
+  isDir?: (p: string) => boolean;
+}): void {
+  const exists = options?.exists ?? ((p) => existsSync(p));
+  const isDir = options?.isDir ?? ((p) => statSync(p).isDirectory());
+  if (!exists(rootDir)) {
+    throw new Error(`Directory not found: ${rootDir}`);
+  }
+  if (!isDir(rootDir)) {
+    throw new Error(`Not a directory: ${rootDir}`);
+  }
 }
 
 async function isPortAvailable(port: number): Promise<boolean> {
@@ -182,6 +199,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     rootArg: parsed.rootArg,
     cwd: process.cwd(),
   });
+  assertRootDirExists(rootDir);
   const port = await resolvePort({
     requestedPort: parsed.port,
     defaultPort: 4310,

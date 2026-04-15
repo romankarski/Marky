@@ -37,9 +37,21 @@ export interface TagGraphLinkPayload {
   weight: number;
 }
 
+export interface FileLinkPayload {
+  source: string;
+  target: string;
+}
+
 export interface TagGraphPayload {
   nodes: TagGraphNodePayload[];
   links: TagGraphLinkPayload[];
+  /** File-to-file edges from wiki/markdown links (only emitted when a BacklinkSource is provided). */
+  fileLinks?: FileLinkPayload[];
+}
+
+/** Minimal shape consumed by getTagGraphPayload — decouples search from BacklinkService. */
+export interface BacklinkSource {
+  getAllForwardLinks(): { source: string; target: string }[];
 }
 
 function normaliseTags(raw: unknown): string[] {
@@ -124,7 +136,7 @@ export class SearchService {
     return tagMap;
   }
 
-  getTagGraphPayload(): TagGraphPayload {
+  getTagGraphPayload(backlinks?: BacklinkSource): TagGraphPayload {
     const nodes = Array.from(this.docs.values())
       .sort((a, b) => a.path.localeCompare(b.path))
       .map((doc) => ({
@@ -192,7 +204,44 @@ export class SearchService {
         return a.target.localeCompare(b.target);
       });
 
-    return { nodes, links };
+    const payload: TagGraphPayload = { nodes, links };
+
+    if (backlinks) {
+      // Canonical path lookup. BacklinkService stores wikilink targets as stems
+      // (e.g., 'alpha.md' with no directory) and markdown targets as resolved
+      // relative paths ('notes/alpha.md'). Build two lookups: full-path first,
+      // basename fallback for wikilink stems. Ambiguous stems: first node wins.
+      const byLowerPath = new Map<string, string>();
+      const byBasename = new Map<string, string>();
+      for (const node of nodes) {
+        byLowerPath.set(node.path.toLowerCase(), node.path);
+        const base = node.path.slice(node.path.lastIndexOf('/') + 1).toLowerCase();
+        if (!byBasename.has(base)) byBasename.set(base, node.path);
+      }
+      const resolve = (token: string): string | undefined => {
+        const lower = token.toLowerCase();
+        return byLowerPath.get(lower) ?? byBasename.get(lower);
+      };
+      const fileLinks: FileLinkPayload[] = [];
+      const seen = new Set<string>();
+      for (const edge of backlinks.getAllForwardLinks()) {
+        const canonicalSource = resolve(edge.source);
+        const canonicalTarget = resolve(edge.target);
+        if (!canonicalSource || !canonicalTarget) continue;
+        if (canonicalSource === canonicalTarget) continue;
+        const key = `${canonicalSource}::${canonicalTarget}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        fileLinks.push({ source: canonicalSource, target: canonicalTarget });
+      }
+      fileLinks.sort((a, b) => {
+        const s = a.source.localeCompare(b.source);
+        return s !== 0 ? s : a.target.localeCompare(b.target);
+      });
+      payload.fileLinks = fileLinks;
+    }
+
+    return payload;
   }
 
   async updateDoc(rootDir: string, relPath: string): Promise<void> {

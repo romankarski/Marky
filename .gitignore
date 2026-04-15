@@ -4,3 +4,10 @@ client/dist/
 .env
 *.js.map
 coverage/
+
+# Local tooling (Claude Code, MCP, claude-flow)
+.claude/
+.claude-flow/
+client/.claude-flow/
+.mcp.json
+CLAUDE.md

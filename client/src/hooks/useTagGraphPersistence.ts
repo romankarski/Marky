@@ -110,3 +110,63 @@ export function saveRightRailTab(tab: RightRailTab): void {
     // Fail soft when storage is unavailable or full.
   }
 }
+
+const GRAPH_FILTER_KEY = 'marky:graph-filter';
+
+export interface GraphFilterState {
+  /** Tags the user has *hidden*. null = all tags visible. */
+  hiddenTags: string[];
+  showTagEdges: boolean;
+  showFileLinks: boolean;
+}
+
+const DEFAULT_FILTER: GraphFilterState = {
+  hiddenTags: [],
+  showTagEdges: true,
+  showFileLinks: true,
+};
+
+export function loadGraphFilter(): GraphFilterState {
+  try {
+    if (typeof localStorage === 'undefined') return DEFAULT_FILTER;
+    const raw = localStorage.getItem(GRAPH_FILTER_KEY);
+    if (!raw) return DEFAULT_FILTER;
+    const parsed = JSON.parse(raw) as Partial<GraphFilterState>;
+    return {
+      hiddenTags: Array.isArray(parsed.hiddenTags) ? parsed.hiddenTags.map(String) : [],
+      showTagEdges: parsed.showTagEdges !== false,
+      showFileLinks: parsed.showFileLinks !== false,
+    };
+  } catch {
+    return DEFAULT_FILTER;
+  }
+}
+
+export function saveGraphFilter(state: GraphFilterState): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(GRAPH_FILTER_KEY, JSON.stringify(state));
+  } catch {
+    // Fail soft when storage is unavailable or full.
+  }
+}
+
+const FULL_GRAPH_OPEN_KEY = 'marky:full-graph-open';
+
+export function loadFullGraphOpen(): boolean {
+  try {
+    if (typeof localStorage === 'undefined') return false;
+    return localStorage.getItem(FULL_GRAPH_OPEN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function saveFullGraphOpen(open: boolean): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(FULL_GRAPH_OPEN_KEY, String(open));
+  } catch {
+    // Fail soft when storage is unavailable or full.
+  }
+}
