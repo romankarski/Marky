@@ -1,23 +1,35 @@
 import net from 'node:net';
-import { realpathSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import open from 'open';
 import { startMarkyServer } from './start-server.js';
 
+export type CliAction = 'run' | 'version' | 'help';
+
 export interface ParsedCliArgs {
+  action: CliAction;
   rootArg: string | null;
   port: number | null;
   openBrowser: boolean;
 }
 
 export function parseCliArgs(argv: string[]): ParsedCliArgs {
+  let action: CliAction = 'run';
   let rootArg: string | null = null;
   let port: number | null = null;
   let openBrowser = true;
 
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
+    if (token === '--version' || token === '-v') {
+      action = 'version';
+      continue;
+    }
+    if (token === '--help' || token === '-h') {
+      action = 'help';
+      continue;
+    }
     if (token === '--no-open') {
       openBrowser = false;
       continue;
@@ -31,6 +43,9 @@ export function parseCliArgs(argv: string[]): ParsedCliArgs {
       if (Number.isNaN(port)) {
         throw new Error(`Invalid port: ${value}`);
       }
+      if (port < 1 || port > 65535) {
+        throw new Error(`Port out of range (1-65535): ${value}`);
+      }
       index += 1;
       continue;
     }
@@ -40,11 +55,34 @@ export function parseCliArgs(argv: string[]): ParsedCliArgs {
   }
 
   return {
+    action,
     rootArg,
     port,
     openBrowser,
   };
 }
+
+export function readPackageVersion(moduleUrl: string): string {
+  const here = path.dirname(fileURLToPath(moduleUrl));
+  const pkgPath = path.resolve(here, '../../package.json');
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version?: string };
+  return pkg.version ?? '0.0.0';
+}
+
+const HELP_TEXT = `marky — local-first markdown workspace
+
+Usage:
+  marky [path] [options]
+
+Arguments:
+  path              Root directory to serve (defaults to current directory)
+
+Options:
+  --port <number>   Port to listen on (default: 4310, auto-increments up to 4320)
+  --no-open         Don't open the browser on start
+  -v, --version     Print version and exit
+  -h, --help        Show this help and exit
+`;
 
 export function resolveRootDir(input: {
   envRootDir: string | undefined;
@@ -58,6 +96,20 @@ export function resolveRootDir(input: {
     return path.resolve(input.rootArg);
   }
   return path.resolve(input.cwd);
+}
+
+export function assertRootDirExists(rootDir: string, options?: {
+  exists?: (p: string) => boolean;
+  isDir?: (p: string) => boolean;
+}): void {
+  const exists = options?.exists ?? ((p) => existsSync(p));
+  const isDir = options?.isDir ?? ((p) => statSync(p).isDirectory());
+  if (!exists(rootDir)) {
+    throw new Error(`Directory not found: ${rootDir}`);
+  }
+  if (!isDir(rootDir)) {
+    throw new Error(`Not a directory: ${rootDir}`);
+  }
 }
 
 async function isPortAvailable(port: number): Promise<boolean> {
@@ -132,11 +184,22 @@ export function isDirectCliInvocation(input: {
 
 export async function main(argv = process.argv.slice(2)): Promise<void> {
   const parsed = parseCliArgs(argv);
+
+  if (parsed.action === 'version') {
+    console.log(readPackageVersion(import.meta.url));
+    return;
+  }
+  if (parsed.action === 'help') {
+    console.log(HELP_TEXT);
+    return;
+  }
+
   const rootDir = resolveRootDir({
     envRootDir: process.env.ROOT_DIR,
     rootArg: parsed.rootArg,
     cwd: process.cwd(),
   });
+  assertRootDirExists(rootDir);
   const port = await resolvePort({
     requestedPort: parsed.port,
     defaultPort: 4310,

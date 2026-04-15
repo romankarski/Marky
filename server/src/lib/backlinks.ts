@@ -63,6 +63,17 @@ export class BacklinkService {
     return Array.from(set);
   }
 
+  /** All forward file-to-file edges (source path → target path). Targets are lowercased. */
+  getAllForwardLinks(): { source: string; target: string }[] {
+    const edges: { source: string; target: string }[] = [];
+    for (const [source, targets] of this.forward.entries()) {
+      for (const target of targets) {
+        edges.push({ source, target });
+      }
+    }
+    return edges;
+  }
+
   private _removeFileLinks(relPath: string): void {
     const prevTargets = this.forward.get(relPath);
     if (!prevTargets) return;
