@@ -17,7 +17,9 @@ export function EditorPane({ tab, dispatch, onLinkClick }: EditorPaneProps) {
   const [rawMode, setRawMode] = useState(false);
 
   // Local edit content — single source of truth while editing.
-  const [editContent, setEditContent] = useState<string>('');
+  // Lazy-initialise from tab.content so a remount (e.g. key={tab.id}) renders
+  // the correct content on the very first paint instead of empty-then-flash.
+  const [editContent, setEditContent] = useState<string>(() => tab.content ?? '');
 
   // Auto-save gate: temporarily disabled during mode switch (Pitfall 3)
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
